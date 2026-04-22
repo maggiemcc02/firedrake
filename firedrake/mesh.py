@@ -2171,11 +2171,13 @@ class VertexOnlyMeshTopology(AbstractMeshTopology):
             return self.num_vertices()
 
     @cached_property  # TODO: Recalculate if mesh moves
+    @PETSc.Log.EventDecorator()
     def cell_set(self):
         size = list(self._entity_classes[self.cell_dimension(), :])
         return op2.Set(size, "Cells", comm=self.comm)
 
     @cached_property  # TODO: Recalculate if mesh moves
+    @PETSc.Log.EventDecorator()
     def cell_parent_cell_list(self):
         """Return a list of parent mesh cells numbers in vertex only
         mesh cell order.
@@ -2185,6 +2187,7 @@ class VertexOnlyMeshTopology(AbstractMeshTopology):
         return cell_parent_cell_list[self.cell_closure[:, -1]]
 
     @cached_property  # TODO: Recalculate if mesh moves
+    @PETSc.Log.EventDecorator()
     def cell_parent_cell_map(self):
         """Return the :class:`pyop2.types.map.Map` from vertex only mesh cells to
         parent mesh cells.
@@ -2193,6 +2196,7 @@ class VertexOnlyMeshTopology(AbstractMeshTopology):
                        self.cell_parent_cell_list, "cell_parent_cell")
 
     @cached_property  # TODO: Recalculate if mesh moves
+    @PETSc.Log.EventDecorator()
     def cell_parent_base_cell_list(self):
         """Return a list of parent mesh base cells numbers in vertex only
         mesh cell order.
@@ -2204,6 +2208,7 @@ class VertexOnlyMeshTopology(AbstractMeshTopology):
         return cell_parent_base_cell_list[self.cell_closure[:, -1]]
 
     @cached_property  # TODO: Recalculate if mesh moves
+    @PETSc.Log.EventDecorator()
     def cell_parent_base_cell_map(self):
         """Return the :class:`pyop2.types.map.Map` from vertex only mesh cells to
         parent mesh base cells.
@@ -2214,6 +2219,7 @@ class VertexOnlyMeshTopology(AbstractMeshTopology):
                        self.cell_parent_base_cell_list, "cell_parent_base_cell")
 
     @cached_property  # TODO: Recalculate if mesh moves
+    @PETSc.Log.EventDecorator()
     def cell_parent_extrusion_height_list(self):
         """Return a list of parent mesh extrusion heights in vertex only
         mesh cell order.
@@ -2225,6 +2231,7 @@ class VertexOnlyMeshTopology(AbstractMeshTopology):
         return cell_parent_extrusion_height_list[self.cell_closure[:, -1]]
 
     @cached_property  # TODO: Recalculate if mesh moves
+    @PETSc.Log.EventDecorator()
     def cell_parent_extrusion_height_map(self):
         """Return the :class:`pyop2.types.map.Map` from vertex only mesh cells to
         parent mesh extrusion heights.
@@ -2238,6 +2245,7 @@ class VertexOnlyMeshTopology(AbstractMeshTopology):
         raise NotImplementedError("Currently not implemented for VertexOnlyMesh")
 
     @cached_property  # TODO: Recalculate if mesh moves
+    @PETSc.Log.EventDecorator()
     def cell_global_index(self):
         """Return a list of unique cell IDs in vertex only mesh cell order."""
         cell_global_index = np.copy(self.topology_dm.getField("globalindex").ravel())
@@ -2245,6 +2253,7 @@ class VertexOnlyMeshTopology(AbstractMeshTopology):
         return cell_global_index
 
     @cached_property  # TODO: Recalculate if mesh moves
+    @PETSc.Log.EventDecorator()
     def input_ordering(self):
         """
         Return the input ordering of the mesh vertices as a
@@ -2271,6 +2280,7 @@ class VertexOnlyMeshTopology(AbstractMeshTopology):
             )
 
     @staticmethod
+    @PETSc.Log.EventDecorator()
     def _make_input_ordering_sf(swarm, nroots, ilocal):
         # ilocal = None -> leaves are swarm points [0, 1, 2, ...).
         # ilocal can also be Firedrake cell numbers.
@@ -2291,6 +2301,7 @@ class VertexOnlyMeshTopology(AbstractMeshTopology):
         return sf
 
     @cached_property  # TODO: Recalculate if mesh moves
+    @PETSc.Log.EventDecorator()
     def input_ordering_sf(self):
         """
         Return a PETSc SF which has :func:`~.VertexOnlyMesh` input ordering
@@ -2308,6 +2319,7 @@ class VertexOnlyMeshTopology(AbstractMeshTopology):
         return VertexOnlyMeshTopology._make_input_ordering_sf(self.topology_dm, nroots, ilocal)
 
     @cached_property  # TODO: Recalculate if mesh moves
+    @PETSc.Log.EventDecorator()
     def input_ordering_without_halos_sf(self):
         """
         Return a PETSc SF which has :func:`~.VertexOnlyMesh` input ordering
@@ -2900,6 +2912,7 @@ values from f.)"""
             return cache.setdefault(tolerance, locator)
 
     @cached_property  # TODO: Recalculate if mesh moves. Extend this for regular meshes.
+    @PETSc.Log.EventDecorator()
     def input_ordering(self):
         """
         Return the input ordering of the mesh vertices as a

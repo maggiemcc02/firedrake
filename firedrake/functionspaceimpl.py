@@ -95,6 +95,7 @@ class WithGeometryBase:
         Parent geometric function space if exists.
 
     """
+    @PETSc.Log.EventDecorator()
     def __init__(self, function_space, mesh, parent=None):
         if isinstance(function_space, MixedFunctionSpace):
             if not isinstance(mesh, MeshSequenceGeometry):

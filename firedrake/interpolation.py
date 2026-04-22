@@ -544,7 +544,9 @@ class CrossMeshInterpolator(Interpolator):
         point_eval = interpolate(self.operand, P0DG_vom)
 
         # Expression for interpolating into the input-ordering VOM
-        P0DG_vom_input_ordering = self._target_space_type(vom.input_ordering, "DG", 0)
+        with PETSc.Log.Event("vom_input_ordering"):
+            vom_input_ordering = vom.input_ordering
+        P0DG_vom_input_ordering = self._target_space_type(vom_input_ordering, "DG", 0)
         arg = Argument(P0DG_vom, 0 if self.ufl_interpolate.is_adjoint else 1)
         point_eval_input_ordering = interpolate(arg, P0DG_vom_input_ordering)
 

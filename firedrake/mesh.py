@@ -2340,6 +2340,7 @@ class _MultiCellTypeDummyCoordinates:
 class MeshGeometry(ufl.Mesh, MeshGeometryMixin):
     """A representation of mesh topology and geometry."""
 
+    @PETSc.Log.EventDecorator()
     @MeshGeometryMixin._ad_annotate_init
     def __init__(self, coordinates):
         """Initialise a mesh geometry from coordinates.
@@ -3993,7 +3994,8 @@ def _pic_swarm_in_mesh(
     else:
         parent_mesh.tolerance = tolerance
 
-    coords = np.asarray(coords, dtype=RealType)
+    with PETSc.Log.Event("prepare_coords"):
+        coords = np.asarray(coords, dtype=RealType)
 
     plex = parent_mesh.topology.topology_dm
     tdim = parent_mesh.topological_dimension
@@ -5025,6 +5027,7 @@ def Submesh(mesh, subdim=None, subdomain_id=None, label_name=None, name=None, ig
     return submesh
 
 
+@PETSc.Log.EventDecorator()
 def coordinates_from_topology(topology: AbstractMeshTopology, element: finat.ufl.FiniteElement) -> "CoordinatelessFunction":
     """Convert DMPlex coordinates into Firedrake coordinates.
 

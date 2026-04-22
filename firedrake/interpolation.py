@@ -991,8 +991,8 @@ class VomOntoVomInterpolator(SameMeshInterpolator):
         return {"aij", "baij", "matfree", None}
 
 
-@known_pyop2_safe
 @PETSc.Log.EventDecorator()
+@known_pyop2_safe
 def _build_interpolation_callables(
     expr: Interpolate | ZeroBaseForm,
     tensor: op2.Dat | op2.Mat | op2.Global,

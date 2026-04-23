@@ -867,6 +867,7 @@ class VomOntoVomInterpolator(SameMeshInterpolator):
                 "The target vom and source vom must be linked by input ordering!"
             )
 
+    @PETSc.Log.EventDecorator()
     def _get_callable(self, tensor=None, bcs=None, mat_type=None, sub_mat_type=None):
         if bcs:
             raise NotImplementedError("bcs not implemented for vom-to-vom interpolation.")
@@ -908,6 +909,7 @@ class VomOntoVomInterpolator(SameMeshInterpolator):
 
         return callable
 
+    @PETSc.Log.EventDecorator()
     def _build_python_mat(self, mpi_type) -> PETSc.Mat:
         # In this case mat_type="matfree", so we use the SF wrapped as a PETSc Mat
         # to perform the permutation.
@@ -932,6 +934,7 @@ class VomOntoVomInterpolator(SameMeshInterpolator):
         mat.setUp()
         return mat
 
+    @PETSc.Log.EventDecorator()
     def _create_permutation_mat(self, mat_type: Literal["aij", "baij"]) -> PETSc.Mat:
         """Create the PETSc matrix that represents the interpolation operator from a vertex-only mesh to
         its input ordering vertex-only mesh.
@@ -1393,6 +1396,7 @@ def vom_cell_parent_node_map_extruded(vertex_only_mesh: MeshGeometry, extruded_c
 
 
 @no_annotations
+@PETSc.Log.EventDecorator()
 def expr_as_coeff(
         target_space: WithGeometry,
         operand: Expr,
@@ -1508,6 +1512,7 @@ class VomOntoVomMatContext:
     def mpi_type(self, val):
         self._mpi_type = val
 
+    @PETSc.Log.EventDecorator()
     def reduce(self, source_vec: PETSc.Vec, target_vec: PETSc.Vec) -> None:
         """Reduce data in source_vec using the PETSc SF.
 

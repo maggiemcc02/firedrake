@@ -31,13 +31,17 @@ def test_dynamic_meshes_2D():
     k = Constant(1/dt)
     F = k*inner(u-u0, v)*dx + inner(grad(u), grad(v))*dx - f*v*dx
     u1 = Function(V)
-    solve(lhs(F) == rhs(F), u1)
+    lvp1 = LinearVariationalProblem(lhs(F), rhs(F), u1)
+    lvs1 = LinearVariationalSolver(lvp1)
+    lvs1.solve()
     J = float(dt)*assemble(u1**2*dx)
 
     mesh.coordinates.assign(mesh.coordinates + s[2])
     F = k*inner(u-u1, v)*dx + inner(grad(u), grad(v))*dx - f*v*dx
     u2 = Function(V)
-    solve(lhs(F) == rhs(F), u2)
+    lvp2 = LinearVariationalProblem(lhs(F), rhs(F), u2)
+    lvs2 = LinearVariationalSolver(lvp2)
+    lvs2.solve()
     J += float(dt)*assemble(u2**2*dx)
 
     ctrls = [Control(c) for c in s]
@@ -100,14 +104,18 @@ def test_dynamic_meshes_3D(mesh_type):
     k = Constant(1/dt)
     F = k*inner(u-u0, v)*dx + inner(grad(u), grad(v))*dx - f*v*dx
     u1 = Function(V)
-    solve(lhs(F) == rhs(F), u1)
+    lvp1 = LinearVariationalProblem(lhs(F), rhs(F), u1)
+    lvs1 = LinearVariationalSolver(lvp1)
+    lvs1.solve()
     J = float(dt)*assemble(u1**2*dx)
 
     mesh.coordinates.assign(mesh.coordinates + s[2])
 
     F = k*inner(u-u1, v)*dx + inner(grad(u), grad(v))*dx - f*v*dx
     u2 = Function(V)
-    solve(lhs(F) == rhs(F), u2)
+    lvp2 = LinearVariationalProblem(lhs(F), rhs(F), u2)
+    lvs2 = LinearVariationalSolver(lvp2)
+    lvs2.solve()
     J += float(dt)*assemble(u2**2*dx)
 
     ctrls = [Control(c) for c in s]

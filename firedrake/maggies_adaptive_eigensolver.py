@@ -372,7 +372,7 @@ class GoalAdaptiveSolverBase:
     # Allows the user to design, say output.
     # Pretty much, after each iteration, this will run any user-supplied code.
     # For example, the user could want to save the solution, print output, save plots, etc
-    # This replaces the old write solution tools
+    # This replaces the old write solution toolgi
     def post_iteration(self, it: int):
         """Hook called after SOLVE+ESTIMATE, before convergence check.
            Invokes the user-supplied ``post_iteration_callback``, if any."""

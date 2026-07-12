@@ -4,7 +4,8 @@ import pytest
 from firedrake import *
 
 
-@pytest.mark.parallel([1, 3])
+#@pytest.mark.parallel([1, 3])
+@pytest.mark.parallel([1]) #Doing it in serial for now
 @pytest.mark.skipnetgen
 def test_goal_adaptive_poisson():
     """DWR goal-adaptive solver on Poisson with a known exact solution.

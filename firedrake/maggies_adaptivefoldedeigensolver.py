@@ -1528,6 +1528,7 @@ class GoalAdaptiveFoldedEigensolver(SteadyGoalAdaptiveSolver, OptionsManager):
         lams_p, vecs_p = _solve_eigs(high_problem, opts.nev, sp_target)
         self._lam_p = lams_p[0]
 
+
         
         # 7. Maggie Change - checking multiplicity
         # Check multiplicity based on lower degree solve
@@ -1632,9 +1633,6 @@ class GoalAdaptiveFoldedEigensolver(SteadyGoalAdaptiveSolver, OptionsManager):
             sigma_h = 0.5 * m_norm(e_sigma)**2 # Maggie change for now
             rhs = assemble(replace_both_args(A, u_h, e)
                                  - lam_h * replace_both_args(M, u_h, e)) # took float out
-            if abs(rhs.imag) > 1.0e-10 * max(1.0, abs(rhs)):
-                self.print(RED % f"Error estimate has a nontrivial imaginary part and we will take real part: {rhs}")
-                rhs = rhs.real
 
         else: # Maggie never touched this because folded operator is self adjoint
             e_adj = z_p - z_h
@@ -1649,6 +1647,64 @@ class GoalAdaptiveFoldedEigensolver(SteadyGoalAdaptiveSolver, OptionsManager):
         # 11. Maggie change - signed error, phi_value, and its correction.
         denom = 1.0 - sigma_h
         self.signed_error = rhs/denom if abs(denom) > 1e-14 else float("nan")
+
+        # a bunch of checks:
+        m_hh = assemble(replace_both_args(M, u_h, u_h))
+        m_pp = assemble(replace_both_args(M, u_p, u_p))
+        m_hp = assemble(replace_both_args(M, u_h, u_p))
+        print("m(u_h, u_h) =", m_hh)
+        print("m(u_p, u_p) =", m_pp)
+        print("m(u_h, u_p) =", m_hp)
+        print('top of estimate =', rhs)
+        print('bottom of estimate =', denom)
+        print('extra checks')
+        a_hp = assemble(replace_both_args(A, u_h, u_p))
+        a_ph = assemble(replace_both_args(A, u_p, u_h))
+        m_hp = assemble(replace_both_args(M, u_h, u_p))
+        m_ph = assemble(replace_both_args(M, u_p, u_h))
+        print("a(u_h, u_p) =", a_hp)
+        print("conj(a(u_p, u_h)) =", np.conj(a_ph))
+        print("A Hermitian defect =", a_hp - np.conj(a_ph))
+        print("m(u_h, u_p) =", m_hp)
+        print("conj(m(u_p, u_h)) =", np.conj(m_ph))
+        print("M Hermitian defect =", m_hp - np.conj(m_ph))
+        a_pp = assemble(replace_both_args(A, u_p, u_p))
+        m_pp = assemble(replace_both_args(M, u_p, u_p))
+        lam_p_rayleigh = a_pp / m_pp
+        print("Rayleigh quotient of matched u_p =", lam_p_rayleigh)
+        print('even more checks')
+        u_h_high = Function(u_p.function_space())
+        for uh_high_i, uh_i in zip(
+            u_h_high.subfunctions,
+            u_h.subfunctions,
+        ):
+            uh_high_i.interpolate(uh_i)
+
+        a_hp = assemble(
+            replace_both_args(A, u_h_high, u_p)
+        )
+
+        a_ph = assemble(
+            replace_both_args(A, u_p, u_h_high)
+        )
+
+        m_hp = assemble(
+            replace_both_args(M, u_h_high, u_p)
+        )
+
+        m_ph = assemble(
+            replace_both_args(M, u_p, u_h_high)
+        )
+
+        print("A Hermitian defect:", a_hp - np.conj(a_ph))
+        print("M Hermitian defect:", m_hp - np.conj(m_ph))
+
+        # Maggie change 11.5 - Check if imaginary
+        if abs(self.signed_error.imag) > 1.0e-10:
+                self.print(RED % f"Error estimate has a nontrivial imaginary part and we will take real part: {self.signed_error}")
+                self.signed_error = self.signed_error.real 
+
+
         eta_h = abs(rhs / denom) if abs(denom) > 1e-14 else float("nan")
         self.etah_vec.append(eta_h)
         self.print(f'{"Predicted magnitude of error:":40s}{eta_h: 15.12e}')

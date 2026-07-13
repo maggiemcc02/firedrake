@@ -324,7 +324,7 @@ def coarsen_nlvp(problem, self, coefficient_mapping=None):
 @coarsen.register(firedrake.LinearEigenproblem)
 def coarsen_eigenproblem(problem, self, coefficient_mapping=None):
     # Have we done this already?
-    mh, _ = utils.get_level(problem.output_space().mesh())
+    mh, _ = utils.get_level(problem.output_space.mesh()) # maggie updated this
     if self == coarsen and hasattr(problem, "_coarse"):
         if mh is utils.get_level(problem._coarse.output_space.mesh())[0]:
             return problem._coarse

@@ -323,6 +323,7 @@ class GoalAdaptiveSolverBase:
     # Solve is the same as in the older code
     def solve(self):
         """Run the adaptive SOLVE→ESTIMATE→MARK→REFINE loop to convergence."""
+        # Runs the standard loop for adaptivity where step() executes the steps of a given iteration
         for it in range(self.options.max_it):
             try:
                 self.step(it=it)
@@ -350,24 +351,34 @@ class GoalAdaptiveSolverBase:
             :meth:`solve` catches this automatically; callers driving the loop
             manually with :meth:`step` must handle it themselves.
         """
+
+        # One iteration of the adaptive loop!!!
+
+
         self.print(f"---------------------------- [MESH LEVEL {it}] ----------------------------")
+
+
         # SOLVE + ESTIMATE
-        eta_h, eta = self.solve_and_estimate()
-        self.post_iteration(it)
-        if abs(eta_h) < self.options.tolerance:
+        eta_h, eta = self.solve_and_estimate() # defined in the subclass
+        self.post_iteration(it) # user given actions
+        if abs(eta_h) < self.options.tolerance: # tolerance stopping criteria 
             self.print("Error estimate below tolerance, finished.")
             raise StopIteration
-        elif it == self.options.max_it - 1:
+        elif it == self.options.max_it - 1: # max iter stopping criteria
             self.print(f"Maximum iteration ({self.options.max_it}) reached. Exiting.")
             raise StopIteration
+
+        
         # MARK
         self.print("Computing local refinement indicators eta_K ...")
-        eta_cell = self.compute_error_indicators()
-        self.compute_efficiency_indices(eta_cell, eta_h, eta)
-        markers = self.set_adaptive_cell_markers(eta_cell)
+        eta_cell = self.compute_error_indicators() # defined in the subclass - local indicators
+        self.compute_efficiency_indices(eta_cell, eta_h, eta) # effectivity indices
+        markers = self.set_adaptive_cell_markers(eta_cell) # call the marking routine - in base class
+
+
         # REFINE
         self.print("Transferring problem to new mesh ...")
-        self.refine_problem(markers)
+        self.refine_problem(markers) # refine the problem (base class)
 
     # Allows the user to design, say output.
     # Pretty much, after each iteration, this will run any user-supplied code.
@@ -382,6 +393,10 @@ class GoalAdaptiveSolverBase:
     # ------------------------------------------------------------------
     # Common machinery (mark + refine + efficiency)
     # ------------------------------------------------------------------
+
+
+    # Not change to set_adaptive_cell_markers
+    # note - maximum marking not dorfler marking!!!
 
     def set_adaptive_cell_markers(self, eta_cell):
         """Mark cells for refinement using Dörfler marking.
@@ -406,6 +421,12 @@ class GoalAdaptiveSolverBase:
             m.dat.data_wo[e.dat.data_ro > threshold] = 1
         return markers
 
+    
+    # In the old code, this was implemented in subclasses not in this base class
+    # Thus, every solver had to have its own refinement method
+    # Thus, the new version of the eigensolver should inherit this 
+    # The question is whether refine(self.problem, ...) will know how to handle an eigenproblem - I think it does (bult in and in old code)
+
     def refine_problem(self, markers, coef_map=None):
         """Refine the mesh and reconstruct the problem on the new mesh.
 
@@ -414,13 +435,18 @@ class GoalAdaptiveSolverBase:
         markers
             DG0 Function with value 1 on cells to refine.
         """
+
+        # Loop over markers 
         for marker in markers.subfunctions:
             mesh = marker.function_space().mesh()
+            # refine marked elements
             new_mesh = mesh.refine_marked_elements(marker)
+            # add it to its repsective hierarchy
             amh, _ = get_level(mesh)
             amh.add_mesh(new_mesh)
 
         # Reconstruct MeshSequence with the refined meshes
+        # Reconstruct the problem on the refined mesh
         mesh = self.amh[-1]
         if len(mesh) > 1:
             new_mesh = type(mesh)([get_level(m)[0][-1] for m in mesh])
@@ -429,9 +455,19 @@ class GoalAdaptiveSolverBase:
             coef_map = {}
         self.problem = refine(self.problem, refine, coefficient_mapping=coef_map)
 
+
+    # Old code computed several diagnostics on the error
+    # In particular, it computed eff1, eff2, and eff3 like in Joe's old code
+    # This code leaves it up to the subclasses to decide what their measure of efficiency it
+    # This means the generic base no longer assumes that all goal-adaptive solvers should measure efficiency in exactly the same way.
+
     def compute_efficiency_indices(self, eta_cell, eta_h, eta):
         """Hook called after marking.  Default no-op; override in subclasses."""
         pass
+
+    
+    # Same as before 
+    # Chat: This uses PETSc-aware printing. In parallel, it avoids every MPI process printing the same message.
 
     def print(self, *args, **kwargs):
         if self.options.verbose:
@@ -440,6 +476,9 @@ class GoalAdaptiveSolverBase:
     # ------------------------------------------------------------------
     # Abstract interface for subclasses
     # ------------------------------------------------------------------
+
+
+    # Same as before - needs to be defined in the subclass
 
     def solve_and_estimate(self):
         """Solve the PDE(s) and compute a global error estimate.
@@ -455,6 +494,9 @@ class GoalAdaptiveSolverBase:
         """
         raise NotImplementedError
 
+    
+    # Same as before - needs to be defined in the subclass 
+
     def compute_error_indicators(self):
         """Compute cell-wise error indicators using stored solver state.
 
@@ -465,6 +507,11 @@ class GoalAdaptiveSolverBase:
         """
         raise NotImplementedError
 
+
+
+# Not in the old code
+# In the old code, the effectivity index computations were set in the base class
+# Makes more sense to seperate out - not every problem has a scalar goal value
 
 class SteadyGoalAdaptiveSolver(GoalAdaptiveSolverBase):
     """Intermediate base for steady-state goal-adaptive solvers.
@@ -514,6 +561,720 @@ class SteadyGoalAdaptiveSolver(GoalAdaptiveSolverBase):
             eff3 = eta_cell_total / abs(eta_h)
             self.eff3_vec.append(eff3)
             self.print(f'{"Localisation efficiency:":40s}{eff3: 15.12f}')
+
+
+
+# The newer nonlinear variational code
+# Note the inheritance changes - inherits from the steady solver and options manager for PETSc
+
+class GoalAdaptiveNonlinearVariationalSolver(SteadyGoalAdaptiveSolver, OptionsManager):
+    """Solves a nonlinear variational problem to minimise the error in a
+    user-specified goal functional by adaptively refining the mesh using the
+    dual-weighted residual (DWR) error estimate.
+
+    All options — both goal-adaptive loop parameters and PETSc solver
+    parameters for the inner primal/dual solves — are passed through a
+    single ``solver_parameters`` dictionary.  Goal-adaptive parameters are
+    distinguished by a ``"goal_adaptive"`` namespace key (which after
+    flattening becomes a ``goal_adaptive_`` prefix), e.g.::
+
+        solver_parameters = {
+            "goal_adaptive": {
+                "tolerance": 1e-4,
+                "max_it": 8,
+                "dual_low_method": "interpolate",
+                "verbose": False,
+            },
+            "snes_type": "ksponly",
+            "ksp_type": "preonly",
+            "pc_type": "lu",
+        }
+
+    Parameters
+    ----------
+    problem
+        The variational problem defined on the initial (coarse) mesh.
+    goal_functional
+        The goal functional — a zero-form in terms of the primal solution.
+    solver_parameters
+        Unified parameter dictionary.  Keys prefixed by ``goal_adaptive_``
+        (or nested under a ``"goal_adaptive"`` sub-dict) configure the
+        adaptive loop (see ``GoalAdaptiveOptions``); all other keys are
+        passed to the inner :class:`~.NonlinearVariationalSolver` /
+        :class:`~.LinearVariationalSolver`.
+    options_prefix
+        PETSc options prefix, forwarded to ``petsctools.OptionsManager``.
+        Allows command-line overrides, e.g.
+        ``-mysolve_snes_type ksponly``.
+    primal_solver_kwargs
+        Extra keyword arguments for the primal :class:`~.NonlinearVariationalSolver`.
+    dual_solver_kwargs
+        Extra keyword arguments for the dual :class:`~.LinearVariationalSolver`.
+    exact_solution
+        Exact primal solution (UFL expression or list/tuple for mixed spaces).
+        Used to compute the true error for efficiency indices.
+    exact_goal
+        Exact scalar value of the goal functional.  Used to compute the true
+        error when an analytic formula is available.
+    post_iteration_callback
+        Optional callable ``callback(solver, it)`` invoked after each
+        SOLVE+ESTIMATE step (before convergence check and refinement).
+        Use this for visualisation or post-processing at each mesh level.
+        See :func:`vtk_output_callback` for a ready-made VTK writer.
+    """
+
+    _GOAL_PREFIX = "goal_adaptive_" 
+
+    # The asterix means subsequent arguments must be passed by name
+    # tolerance now lives in solver parameters
+    
+    def __init__(self,
+                 problem: NonlinearVariationalProblem,
+                 goal_functional: ufl.BaseForm,
+                 *,
+                 solver_parameters: dict | None = None,
+                 options_prefix: str | None = None,
+                 primal_solver_kwargs: dict | None = None,
+                 dual_solver_kwargs: dict | None = None,
+                 exact_solution: ufl.classes.Expr | None = None,
+                 exact_goal: ufl.classes.Expr | None = None,
+                 post_iteration_callback=None,
+                 ):
+        
+        # No test or trials in the goal functional - just a scalar result
+        if not (isinstance(goal_functional, ufl.BaseForm) and len(goal_functional.arguments()) == 0):
+            raise ValueError("goal_functional must be a 0-form")
+
+        # Initialize the constructors of both parents
+        if options_prefix is None:
+            options_prefix = ""
+        base_mesh = problem.u.function_space().mesh() # base mesh obtained automatically! 
+        # Uses the base to set up the mesh hierarchy! Old code did this itself
+        SteadyGoalAdaptiveSolver.__init__(self, base_mesh, solver_parameters,
+                                          exact_goal=exact_goal,
+                                          post_iteration_callback=post_iteration_callback)
+
+        # Seperate primal and dual solver parameters are removed
+        # primal: primal_options_prefix = self.options_prefix + "primal_"
+        # dual: dual_options_prefix = self.options_prefix + "dual_"
+        OptionsManager.__init__(self, solver_parameters, options_prefix)
+
+        # Sets the adaptive machinary
+        self.problem = problem
+        self.goal_functional = goal_functional
+        self.primal_solver_kwargs = primal_solver_kwargs or {}
+        self.dual_solver_kwargs = dual_solver_kwargs or {}
+
+        # hmmm 
+        # Old code has self.u_exact = as_mixed(exact_solution) if isinstance(exact_solution, (tuple, list)) else exact_solution
+        # Does this new code support mixed solutions?
+        self.u_exact = exact_solution
+        
+        self.u_high = None
+        # Internal state set by solve_and_estimate, used by compute_error_indicators
+        self._u_err = None
+        self._z_lo = None
+        self._z_err = None
+
+    # A new helper - gives one definition of the best currently available solution
+    def _current_solution(self):
+        """Return the solution function on the current (finest) mesh."""
+        return self.u_high if self.u_high is not None else self.problem.u
+
+    
+
+    # New code onlu returns the solution and not the error estimate
+    # Instead, the error can be found via solver.get_error_estimate()
+    # New code does not reset u_high=None    
+    def solve(self):
+        """Run the adaptive loop and return the final solution and error estimate.
+
+        Each call continues from the current mesh and solution; history vectors
+        (``Ndofs_vec``, ``etah_vec``, etc.) are appended rather than reset.
+
+        Returns
+        -------
+        tuple[Function, float]
+            ``(u_out, error_estimate)`` where ``u_out`` is the solution on the
+            finest mesh reached and ``error_estimate`` is the final ``|eta_h|``.
+        """
+        super().solve()
+        return self._current_solution()
+
+    
+    # One iter of the adaptive loop
+    # Uses current solution helper to output the best available current solution
+    # Old code used to also output the error
+
+    def step(self, it=None):
+        """Compute one SOLVE→ESTIMATE→MARK→REFINE step and return the current solution.
+
+        Useful for users who want to inspect or post-process the solution at
+        each mesh level without running the full :meth:`solve` loop.
+
+        Parameters
+        ----------
+        it
+            Mesh level index.  If ``None``, inferred from the current mesh
+            hierarchy level.
+
+        Returns
+        -------
+        tuple[Function, float]
+            ``(u_out, eta_h)`` — the solution and error estimate on the current
+            mesh.  Only returned when refinement was performed.
+
+        Raises
+        ------
+        StopIteration
+            When the error estimate is below ``tolerance`` or the maximum
+            iteration count is reached.  Callers must catch this::
+
+                for it in range(solver.options.max_it):
+                    try:
+                        u, eta = solver.step(it)
+                    except StopIteration:
+                        break
+        """
+        if it is None:
+            V = self.problem.u.function_space()
+            _, it = get_level(V.mesh())
+        super().step(it)
+        return self._current_solution()
+
+    
+    
+    
+    # Same as old code 
+    # Solve the primal and dual problems
+    # Compute the global error estimate
+    # CHECK - z_err vs z_lo vs u_err -> uh^+ - Ih uh^+ or uh^+ - uh
+    def solve_and_estimate(self):
+        """Solve primal and dual, compute global error estimate."""
+        u_err = self.solve_primal()
+        z_lo, z_err = self.solve_dual()
+        self._u_err = u_err
+        self._z_lo = z_lo
+        self._z_err = z_err
+        eta_h, eta = self.estimate_error(u_err, z_lo, z_err)
+        return eta_h, eta
+
+    
+    
+    def solve_primal(self):
+        """Solve the primal problem and return the primal error representative.
+
+        When ``use_adjoint_residual=False`` (the default), the primal problem is
+        solved once in the base space ``V``.
+
+        When ``use_adjoint_residual=True``, the problem is also solved in an
+        enriched space of degree ``degree + primal_extra_degree``.  The
+        low-degree approximation is obtained via
+        ``primal_low_method`` (interpolate / project / solve), and the
+        difference ``u_high - u`` is returned as the primal error representative.
+
+        Returns
+        -------
+        Function or None
+            The primal error representative ``u_high - u_h``, or ``None`` when
+            ``use_adjoint_residual=False``.
+        """
+        F = self.problem.F
+        u = self.problem.u
+        bcs = self.problem.bcs
+        V = self.problem.u.function_space()
+        self.Ndofs_vec.append(V.dim())
+        primal_options_prefix = self.options_prefix + "primal_" # this new prefix methodology
+
+        
+        # Solve the primal problem
+        def solve_uh():
+            self.print(f'Solving primal (degree: {V.ufl_element().degree()}, dofs: {V.dim()}) ...')
+            solver = NonlinearVariationalSolver(self.problem, solver_parameters=self.parameters,
+                                                options_prefix=primal_options_prefix,
+                                                **self.primal_solver_kwargs)
+            solver.set_transfer_manager(self.atm)
+            solver.solve()
+            self.primal_solver = solver
+
+        
+        # If we are going to compute the residual using the adjoint problem ...
+        if self.options.use_adjoint_residual:
+            if self.options.primal_low_method == "solve":
+                solve_uh()
+
+            # Now solve in higher-order space
+            high_degree = V.ufl_element().degree() + self.options.primal_extra_degree # Does this account for mixed problems?
+            V_high = reconstruct_degree(V, high_degree) # construct enriched space
+            u_high = Function(V_high, name="high_order_solution")
+            u_high.interpolate(u) # setting u as initial guess?
+
+            v_old, = F.arguments()
+            v_high = v_old.reconstruct(function_space=V_high)
+            F_high = replace(F, {v_old: v_high, u: u_high})
+            bcs_high = [bc.reconstruct(V=V_high, indices=bc._indices) for bc in bcs]
+            problem_high = NonlinearVariationalProblem(F_high, u_high, bcs_high) # create the enriched problem
+
+            self.print(f"Solving primal with higher order for error estimate (degree: {high_degree}, dofs: {V_high.dim()}) ...")
+            # solve the enriched problem
+            solver = NonlinearVariationalSolver(problem_high, solver_parameters=self.parameters,
+                                                options_prefix=primal_options_prefix,
+                                                **self.primal_solver_kwargs)
+            solver.set_transfer_manager(self.atm)
+            solver.solve()
+            self.primal_solver = solver
+
+            self.u_high = u_high
+
+            
+            # Ways to obtain uh : 
+            # "solve" - independently solve the nonlinear problem in V
+            # "project" - solve only in V_high, then L²-project u_high into V
+            # "interpolate" - solve only in V_high, then interpolate u_high into V
+            
+            if self.options.primal_low_method == "solve":
+                pass
+            elif self.options.primal_low_method == "project":
+                u.project(u_high)
+            elif self.options.primal_low_method == "interpolate":
+                u.interpolate(u_high)
+            else:
+                raise ValueError(f"Unrecognised primal_low_method {self.options.primal_low_method}")
+            
+            
+            # u_err is uh^+ - uh 
+            # I want uh but I also want u_err = uh^+ - Ih uh^+ 
+            # So I will need to reassess this!!
+
+            u_err = u_high - u
+
+        # Dont need primal error for primal residual 
+        else:
+            solve_uh()
+            u_err = None
+        return u_err
+
+
+
+    
+    
+    def solve_dual(self):
+        """Solve the dual (adjoint) problem and return the dual solutions.
+
+        The dual problem is always solved in an enriched space of degree
+        ``degree + dual_extra_degree``.  A low-degree approximation ``z_lo`` is
+        obtained via ``dual_low_method`` (interpolate / project / solve).
+
+        Returns
+        -------
+        tuple[Function, Function]
+            ``(z_lo, z_err)`` where ``z_lo`` is the low-degree dual solution
+            (in the same space as the primal ``u``) and ``z_err = z - z_lo``
+            is the dual error representative used to weight the residuals.
+        """
+
+        def solve_zh(z, linearise_at_high=True):
+            bcs = self.problem.bcs
+            J = self.goal_functional
+            F = self.problem.F
+            u = self.problem.u
+            dual_options_prefix = self.options_prefix + "dual_"
+
+            Z = z.function_space()
+            self.print(f"Solving dual (degree: {Z.ufl_element().degree()}, dofs: {Z.dim()}) ...")
+
+            Fz = residual(F, TestFunction(Z))
+            dF = derivative(Fz, u, TrialFunction(Z))
+            dJ = derivative(J, u, TestFunction(Z))
+            a = adjoint(dF)
+
+            if linearise_at_high and self.u_high is not None:
+                a = replace(a, {u: self.u_high})
+                dJ = replace(dJ, {u: self.u_high})
+
+            bcs_dual = [bc.reconstruct(V=Z, indices=bc._indices, g=0) for bc in bcs]
+            problem = LinearVariationalProblem(a, dJ, z, bcs_dual)
+            solver = LinearVariationalSolver(problem, solver_parameters=self.parameters,
+                                             options_prefix=dual_options_prefix,
+                                             **self.dual_solver_kwargs)
+            solver.set_transfer_manager(self.atm)
+            solver.solve()
+
+        # Higher-order dual solution
+        V = self.problem.u.function_space()
+        dual_degree = V.ufl_element().degree() + self.options.dual_extra_degree
+        V_dual = reconstruct_degree(V, dual_degree)
+        z = Function(V_dual, name="dual_high_order_solution")
+        solve_zh(z, linearise_at_high=True)
+
+        # Lower-order dual solution
+        z_lo = Function(V, name="dual_low_order_solution")
+        if self.options.dual_low_method == "solve":
+            z_lo.interpolate(z)
+            # Linearise at the low-order primal (self.problem.u), not u_high,
+            # so the low-order adjoint matches the derivation of the cubic DWR estimate.
+            solve_zh(z_lo, linearise_at_high=False)
+        elif self.options.dual_low_method == "project":
+            z_lo.project(z)
+        elif self.options.dual_low_method == "interpolate":
+            z_lo.interpolate(z)
+        else:
+            raise ValueError(f"Unrecognised dual_low_method {self.options.dual_low_method}")
+        z_err = z - z_lo
+        self.z = z
+        return z_lo, z_err
+
+    
+    
+    
+    
+    def estimate_error(self, u_err, z_lo, z_err):
+        """Compute the global DWR error estimate for the goal functional.
+
+        Computes the primal residual :math:`\\rho(u_h; z - z_h)` and, when
+        ``use_adjoint_residual=True``, also the adjoint residual
+        :math:`\\rho^*(z_h; u - u_h)`, combining them as
+        :math:`\\frac{1}{2}(\\rho + \\rho^*)`.  Also estimates the solver error
+        :math:`\\rho(u_h; z_h)`.
+
+        Parameters
+        ----------
+        u_err
+            Primal error representative ``u_high - u_h`` (or ``None`` when
+            ``use_adjoint_residual=False``).
+        z_lo
+            Low-degree dual solution in the base space.
+        z_err
+            Dual error representative ``z - z_lo``.
+
+        Returns
+        -------
+        tuple[float, float | None]
+            ``(eta_h, eta)`` — the error estimate and the true error
+            ``J(u) - J(u_h)`` (or ``None`` if no exact value was supplied).
+        """
+
+
+        J = self.goal_functional
+        F = self.problem.F
+        u = self.problem.u
+
+        # Primal contribution to error estimator
+        primal_err = assemble(residual(F, -z_err))
+
+        # Dual contribution to error estimator
+        if self.options.use_adjoint_residual:
+            Z = z_lo.function_space()
+            dF = derivative(F, u, TrialFunction(Z))
+            dJ = derivative(J, u)
+            G = action(adjoint(dF), z_lo) - dJ
+
+            dual_err = assemble(residual(G, -u_err))
+            discretisation_error = 0.5 * (primal_err + dual_err)
+        else:
+            discretisation_error = primal_err
+
+        # Estimate of solver error
+        solver_error = assemble(residual(F, -z_lo))
+
+        if abs(solver_error) > abs(discretisation_error):
+            self.print(RED % 'Warning: solver error estimate greater than discretisation error estimate, refine solver tolerances')
+
+        # Final error estimate
+        eta_h = discretisation_error + solver_error
+        self.etah_vec.append(eta_h)
+
+        Juh = assemble(J)
+        self.print(f'{"Computed goal J(uh):":40s}{Juh:15.12f}')
+        self.Juh = Juh
+        if self.goal_exact is not None:
+            if isinstance(self.goal_exact, numbers.Real):
+                Ju = self.goal_exact
+            else:
+                Ju = assemble(self.goal_exact)
+        elif self.u_exact is not None:
+            Ju = assemble(replace(J, {u: self.u_exact}))
+        else:
+            Ju = None
+
+        if Ju is not None:
+            eta = Ju - Juh
+            self.eta_vec.append(eta)
+            self.print(f'{"Exact goal J(u):":40s}{Ju: 15.12f}')
+            self.print(f'{"True error, J(u) - J(u_h):":40s}{eta: 15.12e}')
+        else:
+            eta = None
+
+        if self.options.use_adjoint_residual:
+            self.print(f'{"Primal error, rho(u_h; z-z_h):":40s}{primal_err: 15.12e}')
+            self.print(f'{"Dual error,  rho*(z_h; u-u_h):":40s}{dual_err: 15.12e}')
+            self.print(f'{"Difference":40s}{abs(primal_err-dual_err):19.12e}')
+            self.print(f'{"Discretisation error, 0.5(rho + rho*)":40s}{discretisation_error: 15.12e}')
+        else:
+            self.print(f'{"Discretisation error, rho(u_h; z-z_h)":40s}{discretisation_error: 15.12e}')
+        self.print(f'{"Solver error, rho(u_h; z_h):":40s}{solver_error: 15.12e}')
+        self.print(f'{"Final error estimate:":40s}{eta_h: 15.12e}')
+        return eta_h, eta
+
+    
+    
+    
+    def compute_error_indicators(self):
+        """Compute cell-wise DWR error indicators via bubble/cone projections.
+
+        Projects the primal residual :math:`F(u_h; \\cdot)` onto cell-bubble
+        and facet-bubble spaces, then weights by the dual error ``z_err``.
+        When ``use_adjoint_residual=True``, the adjoint residual is also
+        projected and weighted by ``u_err``, and the two contributions are
+        averaged.
+
+        Returns
+        -------
+        Function
+            DG0 Function of absolute-value cell-wise indicators :math:`\\eta_K`.
+        """
+        J = self.goal_functional
+        F = self.problem.F
+        u = self.problem.u
+        u_err = self._u_err # need to check what this is!!
+        z_lo = self._z_lo
+        z_err = self._z_err
+        V = u.function_space()
+
+        mesh = V.mesh().unique()
+        dim = mesh.topological_dimension
+        cell = mesh.ufl_cell()
+        variant = "integral"
+
+        # Might need to change for mixed spaces!!
+        degree = V.ufl_element().degree()
+        cell_residual_degree = degree + self.options.cell_residual_extra_degree
+        facet_residual_degree = degree + self.options.facet_residual_extra_degree
+
+
+        # ------------------------------- Primal residual -------------------------------
+        # Cell bubbles
+        B = FunctionSpace(mesh, "B", dim+1, variant=variant)
+        bubbles = Function(B).assign(1)
+
+        # Might need to change for mixed spaces!!
+        # DG space on cell interiors
+        if V.value_shape == ():
+            DG = FunctionSpace(mesh, "DG", cell_residual_degree, variant=variant)
+        else:
+            DG = TensorFunctionSpace(mesh, "DG", cell_residual_degree, variant=variant, shape=V.value_shape)
+
+
+        # Might need problem on each subspace of a mixed space
+        uc = TrialFunction(DG)
+        vc = TestFunction(DG)
+        ac = inner(uc, bubbles*vc)*dx
+        Lc = residual(F, bubbles*vc)
+        # solve for Rcell
+        Rcell = Function(DG)
+        solve(ac == Lc, Rcell, solver_parameters=self.options.sp_cell)
+
+        # Facet bubbles
+        FB = FunctionSpace(mesh, "FB", dim, variant=variant)
+        cones = Function(FB).assign(1)
+
+        # Broken facet bubble space
+        # Might need to change for mixed spaces!!
+        el = BrokenElement(FiniteElement("FB", cell=cell, degree=facet_residual_degree+dim, variant=variant))
+        if V.value_shape == ():
+            Q = FunctionSpace(mesh, el)
+        else:
+            Q = TensorFunctionSpace(mesh, el, shape=V.value_shape)
+
+        # Might need problem on each subspace of a mixed space
+        Qtest = TestFunction(Q)
+        Qtrial = TrialFunction(Q)
+        Lf = residual(F, Qtest) - inner(Rcell, Qtest)*dx
+        af = both(inner(Qtrial/cones, Qtest))*dS + inner(Qtrial/cones, Qtest)*ds
+        # solve for Rfacet
+        Rhat = Function(Q)
+        solve(af == Lf, Rhat, solver_parameters=self.options.sp_facet)
+        Rfacet = Rhat/cones
+
+        # Primal error indicators
+        DG0 = FunctionSpace(mesh, "DG", degree=0)
+        test = TestFunction(DG0)
+
+        # Will inner sum over spaces?
+        eta_primal = assemble(
+            inner(inner(Rcell, z_err), test)*dx +
+            + inner(avg(inner(Rfacet, z_err)), both(test))*dS +
+            + inner(inner(Rfacet, z_err), test)*ds
+        )
+        with eta_primal.dat.vec as evec:
+            evec.abs()
+
+        # ------------------------------- Adjoint residual -------------------------------
+        if self.options.use_adjoint_residual:
+            # r*(v) = J'(u)[v] - A'_u(u)[v, z] since F = A(u;v) - L(v)
+            dF = derivative(F, u, TrialFunction(V))
+            dJ = derivative(J, u, TestFunction(V))
+            rstar = action(adjoint(dF), z_lo) - dJ
+
+            # dual: project r* -> Rcell*, Rfacet*
+            Lc_star = residual(rstar, bubbles*vc)
+            Rcell_star = Function(DG)
+            solve(ac == Lc_star, Rcell_star, solver_parameters=self.options.sp_cell)
+
+            Lf_star = residual(rstar, Qtest) - inner(Rcell_star, Qtest)*dx
+            Rhat_star = Function(Q)
+            solve(af == Lf_star, Rhat_star, solver_parameters=self.options.sp_facet)
+            Rfacet_star = Rhat_star/cones
+
+            eta_dual = assemble(
+                inner(inner(Rcell_star, u_err), test)*dx
+                + inner(avg(inner(Rfacet_star, u_err)), both(test))*dS
+                + inner(inner(Rfacet_star, u_err), test)*ds
+            )
+            with eta_dual.dat.vec as evec:
+                evec.abs()
+            eta_cell = assemble(0.5*(eta_primal + eta_dual))
+
+            with eta_primal.dat.vec as evec:
+                self.eta_primal_total = abs(evec.sum())
+            with eta_dual.dat.vec as evec:
+                self.eta_dual_total = abs(evec.sum())
+            self.print(f'{"Sum of primal refinement indicators:":40s}{self.eta_primal_total: 15.12e}')
+            self.print(f'{"Sum of dual refinement indicators:":40s}{self.eta_dual_total: 15.12e}')
+        else:
+            eta_cell = eta_primal
+
+        return eta_cell
+
+    
+    # Simplified from older code by delegating the task to the base class
+    def refine_problem(self, markers):
+        """Adaptively refine the mesh and rediscretise the problem on the refined mesh"""
+        coef_map = {}
+        super().refine_problem(markers, coef_map=coef_map)
+
+        self.goal_functional = refine(self.goal_functional, refine, coefficient_mapping=coef_map)
+        if self.u_exact is not None:
+            self.u_exact = refine(self.u_exact, refine, coefficient_mapping=coef_map)
+
+
+# ---------------------------------------------------------------------------
+# Callbacks
+# ---------------------------------------------------------------------------
+
+def vtk_output_callback(output_dir="./output", run_name="default"):
+    """Return a ``post_iteration_callback`` that writes primal and dual solutions to VTK.
+
+    Usage::
+
+        from firedrake import *
+        solver = GoalAdaptiveNonlinearVariationalSolver(
+            problem, goal_functional,
+            solver_parameters={...},
+            post_iteration_callback=vtk_output_callback(
+                output_dir="./output", run_name="myproblem"
+            ),
+        )
+
+    Parameters
+    ----------
+    output_dir
+        Directory in which to write the VTK files.
+    run_name
+        Label prepended to filenames:
+        ``<output_dir>/<run_name>/<run_name>_solution_<it>.pvd`` and
+        ``<output_dir>/<run_name>/<run_name>_dual_solution_<it>.pvd``.
+
+    Returns
+    -------
+    callable
+        A function ``callback(solver, it)`` suitable for passing to
+        ``post_iteration_callback``.
+    """
+    def _callback(solver, it):
+        prefix = f"{output_dir}/{run_name}/{run_name}"
+        comm = solver.problem.u.function_space().mesh().comm
+        solver.print("Writing (primal) solution ...")
+        VTKFile(f"{prefix}_solution_{it}.pvd", comm=comm).write(*solver.problem.u.subfunctions)
+        solver.print("Writing (dual) solution ...")
+        VTKFile(f"{prefix}_dual_solution_{it}.pvd", comm=comm).write(*solver.z.subfunctions)
+    return _callback
+
+
+
+# Creating my updated eigensolver class
+class GoalAdaptiveEigensolver(GoalAdaptiveSolverBase):
+
+
+    # Old constructor:
+    # def __init__(self,
+    #              problem,
+    #              target: float,
+    #              tolerance: float,
+    #              goal_adaptive_options: dict | None = None,
+    #              solver_parameters: dict | None = None,
+    #              exact_eigenvalue: float | None = None,
+    #              ):
+    #     super().__init__(tolerance, goal_adaptive_options, exact_goal=exact_eigenvalue)
+    #     self.problem = problem
+    #     self.target = target
+    #     self.sp = solver_parameters or {}
+
+    #     # Set up AdaptiveMeshHierarchy
+    #     mesh = problem.output_space.mesh()
+    #     mh, level = get_level(mesh)
+    #     if mh is None:
+    #         AdaptiveMeshHierarchy(mesh)
+    #     else:
+    #         amh = AdaptiveMeshHierarchy(mh[0])
+    #         for m in mh[1:level+1]:
+    #             amh.add_mesh(m)
+
+    #     self.atm = AdaptiveTransferManager()
+    #     self._lam_h = None
+
+
+    # New constructor:
+    def __init__(
+    self,
+    problem,
+    target,
+    *,
+    solver_parameters=None,
+    options_prefix=None,
+    exact_eigenvalue=None,
+    post_iteration_callback=None,):
+
+
+    if options_prefix is None:
+        options_prefix = ""
+
+    base_mesh = problem.output_space.mesh()
+
+    SteadyGoalAdaptiveSolver.__init__(
+        self,
+        base_mesh,
+        solver_parameters,
+        exact_goal=exact_eigenvalue,
+        post_iteration_callback=post_iteration_callback,)
+
+    OptionsManager.__init__(
+        self,
+        solver_parameters,
+        options_prefix,)
+
+    self.problem = problem
+    self.target = target
+    self._lam_h = None
+    self._u_h = None
+    self._u_p = None
+    self._z_h = None
+    self._z_p = None
+    self._z_err = None
+
+
+
+
 
 
 
@@ -596,31 +1357,88 @@ class GoalAdaptiveEigensolver(GoalAdaptiveSolverBase):
         self.atm = AdaptiveTransferManager()
         self._lam_h = None
 
-    def _make_options(self, d):
-        return GoalAdaptiveEigenOptions(**d)
+    
+    # Old options handler:
+    # def _make_options(self, d):
+    #     return GoalAdaptiveEigenOptions(**d)
+
+    # New:
+    def _make_options(self, data)
+    
+    # If its already in format of EigenOptions do nothing
+    if isinstance(data, GoalAdaptiveEigenOptions):
+        return data
+
+    # If given no inputs, set the default
+    if data is None:
+        return GoalAdaptiveEigenOptions()
+
+    #  If a dictionary, extract the adaptive part
+    if isinstance(data, dict):
+        eigen_data = data.get("goal_adaptive", {})
+        return GoalAdaptiveEigenOptions(**eigen_data)
+
+    # If we dont know what to do with it raise an error 
+    raise TypeError("Expected GoalAdaptiveEigenOptions or a solver-parameter dictionary.")
+
+
+    # Set what we mean by the current eigenpair
+    # Could be changed to return the enriched result
+    def _current_eigenpair(self):
+        """Return the most recently computed low-order eigenpair."""
+        if self._lam_h is None or self._u_h is None:
+            raise RuntimeError("No eigenpair has been computed yet.")
+        return self._lam_h, self._u_h
+
+    # Solve setup
+    # def solve(self):
+    #     """Run the adaptive loop and return the eigenvalue and error estimate.
+    #     Returns
+    #     -------
+    #     tuple[float, float]
+    #         ``(lam_h, error_estimate)`` on the finest mesh.
+    #     """
+    #     super().solve()
+    #     # return self._lam_h, self.etah_vec[-1]
+    #     return self._lam_h
+
 
     def solve(self):
-        """Run the adaptive loop and return the eigenvalue and error estimate.
-
-        Returns
-        -------
-        tuple[float, float]
-            ``(lam_h, error_estimate)`` on the finest mesh.
-        """
+        """Run the adaptive loop and return the final computed eigenpair."""
         super().solve()
-        return self._lam_h, self.etah_vec[-1]
+        return self._current_eigenpair()
+
+    
+    # A step method
+    def step(self, it=None):
+        """Run one adaptive eigenvalue iteration and return the current eigenpair."""
+        if it is None:
+            V = self.problem.output_space
+            _, it = get_level(V.mesh())
+        super().step(it)
+        return self._current_eigenpair()
+        #  if it is None:
+        #     V = self.problem.u.function_space()
+        #     _, it = get_level(V.mesh())
+        # super().step(it)
+        # return self._current_solution()
+
 
     def solve_and_estimate(self):
+
         """Solve the eigenproblem at two polynomial degrees, match eigenfunctions,
         and compute a global error estimate for the eigenvalue."""
+
+
         opts = self.options
         problem = self.problem
         V = problem.output_space
         self.Ndofs_vec.append(V.dim())
         self.print(f"Solving eigenproblem (degree: {V.ufl_element().degree()}, dofs: {V.dim()}) ...")
 
-        sp_target = dict(self.sp)
-        if opts.self_adjoint:
+        #sp_target = dict(self.sp)
+        sp_target = dict(self.parameters) # needed change?
+        if opts.self_adjoint: # if self adjoint then tell the solver
             sp_target.setdefault("eps_gen_hermitian", None)
         sp_target["eps_target"] = self.target
 
@@ -631,15 +1449,20 @@ class GoalAdaptiveEigensolver(GoalAdaptiveSolverBase):
         self.print(f'{"Computed eigenvalue:":40s}{self._lam_h:15.12f}')
 
         # Solve at degree p + dual_extra_degree (enriched primal)
-        high_problem = _reconstruct_eig_degree(problem, opts.dual_extra_degree)
+        # dual_extra_degree or primal_extra_degree??
+        high_problem = _reconstruct_eig_degree(problem, opts.dual_extra_degree) # Might need to change for mixed spaces
         self.print(f"Solving enriched eigenproblem (dofs: {high_problem.output_space.dim()}) ...")
         lams_p, vecs_p = _solve_eigs(high_problem, opts.nev, sp_target)
+        
+        # I will need to update this matching!!
         self._lam_p, self._u_p = match_best(self._u_h, vecs_p, lams_p)
 
-        if opts.self_adjoint:
+        if opts.self_adjoint: # if self adjoint we dont need to dual problem
             self._z_h = self._u_h
             self._z_p = self._u_p
-        else:
+
+
+        else: # if not need adjoint problem
             # Adjoint eigenproblem at degree p
             adj_problem = _make_adjoint_eig_problem(problem)
             self.print(f"Solving adjoint eigenproblem (dofs: {adj_problem.output_space.dim()}) ...")
@@ -653,14 +1476,22 @@ class GoalAdaptiveEigensolver(GoalAdaptiveSolverBase):
             _, self._z_p = match_best(self._u_h, zsp, lamzp)
 
         # Dual error representative (UFL expression, may span two spaces)
+        # I think this is wrong!!
         self._z_err = self._z_p - self._z_h
 
+        # Compute the errors
         eta_h, eta = self._estimate_eigenvalue_error()
         return eta_h, eta
 
+
+    
+
     def _estimate_eigenvalue_error(self):
+
         """Compute global error estimate for the eigenvalue (Larson–Bengzon formula)."""
         from firedrake.assemble import assemble
+
+
         u_h, u_p = self._u_h, self._u_p
         z_h, z_p = self._z_h, self._z_p
         lam_h = self._lam_h
@@ -671,7 +1502,7 @@ class GoalAdaptiveEigensolver(GoalAdaptiveSolverBase):
         phi_h = Function(u_h.function_space())
         phi_h.interpolate(u_p)
         e = u_p - phi_h     # primal enrichment error (UFL expression)
-        e_sigma = u_p - u_h
+        e_sigma = u_p - u_h # for the remainder term
 
         if self.options.self_adjoint:
             sigma_h = 0.5 * float(assemble(inner(e_sigma, e_sigma) * dx))
@@ -701,6 +1532,7 @@ class GoalAdaptiveEigensolver(GoalAdaptiveSolverBase):
 
         return eta_h, eta
 
+
     def compute_error_indicators(self):
         """Compute cell/facet residual indicators for the eigenvalue problem."""
         A = self.problem._original_A
@@ -713,31 +1545,36 @@ class GoalAdaptiveEigensolver(GoalAdaptiveSolverBase):
         F_eig = replace(A, {trial: u_h}) - lam_h * replace(M, {trial: u_h})
         return _compute_residual_indicators(F_eig, z_err, self.options)
 
-    def refine_problem(self, markers):
-        """Refine the mesh and reconstruct the :class:`~.LinearEigenproblem`."""
-        mesh = markers.function_space().mesh()
-        new_mesh = mesh.refine_marked_elements(markers)
-        amh, _ = get_level(mesh)
-        amh.add_mesh(new_mesh)
-        coef_map = {}
-        self.problem = refine(self.problem, refine, coefficient_mapping=coef_map)
+    
 
-    def write_solution(self, it):
-        ws = self.options.write_solution
-        if ws is False:
-            return
-        elif ws is True:
-            should_write = True
-        elif isinstance(ws, Integral):
-            should_write = (it % ws == 0)
-        else:
-            raise ValueError(f"write_solution must be False, True, or a positive integer, got {ws!r}")
-        if should_write:
-            output_dir = self.options.output_dir
-            run_name = self.options.run_name
-            self.print("Writing (primal) eigenfunction ...")
-            VTKFile(f"{output_dir}/{run_name}/{run_name}_eigenfunction_{it}.pvd"
-                    ).write(*self._u_h.subfunctions)
+    # I will use the base refinement for now!
+
+    # def refine_problem(self, markers):
+    #     """Refine the mesh and reconstruct the :class:`~.LinearEigenproblem`."""
+    #     mesh = markers.function_space().mesh()
+    #     new_mesh = mesh.refine_marked_elements(markers)
+    #     amh, _ = get_level(mesh)
+    #     amh.add_mesh(new_mesh)
+    #     coef_map = {}
+    #     self.problem = refine(self.problem, refine, coefficient_mapping=coef_map)
+
+
+    # def write_solution(self, it):
+    #     ws = self.options.write_solution
+    #     if ws is False:
+    #         return
+    #     elif ws is True:
+    #         should_write = True
+    #     elif isinstance(ws, Integral):
+    #         should_write = (it % ws == 0)
+    #     else:
+    #         raise ValueError(f"write_solution must be False, True, or a positive integer, got {ws!r}")
+    #     if should_write:
+    #         output_dir = self.options.output_dir
+    #         run_name = self.options.run_name
+    #         self.print("Writing (primal) eigenfunction ...")
+    #         VTKFile(f"{output_dir}/{run_name}/{run_name}_eigenfunction_{it}.pvd"
+    #                 ).write(*self._u_h.subfunctions)
 
 
 # ---------------------------------------------------------------------------

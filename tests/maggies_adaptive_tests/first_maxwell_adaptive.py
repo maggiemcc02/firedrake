@@ -8,6 +8,13 @@ import os
 import matplotlib.pyplot as plt
 
 
+# THINGS TO SORT
+###################################################################
+
+# A is not hermitian it seems in the error estimate - complex error estimate
+# How to save outputs
+
+
 # FORMULATE THE FOLDED EIGENPROBLEM
 ###################################################################
 

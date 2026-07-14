@@ -27,13 +27,29 @@ complex_unit = Constant(1j)
 # Define initial mesh ---------------------
 # N = 32
 # mesh = SquareMesh(N, N, pi, quadrilateral=False)
+# Create the square domain
 N = 32
+square = WorkPlane().Rectangle(pi, pi).Face()
+# Maximum element size
 initial_mesh_size = np.pi / N
-L = float(np.pi)
-rect = WorkPlane().MoveTo(0, 0).Rectangle(L, L).Face()
-geo = OCCGeometry(rect, dim=2)
+# Set the boundary labels
+square.edges.Min(X).name = "left" # x=0
+square.edges.Max(X).name = "right" # x=pi
+square.edges.Min(Y).name = "bottom" # y=0
+square.edges.Max(Y).name = "top" # y=pi
+# Create the 2D mesh
+geo = OCCGeometry(square, dim=2)
 ngm = geo.GenerateMesh(maxh=initial_mesh_size)
+# Take the named boundaries and +1 to get netgen labelling
+names = ngm.GetRegionNames(codim=1)
+left = names.index("left") + 1
+right = names.index("right") + 1
+bottom = names.index("bottom") + 1
+top = names.index("top") + 1
+# Create the final mesh
 mesh = Mesh(ngm)
+
+
 
 
 # The Mixed space
@@ -44,12 +60,14 @@ u = TrialFunction(V)
 (E, H) = split(u)
 v = TestFunction(V)
 (F, G) = split(v)
-
-
 # # The BC's (zero tangential trace)
-bcs = [DirichletBC(V.sub(0).sub(0), 0, (3, 4)),
-          DirichletBC(V.sub(0).sub(1), 0, (1, 2))]
-
+# bcs = [DirichletBC(V.sub(0).sub(0), 0, (3, 4)),
+#           DirichletBC(V.sub(0).sub(1), 0, (1, 2))]
+bcs = [
+    # E_x = 0 on horizontal edges
+    DirichletBC(V.sub(0).sub(0), 0, (bottom, top)),
+    # E_y = 0 on vertical edges
+    DirichletBC(V.sub(0).sub(1), 0, (left, right)),]
 
 # 2D curls 
 # Scalar rot
@@ -110,7 +128,7 @@ solver_parameters = {
     # Options for your adaptive eigensolver
     "goal_adaptive": {
         "tolerance": 1.0e-5,
-        "max_it": 10,
+        "max_it": 5,
         "dorfler_alpha": 0.5,
         "primal_extra_degree": 1,
         "dual_extra_degree": 1,
@@ -139,10 +157,46 @@ problem = LinearEigenproblem(A, M, bcs)
 epsilon = 0.01
 target = 0 # set slepc target eigenvalue 0
 
+# Set my desired output
+def my_output(self, it: int):
+
+
+    print(BLUE % "Saving user's desired output ...")
+
+    # Create the directory
+    z_dir= f"output/z-{float(z):.6f}"
+    primal_dir = f"{z_dir}/primal"
+    enriched_dir = f"{z_dir}/enriched"
+    os.makedirs(z_dir, exist_ok=True)
+    os.makedirs(primal_dir, exist_ok=True)
+    os.makedirs(enriched_dir, exist_ok=True)
+
+    # Pull u_h and chosen u_p
+    u_h, u_p = self._u_h, self._u_p
+
+    # Save the current (primal) solution
+    Eout, Hout = u_h.subfunctions
+    Eout.rename(f"E_primal_{it=}")
+    Hout.rename(f"H_primal_{it=}")
+    VTKFile(f"{primal_dir}/it_{it}.pvd").write(Eout, Hout, time=float(z))
+
+    # Save the current chosen enriched solution
+    Eout_p, Hout_p = u_p.subfunctions
+    Eout_p.rename(f"E_enriched_{it=}")
+    Hout_p.rename(f"H_enriched_{it=}")
+    VTKFile(f"{enriched_dir}/it_{it}.pvd").write(Eout_p, Hout_p, time=float(z))
+
+    print(BLUE % "Done saving user's desired output ...")
+
+
+
+
+
+
 
 # LOOP OVER COMPLEX GRID(N)
 ##################################################################
-h = 0.02 # grid spacing
+h = 0.05 # grid spacing
 n = 1/h # n for Grid(n)
 
 grid = np.append(np.arange(3.5, 4.0, h),[4.0]) # Patrick makes this a list
@@ -163,7 +217,7 @@ for curr_z in grid:
     print(BLUE % f"---------------------------- [FOR z = {z}] ----------------------------")
 
     # Call the Adaptive eigensolver
-    solver = GoalAdaptiveFoldedEigensolver(problem, target=0.0, solver_parameters=solver_parameters)
+    solver = GoalAdaptiveFoldedEigensolver(problem, target=0.0, solver_parameters=solver_parameters, post_iteration_callback = my_output)
     solver.solve()
 
     # Pull the final results 
@@ -198,7 +252,7 @@ exact_omega = np.sort(exact_omega)
 midpoints = 0.5 * (exact_omega[1:] + exact_omega[:-1])
 
 # the plot
-z_dir= f"output/z-{float(curr_z):.6f}"
+z_dir= f"output/"
 os.makedirs(z_dir, exist_ok=True)
 plt.plot(grid, phi_vals, linewidth=2, label = r"$\Phi_n(z, A)$")
 plt.plot(exact_omega, 0*exact_omega, 'ok', markersize=5, label = r'exact $\omega$')

@@ -21,6 +21,7 @@ from firedrake.variational_solver import (NonlinearVariationalProblem, Nonlinear
 from firedrake.solving import solve
 from firedrake.output import VTKFile
 from firedrake.logging import RED, BLUE, GREEN
+from firedrake import Constant
 
 from firedrake.preconditioners.pmg import PMGPC
 from firedrake.mg.utils import get_level
@@ -365,7 +366,7 @@ class GoalAdaptiveSolverBase:
         # One iteration of the adaptive loop!!!
 
 
-        self.print(f"---------------------------- [MESH LEVEL {it}] ----------------------------")
+        self.print(GREEN % f"---------------------------- [MESH LEVEL {it}] ----------------------------")
 
 
         # SOLVE + ESTIMATE
@@ -567,7 +568,7 @@ class SteadyGoalAdaptiveSolver(GoalAdaptiveSolverBase):
             eta_cell_total = abs(evec.sum())
 
         self.eta_cell_sum_vec.append(eta_cell_total)
-        self.print(f'{"Sum of refinement indicators:":40s}{eta_cell_total: 15.12e}')
+        self.print(BLUE % f'{"Sum of refinement indicators:":40s}{eta_cell_total: 15.12e}')
 
         if eta is not None:
             eff1 = abs(eta_h / eta)
@@ -579,11 +580,1034 @@ class SteadyGoalAdaptiveSolver(GoalAdaptiveSolverBase):
         else:
             eff3 = eta_cell_total / abs(eta_h)
             self.eff3_vec.append(eff3)
-            self.print(f'{"Localisation efficiency:":40s}{eff3: 15.12f}')
+            self.print(BLUE % f'{"Localisation efficiency:":40s}{eff3: 15.12f}')
+
+
+
+
+# My adaptive eigensolver, based on the old version but placed in Pablo's current code
+
+
+class GoalAdaptiveFoldedEigensolver(SteadyGoalAdaptiveSolver, OptionsManager):
+    """Solves an eigenvalue problem adaptively to minimise the error in a
+    target eigenvalue of a folded operator.  The goal functional is :math:`J = \\lambda`.
+
+    At each iteration the solver:
+
+    1. Solves the primal (and, if non-self-adjoint, dual) eigenproblem at both
+       degree ``p`` and ``p + dual_extra_degree``.
+    2. Estimates the error in the eigenvalue via the dual-weighted residual
+       formula of Larson & Bengzon.
+    3. Computes cell-wise indicators using the same bubble/cone projection as
+       :class:`GoalAdaptiveNonlinearVariationalSolver`.
+    4. Refines the mesh by Dörfler marking.
+
+    Parameters
+    ----------
+    problem
+        A :class:`~.LinearEigenproblem` on the initial mesh.
+    target
+        Target eigenvalue used by SLEPc for spectral targeting
+        (``eps_target``).
+    epsilon
+        the desired pseudospectral contour
+    tolerance
+        Terminate when ``|eta_h| < tolerance``.
+    goal_adaptive_options
+        Dictionary passed to :class:`GoalAdaptiveEigenOptions`.
+        Key extra entries: ``"self_adjoint"`` (bool) and ``"nev"`` (int).
+    solver_parameters
+        SLEPc solver parameters forwarded to :class:`~.LinearEigensolver`.
+        Do not set ``eps_target`` here; it is set from ``target``.
+    exact_eigenvalue
+        Exact eigenvalue, if known, for computing efficiency indices.
+    """
+
+    # def __init__(self,
+    #              problem,
+    #              target: float,
+    #              tolerance: float,
+    #              goal_adaptive_options: dict | None = None,
+    #              solver_parameters: dict | None = None,
+    #              exact_eigenvalue: float | None = None,
+    #              ):
+    #     super().__init__(tolerance, goal_adaptive_options, exact_goal=exact_eigenvalue)
+    #     self.problem = problem
+    #     self.target = target
+    #     self.sp = solver_parameters or {}
+
+    #     # Set up AdaptiveMeshHierarchy
+    #     mesh = problem.output_space.mesh()
+    #     mh, level = get_level(mesh)
+    #     if mh is None:
+    #         AdaptiveMeshHierarchy(mesh)
+    #     else:
+    #         amh = AdaptiveMeshHierarchy(mh[0])
+    #         for m in mh[1:level+1]:
+    #             amh.add_mesh(m)
+
+    #     self.atm = AdaptiveTransferManager()
+    #     self._lam_h = None
+
+    
+    # # Old options handler:
+    # # def _make_options(self, d):
+    # #     return GoalAdaptiveEigenOptions(**d)
+
+
+    # New init (made by chat to match the nonlinar solver approach)
+
+
+    # 1. Maggie change - New init (made by chat to match the nonlinar solver approach). Also add in epsilon for pseudospectrum
+
+    _GOAL_PREFIX = "goal_adaptive_"
+
+    def __init__(
+        self,
+        problem,
+        target: float | complex,
+        *,
+        epsilon: float = 1.0e-2,
+        solver_parameters: dict | None = None,
+        options_prefix: str | None = None,
+        exact_eigenvalue: float | complex | None = None,
+        post_iteration_callback=None,):
+        
+        if solver_parameters is None:
+            solver_parameters = {}
+
+        if options_prefix is None:
+            options_prefix = ""
+
+        # The new adaptive base creates the mesh hierarchy, transfer manager,
+        # history vectors, tolerance options and effectivity vectors.
+        base_mesh = problem.output_space.mesh()
+
+        SteadyGoalAdaptiveSolver.__init__(self, base_mesh, solver_parameters, exact_goal=exact_eigenvalue, post_iteration_callback=post_iteration_callback,)
+
+        # Handles the PETSc/SLEPc parameters and options prefix.
+        OptionsManager.__init__(self, solver_parameters, options_prefix,)
+
+        # Eigenproblem data.
+        self.problem = problem
+        self.target = target
+        self.epsilon = epsilon
+        self._lam_h = None
+        self._u_h = None
+        self._lam_p = None
+        self._u_p = None
+        self._z_h = None
+        self._z_p = None
+        self._z_err = None
+
+        # 2. Maggie Change - extra for Matt's algorithm 
+        self.signed_error = None
+        self.corrected_eigenvalue = None
+
+    # 3. Maggie Change - new make options (created with chat)
+    def _make_options(self, data):
+    
+        # If its already in format of EigenOptions do nothing
+        if isinstance(data, GoalAdaptiveEigenOptions):
+            return data
+
+        # If given no inputs, set the default
+        if data is None:
+            return GoalAdaptiveEigenOptions()
+
+        #  If a dictionary, extract the adaptive part
+        if isinstance(data, dict):
+            eigen_data = data.get("goal_adaptive", {})
+            return GoalAdaptiveEigenOptions(**eigen_data)
+
+        # If we dont know what to do with it raise an error 
+        raise TypeError("Expected GoalAdaptiveEigenOptions or a solver-parameter dictionary.")
+
+
+    # 4. Maggie change - instead of current solution in nonlinear variational problem, return current eigenpair
+    # Set what we mean by the current eigenpair
+    # Could be changed to return the enriched result
+    def _current_eigenpair(self):
+        """Return the most recently computed low-order eigenpair."""
+        if self._lam_h is None or self._u_h is None:
+            raise RuntimeError("No eigenpair has been computed yet.")
+        return self._lam_h, self._u_h
+
+    # Solve setup
+    # def solve(self):
+    #     """Run the adaptive loop and return the eigenvalue and error estimate.
+    #     Returns
+    #     -------
+    #     tuple[float, float]
+    #         ``(lam_h, error_estimate)`` on the finest mesh.
+    #     """
+    #     super().solve()
+    #     # return self._lam_h, self.etah_vec[-1]
+    #     return self._lam_h
+
+
+
+    # Stopping criteria for folded operators
+    def should_refine(self, it, eta_h, eta):
+        """ The stopping criteria we want the base to use to decide when to refine """
+
+        lam_h = self._lam_h    
+
+        # Compute and Correct Matt's phi value
+        self.matts_phi = np.sqrt(lam_h)
+        corrected = lam_h + self.signed_error
+        if corrected >= 0:
+            self.corrected_phi = np.sqrt(corrected)
+        else:
+            self.corrected_phi = float("nan")
+        
+        self.print(BLUE % f'Eigenvalue before correction is {self._lam_h}')
+        self.print(BLUE % f'Eigenvalue after correction is {corrected}')
+        self.print(BLUE % f'Matts phi value is {self.matts_phi}')
+        self.print(BLUE % f'The (error) corrected phi value is {self.corrected_phi}')
+
+
+        # Check if L2 alignement failed 
+        if self.check_up:
+            self.print(GREEN % f'The L2 aligned enriched soln was very small (in norm) - red flag!!')
+            self.print(GREEN % f'As a result, we will adapt the eigensolve')
+            return True 
+        
+        # Check pseudospectral info
+        gap_spec = self.matts_phi  - self.epsilon 
+        gap_correct = self.corrected_phi - self.epsilon
+        if gap_spec * gap_correct < 0:
+            self.print(GREEN % f'The corrected phi and original phi disagree')
+            self.print(GREEN % f'As a result, we will adapt the eigensolve')
+            return True 
+        
+        # Otherwise, dont adapt
+        else:
+            self.print(GREEN % f'The corrected and original phi match')
+            self.print(GREEN % f'No need to do an adaptive solve')
+            self.print(GREEN % f'But I will adapt anyways for now')
+            return True
+
+
+    # 5. Maggie change - Rewrite solve and step like in nonlinear code
+    def solve(self):
+        """Run the adaptive loop and return the final computed eigenpair."""
+        super().solve()
+        return self._current_eigenpair()
+
+    
+    # A step method
+    def step(self, it=None):
+        """Run one adaptive eigenvalue iteration and return the current eigenpair."""
+        if it is None:
+            V = self.problem.output_space
+            _, it = get_level(V.mesh())
+        super().step(it)
+        return self._current_eigenpair()
+        #  if it is None:
+        #     V = self.problem.u.function_space()
+        #     _, it = get_level(V.mesh())
+        # super().step(it)
+        # return self._current_solution()
+
+
+    def solve_and_estimate(self):
+
+        """Solve the eigenproblem at two polynomial degrees, match eigenfunctions,
+        and compute a global error estimate for the eigenvalue."""
+
+
+        opts = self.options
+        problem = self.problem
+        V = problem.output_space
+        self.Ndofs_vec.append(V.dim())
+        self.print(f"Solving eigenproblem (degree: {V.ufl_element().degree()}, dofs: {V.dim()}) ...")
+
+        #sp_target = dict(self.sp)
+        sp_target = dict(self.parameters) # needed change?
+        if opts.self_adjoint: # if self adjoint then tell the solver
+            sp_target.setdefault("eps_gen_hermitian", None)
+        sp_target["eps_target"] = self.target
+
+        # Solve at degree p
+        lams, vecs = _solve_eigs(problem, opts.nev, sp_target)
+        self._lam_h = lams[0]
+        self._u_h = vecs[0]
+        
+
+        # 6. Maggie change - adding in some checks
+        # Some checks for a self adjoint problem
+        if opts.self_adjoint:
+            # Check that lam_h is real 
+            if abs(self._lam_h.imag) > 1.0e-10:
+                print(RED % f"Warning: computed folded eigenvalue has nontrivial imaginary part: {self._lam_h}")
+                print(RED % f"We will take the real part")
+                self._lam_h = self._lam_h.real
+            elif (abs(self._lam_h.imag) > 0 and abs(self._lam_h.imag) < 1.0e-10):
+                print(RED % f"Warning: computed folded eigenvalue has a small imaginary part: {self._lam_h}")
+                print(RED % f"We will take the real part")
+                self._lam_h = self._lam_h.real
+            # Check that lam_h is nonnegative
+            # neg_tol = 1e-8
+            # if self._lam_h < 0:
+            #     print(RED % f"WARNING - the min eigenval is negative: lambda_min = {self._lam_h}")
+            #     if abs(self._lam_h) <= neg_tol:
+            #         print(RED % f"Since the eigenvalue is small and negative, we set lambda_min = 0")
+            #         self._lam_h = 0.0
+            #     else:
+            #         raise ValueError(RED % f"The eigenvalue is significantly negative and thats an issue so we quit!")
+
+
+
+        # Solve at degree p + dual_extra_degree (enriched primal)
+        # dual_extra_degree or primal_extra_degree??
+        high_problem = _reconstruct_eig_degree(problem, opts.dual_extra_degree) # Might need to change for mixed spaces
+        self.print(f"Solving enriched eigenproblem (dofs: {high_problem.output_space.dim()}) ...")
+        lams_p, vecs_p = _solve_eigs(high_problem, opts.nev, sp_target)
+        self._lam_p = lams_p[0]
+
+        # Prints
+        self.print(BLUE % f'Lower-degree eigenvalues {lams}')
+        self.print(BLUE % f'Enriched eigenvalues: {lams_p}')
+        self.print(BLUE % f'{"Computed eigenvalue of interest is:":40s}{self._lam_h:15.12f}')
+
+
+        
+        # 7. Maggie Change - checking multiplicity
+        # Check multiplicity based on lower degree solve
+        mult_lower = 1
+        tolerance = 0.01 
+        for i in range(1, len(vecs)):
+            if abs(lams[i] - self._lam_h) <= tolerance:
+                mult_lower += 1
+        self.print(BLUE % f"Lower degree solve multiplicity: {mult_lower}")
+
+
+        # check multiplicity based on enriched solve
+        self.mult = 1
+        tolerance = 0.01 
+        for i in range(1, len(vecs_p)):
+            if abs(lams_p[i] - lams_p[0]) <= tolerance:
+                self.mult += 1
+        self.print(BLUE % f"Enriched solve multiplicity: {self.mult}")
+        self.enriched_cluster = vecs_p[:self.mult] 
+
+        # Compare multiplicities
+        if mult_lower != self.mult:
+            self.print(RED % f'Warning - the lower degree and enriched multiplicities dont match')
+        
+        # 8. Maggie change - L2 matching
+        # I will need to update this matching!!
+        # self._lam_p, self._u_p = match_best(self._u_h, vecs_p, lams_p)
+        self.print("Matching eigenfunctions with L2 projection (Maggie Change)...")
+        if is_mixed_space(V): # Assumes mixed space has 2 subspaces for now (Maxwell example)
+            # Set the enriched bases (mixed space) for the L2 projection code
+            self.enriched_basis_E = [self.enriched_cluster[i].subfunctions[0] for i in range(self.mult)]
+            self.enriched_basis_H = [self.enriched_cluster[i].subfunctions[1] for i in range(self.mult)]
+            # L2 enriched matching
+            self._u_p = match_best_mixed(self._u_h, self.enriched_basis_E, self.enriched_basis_H, self.mult, high_problem.output_space) # is this the right call to V_high?
+        # If not, just do L2 projection without any splitting:
+        else:
+            self._u_p = match_best_notmixed(self._u_h, self.enriched_cluster, self.mult, high_problem.output_space)
+
+
+        # Check the size of the enriched result
+        check_nrm = m_norm(self._u_p)
+        self.check_up = False
+        if check_nrm < 1e-12:
+            print(RED % f'Since the L2 aligned enriched vector is small (in norm) we will want to adapt!!')
+            self.check_up = True
+
+
+        if opts.self_adjoint: # if self adjoint we dont need to dual problem
+            self._z_h = self._u_h
+            self._z_p = self._u_p
+
+
+        else: # if not need adjoint problem # Maggie never touched this because folded operator is self adjoint
+            # Adjoint eigenproblem at degree p
+            adj_problem = _make_adjoint_eig_problem(problem)
+            self.print(f"Solving adjoint eigenproblem (dofs: {adj_problem.output_space.dim()}) ...")
+            lamz, zs = _solve_eigs(adj_problem, opts.nev, sp_target)
+            _, self._z_h = match_best(self._u_h, zs, lamz)
+
+            # Adjoint at degree p + dual_extra_degree
+            adj_high = _reconstruct_eig_degree(adj_problem, opts.dual_extra_degree)
+            self.print(f"Solving enriched adjoint eigenproblem (dofs: {adj_high.output_space.dim()}) ...")
+            lamzp, zsp = _solve_eigs(adj_high, opts.nev, sp_target)
+            _, self._z_p = match_best(self._u_h, zsp, lamzp)
+
+        # 9. Maggie change - Making z_err a function so we can split it later
+        # Pablo: Dual error representative (UFL expression, may span two spaces)
+        # I think this is wrong!!
+        # My change to make it a function
+        self._z_err = Function(self._z_p.function_space())
+        self._z_err.interpolate(self._z_p - self._z_h)
+        # self._z_err = self._z_p - self._z_h
+
+        # Compute the errors
+        eta_h, eta = self._estimate_eigenvalue_error()
+        return eta_h, eta
+
+
+    
+
+    def _estimate_eigenvalue_error(self):
+
+        """Compute global error estimate for the eigenvalue (Larson–Bengzon formula)."""
+        from firedrake.assemble import assemble
+
+
+        u_h, u_p = self._u_h, self._u_p
+        z_h, z_p = self._z_h, self._z_p
+        lam_h = self._lam_h
+        A = self.problem._original_A
+        M = self.problem._original_M
+
+        # Low-order primal representative in the base space
+        phi_h = Function(u_h.function_space())
+        phi_h.interpolate(u_p)
+        e = u_p - phi_h     # primal enrichment error (UFL expression)
+        e_sigma = u_p - u_h # for the remainder term
+
+
+        # 10. Maggie change - m_norm in error
+        if self.options.self_adjoint:
+            #sigma_h = 0.5 * float(assemble(inner(e_sigma, e_sigma) * dx))
+            sigma_h = 0.5 * m_norm(e_sigma)**2 # Maggie change for now
+            rhs = assemble(replace_both_args(A, u_h, e)
+                                 - lam_h * replace_both_args(M, u_h, e)) # took float out
+
+        else: # Maggie never touched this because folded operator is self adjoint
+            e_adj = z_p - z_h
+            sigma_h = 0.5 * float(assemble(inner(e_sigma, e_adj) * dx))
+            rhs = 0.5 * (
+                float(assemble(replace_both_args(A, u_h, e_adj)))
+                - lam_h * float(assemble(replace_both_args(M, u_h, e_adj)))
+                + float(assemble(replace_both_args(adjoint(A), z_h, e)))
+                - lam_h * float(assemble(replace_both_args(M, z_h, e)))
+            )
+
+
+        
+        # a bunch of checks:
+        m_hh = assemble(replace_both_args(M, u_h, u_h))
+        m_pp = assemble(replace_both_args(M, u_p, u_p))
+        m_hp = assemble(replace_both_args(M, u_h, u_p))
+        self.print(BLUE % f"m(u_h, u_h) = {m_hh}")
+        self.print(BLUE % f"m(u_p, u_p) = {m_pp}")
+        self.print(BLUE % f"m(u_h, u_p) = {m_hp}")
+        self.print(BLUE % f'top of estimate = {rhs}')
+        self.print(BLUE % f'bottom of estimate = {1.0 - sigma_h}')
+
+
+
+        # 11. Maggie change - signed error, phi_value, and its correction.
+        denom = 1.0 - sigma_h
+        self.signed_error = rhs/denom if abs(denom) > 1e-14 else float("nan")
+
+        # Maggie change 11.5 - Check if imaginary and how imaginary 
+        if abs(self.signed_error.imag) > 1.0e-10:
+                self.print(RED % f"Warning - Error estimate has a nontrivial imaginary part and we will take real part: {self.signed_error}")
+                self.signed_error = self.signed_error.real 
+        if (abs(self.signed_error.imag) < 1.0e-10 and abs(self.signed_error.imag) > 0):
+                self.print(RED % f"Warning - Error estimate has a trivial imaginary part and we will take real part: {self.signed_error}")
+                self.signed_error = self.signed_error.real 
+
+
+        #eta_h = abs(rhs / denom) if abs(denom) > 1e-14 else float("nan")
+        eta_h = abs(self.signed_error)
+        self.etah_vec.append(eta_h)
+        self.print(BLUE % f'{"Predicted magnitude of error:":40s}{eta_h: 15.12e}')
+        self.print(BLUE % f'{"Predicted signed error:":40s}{self.signed_error: 15.12e}')
+
+
+        eta = None
+        if self.goal_exact is not None:
+            eta = abs(self.goal_exact - lam_h)
+            self.eta_vec.append(eta)
+            self.print(f'{"Exact eigenvalue:":40s}{self.goal_exact: 15.12f}')
+            self.print(f'{"True error:":40s}{eta: 15.12e}')
+
+        return eta_h, eta
+
+
+    def compute_error_indicators(self):
+        """Compute cell/facet residual indicators for the eigenvalue problem."""
+        A = self.problem._original_A
+        M = self.problem._original_M
+        u_h = self._u_h
+        lam_h = self._lam_h
+        z_err = self._z_err
+        # Residual linear form: A(u_h, v) - lam_h * M(u_h, v)
+        _, trial = A.arguments()
+        F_eig = replace(A, {trial: u_h}) - lam_h * replace(M, {trial: u_h})
+        return _compute_residual_indicators(F_eig, z_err, self.options)
+
+    
+
+    # I will use the base refinement for now!
+
+    # def refine_problem(self, markers):
+    #     """Refine the mesh and reconstruct the :class:`~.LinearEigenproblem`."""
+    #     mesh = markers.function_space().mesh()
+    #     new_mesh = mesh.refine_marked_elements(markers)
+    #     amh, _ = get_level(mesh)
+    #     amh.add_mesh(new_mesh)
+    #     coef_map = {}
+    #     self.problem = refine(self.problem, refine, coefficient_mapping=coef_map)
+
+
+    # def write_solution(self, it):
+    #     ws = self.options.write_solution
+    #     if ws is False:
+    #         return
+    #     elif ws is True:
+    #         should_write = True
+    #     elif isinstance(ws, Integral):
+    #         should_write = (it % ws == 0)
+    #     else:
+    #         raise ValueError(f"write_solution must be False, True, or a positive integer, got {ws!r}")
+    #     if should_write:
+    #         output_dir = self.options.output_dir
+    #         run_name = self.options.run_name
+    #         self.print("Writing (primal) eigenfunction ...")
+    #         VTKFile(f"{output_dir}/{run_name}/{run_name}_eigenfunction_{it}.pvd"
+    #                 ).write(*self._u_h.subfunctions)
+
+
+# ---------------------------------------------------------------------------
+# Module-level helpers
+# ---------------------------------------------------------------------------
+
+def residual(F, test):
+    """Replace the test function argument of a linear Form."""
+    v, = F.arguments()
+    return replace(F, {v: test})
+
+
+def both(u):
+    """Add u on both sides of a facet."""
+    return u("+") + u("-")
+
+
+def as_mixed(exprs):
+    """Flatten a list of ufl.Expr objects into a vector."""
+    return as_vector([e[idx] for e in exprs for idx in np.ndindex(e.ufl_shape)])
+
+
+# # 23. Maggie change - passing mesh to reconstructor (needed for mixed spaces)
+# def reconstruct_degree(V, degree, mesh):
+#     """Reconstruct a FunctionSpace with a different polynomial degree."""
+#     element = PMGPC.reconstruct_degree(V.ufl_element(), degree)
+#     return V.reconstruct(mesh=mesh,element=element,)
+
+# Pablos version
+def reconstruct_degree(V, degree):
+    """Reconstruct a FunctionSpace with a different polynomial degree."""
+    return V.reconstruct(element=PMGPC.reconstruct_degree(V.ufl_element(), degree))
+
+
+def reconstruct_bcs(bcs, V):
+    """Reconstruct a list of BCs on a different FunctionSpace."""
+    return [bc.reconstruct(V=V, indices=bc._indices) for bc in bcs]
+
+
+def replace_both_args(bilinear_form, trial_coeff, test_coeff):
+    """Substitute both arguments of a bilinear form with coefficients.
+
+    Parameters
+    ----------
+    bilinear_form
+        A UFL bilinear form with two arguments.
+    trial_coeff
+        Coefficient to substitute for the trial (second) argument.
+    test_coeff
+        Coefficient to substitute for the test (first) argument.
+
+    Returns
+    -------
+    ufl.Form
+        A 0-form (scalar integral).
+    """
+    test, trial = bilinear_form.arguments()
+    return replace(bilinear_form, {test: test_coeff, trial: trial_coeff})
+
+
+def l2_normalize(f):
+    """L2-normalise a :class:`~.Function` in place and return it."""
+    from firedrake.assemble import assemble
+    nrm = float(assemble(inner(f, f) * dx)) ** 0.5
+    if nrm > 0:
+        f.assign(f / nrm)
+    return f
+
+
+# 12. Maggie change - Adding in mixed versions of inner products and norms
+# DO I NEED TO SPLIT THE INNER PRODUCT?
+def is_mixed_function(f):
+    return hasattr(f, "subfunctions") and len(f.subfunctions) > 1
+
+def is_mixed_space(V):
+    return hasattr(V, "subspaces") and len(V.subspaces) > 0
+
+def mixed_inner(a, b):
+    return sum(inner(ai, bi) for ai, bi in zip(split(a), split(b)))
+
+def mixed_weighted_inner(a, b, weight):
+    return sum(inner(ai, weight * bi) for ai, bi in zip(split(a), split(b)))
+
+# Here, m is the L2 inner product (folded operator)
+
+def m_inner(u, v):
+    from firedrake.assemble import assemble
+    if is_mixed_function(u):
+        return assemble(sum(inner(ui, vi) * dx for ui, vi in zip(u.subfunctions, v.subfunctions)))
+    else:
+        return assemble(inner(u, v) * dx)
+
+def m_norm(u):
+    val = m_inner(u, u)
+    return abs(val) ** 0.5
+
+def m_normalize(f):
+    nrm = m_norm(f)
+    if nrm < 1e-12:
+        print(RED % f"Warning - when m-normalizing, m norm is really small - {nrm}")
+        
+    else:
+        if is_mixed_function(f):
+            for fi in f.subfunctions:
+                fi.assign(fi / nrm)
+        else:
+            f.assign(f / nrm)
+    return f
+
+
+# 13. Maggie change - BIGGEST change 
+# Joe finds best match for uh in the computed enriched eigenbasis 
+# Instead, we are going to compute the best candidate in the span of the basis using
+# the L2 projection of uh onto the enriched eigenbasis.
+
+
+def match_best_mixed(target, E_candidates, H_candidates, mult, V_high):
+
+    from firedrake.assemble import assemble
+
+    # matching for a mixed problem
+    # target: Function; candidates: list[Function]; lambdas: list[...] or None
+    # mult: computed multiplicity from size of enriched cluster
+
+    # Create the Least squares problem:
+
+    # Assemble the K matrix 
+    K = np.zeros((mult, mult), dtype=complex)
+    for i in range(mult):
+        for j in range(mult):
+            # Double check Kij vs Kji indexing - I think it matters for complex numbers (conjugate in inner product)
+            K[i, j] = assemble(inner(E_candidates[j], E_candidates[i])*dx) + assemble(inner(H_candidates[j], H_candidates[i])*dx)
+
+    # Assemble the F vector
+    F = np.zeros((mult, 1), dtype=complex)
+    target_E, target_H = target.subfunctions
+    for i in range(mult):
+        F[i, 0] = assemble(inner(target_E, E_candidates[i])*dx) + assemble(inner(target_H, H_candidates[i])*dx)
+
+    # Solve the least squares numpy problem
+    X = np.linalg.solve(K, F)
+
+    # Reassemble the needed enriched basis function
+    chosen_enriched = Function(V_high)
+    for i in range(mult):
+        basis_coeff = complex(X[i,0])
+        chosen_enriched.subfunctions[0].interpolate(chosen_enriched.subfunctions[0] + basis_coeff * E_candidates[i])
+        chosen_enriched.subfunctions[1].interpolate(chosen_enriched.subfunctions[1] + basis_coeff * H_candidates[i])
+
+    # normalize chosen enriched result
+    print('Normalizing the least squares solution')
+    chosen_enriched.assign(m_normalize(chosen_enriched))
+    return chosen_enriched
+
+def match_best_notmixed(target, candidates, mult, V_high):
+
+    # matching for a non-mixed problem
+    # target: Function; candidates: list[Function]; lambdas: list[...] or None
+    # mult: computed multiplicity from size of enriched cluster
+
+    # Create the Least squares problem:
+
+    # Assemble the K matrix 
+    K = np.zeros((mult, mult), dtype=complex)
+    for i in range(mult):
+        for j in range(mult):
+            # Double check Kij vs Kji indexing - I think it matters for complex numbers (conjugate in inner product)
+            K[i, j] = assemble(inner(candidates[j], candidates[i])*dx)
+
+
+    # Assemble the F vector
+    F = np.zeros((mult, 1), dtype=complex)
+    for i in range(mult):
+        F[i, 0] = assemble(inner(target, candidates[i])*dx) 
+
+    # Solve the least squares numpy problem
+    X = np.linalg.solve(K, F)
+
+    # Reassemble the needed enriched basis function
+    chosen_enriched = Function(V_high)
+    for i in range(mult):
+        basis_coeff = complex(X[i,0])
+        chosen_enriched.interpolate(chosen_enriched + basis_coeff * candidates[i])
+
+    # normalize chosen enriched result
+    print('Normalizing the least squares solution')
+    chosen_enriched.assign(m_normalize(chosen_enriched))
+
+    return chosen_enriched
+
+
+# def match_best(target, candidates, lambdas=None):
+#     """Return the candidate best correlated with ``target`` in L2.
+
+#     Parameters
+#     ----------
+#     target
+#         Reference :class:`~.Function`.
+#     candidates
+#         List of candidate :class:`~.Function` objects.
+#     lambdas
+#         List of associated eigenvalues (optional).
+
+#     Returns
+#     -------
+#     tuple
+#         ``(lam, aligned)`` where ``lam`` is the eigenvalue of the best match
+#         (or its index if ``lambdas`` is ``None``) and ``aligned`` is a
+#         phase/sign-aligned copy of the best candidate in the same space.
+#     """
+#     from firedrake.assemble import assemble
+#     nt = float(assemble(inner(target, target) * dx)) ** 0.5
+#     scores = []
+#     for i, w in enumerate(candidates):
+#         nw = float(assemble(inner(w, w) * dx)) ** 0.5
+#         if nw == 0.0:
+#             continue
+#         c = complex(assemble(inner(target, w) * dx))
+#         scores.append((abs(c) / (nt * nw), i, c))
+
+#     if not scores:
+#         raise RuntimeError("No nonzero candidate found in match_best.")
+
+#     scores.sort(key=lambda t: t[0], reverse=True)
+#     _, best_i, best_c = scores[0]
+
+#     aligned = candidates[best_i].copy(deepcopy=True)
+#     if best_c != 0:
+#         phase = best_c.conjugate() / abs(best_c)
+#         aligned.assign(phase * aligned)
+
+#     lam = lambdas[best_i] if lambdas is not None else best_i
+#     return lam, aligned
+
+
+# Maggie change - m normalize
+def _solve_eigs(problem, nev, solver_parameters):
+    """Solve a :class:`~.LinearEigenproblem` and return L2-normalised eigenpairs.
+
+    Parameters
+    ----------
+    problem
+        :class:`~.LinearEigenproblem` to solve.
+    nev
+        Number of eigenvalue/eigenvector pairs to request.
+    solver_parameters
+        Dictionary of SLEPc solver parameters.
+
+    Returns
+    -------
+    tuple[list, list]
+        ``(eigenvalues, eigenfunctions)`` — both lists have length
+        ``min(nconv, nev)``.
+    """
+    from firedrake import LinearEigensolver
+    es = LinearEigensolver(problem, n_evals=nev, solver_parameters=solver_parameters)
+    nconv = es.solve()
+    lams, vecs = [], []
+    for i in range(min(nconv, nev)):
+        lams.append(es.eigenvalue(i))
+        vr, _ = es.eigenfunction(i)
+        # change to m normalize
+        # vecs.append(l2_normalize(vr))
+        vecs.append(m_normalize(vr))
+    return lams, vecs
+
+
+# 15. Maggie change - Construct higher degree space subspace by subspace
+def _reconstruct_eig_degree(problem, extra_degree):
+    """Return a new :class:`~.LinearEigenproblem` on a space of degree+extra_degree.
+
+    Uses the original unrestricted forms stored on ``problem._original_A/M/bcs``
+    to avoid double-restricting on the reconstructed problem.
+    """
+    from firedrake import LinearEigenproblem
+    A = problem._original_A
+    M = problem._original_M
+    bcs = problem._original_bcs
+    v, u = A.arguments()
+    V = u.function_space()
+
+    # Will change by accounting for Mixed spaces 
+    # old code:
+    # high_degree = V.ufl_element().degree() + extra_degree
+    # V_high = reconstruct_degree(V, high_degree)
+    # Build higher-order mixed space component by component
+    # high_spaces = []
+    # meshes = V.mesh()
+    # # Need to consider all subspaces (mixed formulation)
+    # # reconstruct_degree did not seem to work
+    # for i, V_i in enumerate(V.subspaces):
+    #     mesh_i = meshes[i]
+    #     element_i = V_i.ufl_element()
+    #     degree_i = element_i.degree()
+    #     high_degree = degree_i + extra_degree
+    #     Space_i = reconstruct_degree(V_i, high_degree, mesh = mesh_i)
+    #     high_spaces.append(Space_i)
+    # V_high = MixedFunctionSpace(high_spaces)
+    high_spaces = []
+    meshes = V.mesh()
+    for i, V_i in enumerate(V.subspaces):
+        mesh_i = meshes[i]
+        element_i = V_i.ufl_element()
+        degree_i = element_i.degree()
+        high_element_i = PMGPC.reconstruct_degree(element_i, degree_i + extra_degree)
+        high_spaces.append(FunctionSpace(mesh_i, high_element_i))
+    V_high = MixedFunctionSpace(high_spaces)
+
+    # new trial and test
+    u_high = TrialFunction(V_high)
+    v_high = TestFunction(V_high)
+    A_high = replace(A, {v: v_high, u: u_high}) # Is this swapped?
+    M_high = replace(M, {M.arguments()[0]: v_high, M.arguments()[1]: u_high}) # Is this swapped?
+
+    # Bc's
+    bcs_high = [bc.reconstruct(V=V_high, indices=bc._indices) for bc in bcs]
+
+    # New problem
+    return LinearEigenproblem(A_high, M_high, bcs=bcs_high,
+                              bc_shift=problem.bc_shift, restrict=problem.restrict)
+
+
+# Maggie leaving this alone because folded problem is self adjoint
+def _make_adjoint_eig_problem(problem):
+    """Return the adjoint of a :class:`~.LinearEigenproblem`.
+
+    For a self-adjoint problem this is identical to the primal.
+    """
+    from firedrake import LinearEigenproblem
+    A_adj = adjoint(problem._original_A)
+    return LinearEigenproblem(A_adj, problem._original_M,
+                              bcs=problem._original_bcs,
+                              bc_shift=problem.bc_shift, restrict=problem.restrict)
+
+
+
+
+
+def _compute_residual_indicators(F, z_err, options):
+    """Compute DG0 cell-wise error indicators via bubble/cone projections.
+
+    This implements the primal-residual indicator
+
+    .. math::
+
+        \\eta_K = \\int_K R_{\\text{cell}} \\cdot z_{\\text{err}}\\,\\mathrm{d}x
+                  + \\int_{\\partial K} R_{\\text{facet}} \\cdot z_{\\text{err}}\\,\\mathrm{d}s
+
+    for the residual form ``F`` against the dual error ``z_err``.
+
+    Parameters
+    ----------
+    F
+        Residual as a linear form (test function as its sole argument).
+    z_err
+        Dual error representative ``z_p - z_h`` (UFL expression or Function).
+    options
+        :class:`GoalAdaptiveOptions` (or subclass) instance for degree
+        parameters and solver parameters.
+
+    Returns
+    -------
+    Function
+        DG0 Function of absolute-value cell indicators.
+    """
+    from firedrake.assemble import assemble
+
+    v, = F.arguments()
+    V = v.function_space()
+    mesh = V.mesh().unique()
+    dim = mesh.topological_dimension
+    cell = mesh.ufl_cell()
+    variant = "integral"
+
+    # Will change for mixed spaces
+    # Old code:
+    # degree = V.ufl_element().degree()
+    # cell_residual_degree = degree + options.cell_residual_extra_degree
+    # facet_residual_degree = degree + options.facet_residual_extra_degree
+
+    # 16. Maggie change - taking degree as max degree of mixed space
+    # getting degree not so simple for mixed space?
+    # Here I take the max degree of the mixed space
+    # Select max degree of subspaces as our degree 
+    if is_mixed_space(V):
+        degrees = []
+        for V_i in V.subspaces:
+            d = V_i.ufl_element().degree()
+            if isinstance(d, tuple):
+                d = max(d)
+            degrees.append(int(d))
+        degree = max(degrees)
+    else:
+        d = element.degree()
+        if isinstance(d, tuple):
+            d = max(d)
+        degree = int(d)
+
+    # Then as before
+    cell_residual_degree = degree + options.cell_residual_extra_degree
+    facet_residual_degree = degree + options.facet_residual_extra_degree
+
+
+    # Bubble functions
+    B = FunctionSpace(mesh, "B", dim+1, variant=variant)
+    bubbles = Function(B).assign(1)
+
+    
+    # Accounting for mixed spaces when forming DG spaces
+    # Old code:
+    # if V.value_shape == ():
+    #     DG = FunctionSpace(mesh, "DG", cell_residual_degree, variant=variant)
+    # else:
+    #     DG = TensorFunctionSpace(mesh, "DG", cell_residual_degree, variant=variant, shape=V.value_shape)
+
+    # 17. Maggie change - DG for mixed spaces
+    if is_mixed_space(V):
+        DG_spaces = []
+        for Vi in V.subspaces:
+            if Vi.value_shape == ():
+                DG_spaces.append(FunctionSpace(mesh, "DG", cell_residual_degree, variant=variant))
+            else:
+                DG_spaces.append(TensorFunctionSpace(mesh, "DG", cell_residual_degree, variant=variant, shape=Vi.value_shape))
+        DG = MixedFunctionSpace(DG_spaces)
+    elif V.value_shape == ():
+        DG = FunctionSpace(mesh, "DG", cell_residual_degree, variant=variant)
+    else:
+        DG = TensorFunctionSpace(mesh, "DG", cell_residual_degree, variant=variant, shape=V.value_shape)
+                
+
+    uc = TrialFunction(DG)
+    vc = TestFunction(DG)
+
+    # 18. Maggie change -
+    # New code for ac if mixed space
+    # Old code:
+    # ac = inner(uc, bubbles*vc)*dx
+    if is_mixed_space(DG):
+        ac = mixed_weighted_inner(uc, vc, bubbles) * dx
+    else:
+        ac = inner(uc, bubbles * vc) * dx
+    
+    Lc = residual(F, bubbles*vc)
+    Rcell = Function(DG)
+    solve(ac == Lc, Rcell, solver_parameters=options.sp_cell)
+
+    FB = FunctionSpace(mesh, "FB", dim, variant=variant)
+    cones = Function(FB).assign(1)
+
+    # 19. Maggie change - DG for mixed spaces
+    # Another mixed change 
+    # old code:
+    # el = BrokenElement(FiniteElement("FB", cell=cell, degree=facet_residual_degree+dim, variant=variant))
+    # if V.value_shape == ():
+    #     Q = FunctionSpace(mesh, el)
+    # else:
+    #     Q = TensorFunctionSpace(mesh, el, shape=V.value_shape)
+    # New code:
+    el = BrokenElement(FiniteElement("FB", cell=cell, degree=facet_residual_degree+dim, variant=variant))
+    if is_mixed_space(V):
+        Q_spaces = []
+        for Vi in V.subspaces:
+            if Vi.value_shape == ():
+                Q_spaces.append(FunctionSpace(mesh, el))
+            else:
+                Q_spaces.append(TensorFunctionSpace(mesh, el, shape=Vi.value_shape))
+        Q = MixedFunctionSpace(Q_spaces)
+    elif V.value_shape == ():
+        Q = FunctionSpace(mesh, el)
+    else:
+        Q = TensorFunctionSpace(mesh, el, shape=V.value_shape)
+
+    Qtest = TestFunction(Q)
+    Qtrial = TrialFunction(Q)
+
+    # 20. Maggie change - for mixed spaces
+    # Another mixed change:
+    # Old code:
+    # Lf = residual(F, Qtest) - inner(Rcell, Qtest)*dx
+    # af = both(inner(Qtrial/cones, Qtest))*dS + inner(Qtrial/cones, Qtest)*ds
+    # New code:
+    if is_mixed_space(V):
+            Lf = residual(F, Qtest) - mixed_inner(Rcell, Qtest)*dx
+            facet_mass = mixed_weighted_inner(Qtrial, Qtest, 1/cones)
+            af = both(facet_mass) * dS + facet_mass * ds
+    else:
+        Lf = residual(F, Qtest) - inner(Rcell, Qtest)*dx
+        af = both(inner(Qtrial/cones, Qtest))*dS + inner(Qtrial/cones, Qtest)*ds
+
+    Rhat = Function(Q)
+    solve(af == Lf, Rhat, solver_parameters=options.sp_facet)
+    Rfacet = Rhat/cones
+    
+    
+    # Build cell-wise indicators
+    DG0 = FunctionSpace(mesh, "DG", degree=0)
+    test = TestFunction(DG0)
+
+    # 21. Maggie change - for mixed spaces
+    # Another change based on Mixed spaces
+    # Old code:
+    # eta_cell = assemble(
+    #     inner(inner(Rcell, z_err), test)*dx
+    #     + inner(avg(inner(Rfacet, z_err)), both(test))*dS
+    #     + inner(inner(Rfacet, z_err), test)*ds
+    # )
+    # New code
+    if is_mixed_space(V):
+        zerr_components = split(z_err)
+        Rcell_components = split(Rcell)
+        Rhat_components = split(Rhat)
+        cell_weight = sum(inner(Rcell_i, zerr_i) for Rcell_i, zerr_i in zip(Rcell_components, zerr_components))
+        facet_weight = sum(inner(Rhat_i / cones, zerr_i) for Rhat_i, zerr_i in zip(Rhat_components, zerr_components))
+
+    else:
+        cell_weight = inner(Rcell, z_err)
+        facet_weight = inner(Rfacet, z_err)
+    
+    # Then eta is 
+    eta_cell = assemble(inner(cell_weight, test)*dx + inner(avg(facet_weight), both(test))*dS + inner(facet_weight, test)*ds )
+
+    # Return abs value array of etas 
+    with eta_cell.dat.vec as evec:
+        evec.abs()
+    return eta_cell
+
+
+
+
 
 
 
 # The newer nonlinear variational code
+# Moved it down below for convienence 
 # Note the inheritance changes - inherits from the steady solver and options manager for PETSc
 
 class GoalAdaptiveNonlinearVariationalSolver(SteadyGoalAdaptiveSolver, OptionsManager):
@@ -1219,1093 +2243,6 @@ def vtk_output_callback(output_dir="./output", run_name="default"):
         solver.print("Writing (dual) solution ...")
         VTKFile(f"{prefix}_dual_solution_{it}.pvd", comm=comm).write(*solver.z.subfunctions)
     return _callback
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-class GoalAdaptiveFoldedEigensolver(SteadyGoalAdaptiveSolver, OptionsManager):
-    """Solves an eigenvalue problem adaptively to minimise the error in a
-    target eigenvalue of a folded operator.  The goal functional is :math:`J = \\lambda`.
-
-    At each iteration the solver:
-
-    1. Solves the primal (and, if non-self-adjoint, dual) eigenproblem at both
-       degree ``p`` and ``p + dual_extra_degree``.
-    2. Estimates the error in the eigenvalue via the dual-weighted residual
-       formula of Larson & Bengzon.
-    3. Computes cell-wise indicators using the same bubble/cone projection as
-       :class:`GoalAdaptiveNonlinearVariationalSolver`.
-    4. Refines the mesh by Dörfler marking.
-
-    Parameters
-    ----------
-    problem
-        A :class:`~.LinearEigenproblem` on the initial mesh.
-    target
-        Target eigenvalue used by SLEPc for spectral targeting
-        (``eps_target``).
-    epsilon
-        the desired pseudospectral contour
-    tolerance
-        Terminate when ``|eta_h| < tolerance``.
-    goal_adaptive_options
-        Dictionary passed to :class:`GoalAdaptiveEigenOptions`.
-        Key extra entries: ``"self_adjoint"`` (bool) and ``"nev"`` (int).
-    solver_parameters
-        SLEPc solver parameters forwarded to :class:`~.LinearEigensolver`.
-        Do not set ``eps_target`` here; it is set from ``target``.
-    exact_eigenvalue
-        Exact eigenvalue, if known, for computing efficiency indices.
-    """
-
-    # def __init__(self,
-    #              problem,
-    #              target: float,
-    #              tolerance: float,
-    #              goal_adaptive_options: dict | None = None,
-    #              solver_parameters: dict | None = None,
-    #              exact_eigenvalue: float | None = None,
-    #              ):
-    #     super().__init__(tolerance, goal_adaptive_options, exact_goal=exact_eigenvalue)
-    #     self.problem = problem
-    #     self.target = target
-    #     self.sp = solver_parameters or {}
-
-    #     # Set up AdaptiveMeshHierarchy
-    #     mesh = problem.output_space.mesh()
-    #     mh, level = get_level(mesh)
-    #     if mh is None:
-    #         AdaptiveMeshHierarchy(mesh)
-    #     else:
-    #         amh = AdaptiveMeshHierarchy(mh[0])
-    #         for m in mh[1:level+1]:
-    #             amh.add_mesh(m)
-
-    #     self.atm = AdaptiveTransferManager()
-    #     self._lam_h = None
-
-    
-    # # Old options handler:
-    # # def _make_options(self, d):
-    # #     return GoalAdaptiveEigenOptions(**d)
-
-
-    # New init (made by chat to match the nonlinar solver approach)
-
-
-    # 1. Maggie change - New init (made by chat to match the nonlinar solver approach). Also add in epsilon for pseudospectrum
-
-    _GOAL_PREFIX = "goal_adaptive_"
-
-    def __init__(
-        self,
-        problem,
-        target: float | complex,
-        *,
-        epsilon: float = 1.0e-2,
-        solver_parameters: dict | None = None,
-        options_prefix: str | None = None,
-        exact_eigenvalue: float | complex | None = None,
-        post_iteration_callback=None,):
-        
-        if solver_parameters is None:
-            solver_parameters = {}
-
-        if options_prefix is None:
-            options_prefix = ""
-
-        # The new adaptive base creates the mesh hierarchy, transfer manager,
-        # history vectors, tolerance options and effectivity vectors.
-        base_mesh = problem.output_space.mesh()
-
-        SteadyGoalAdaptiveSolver.__init__(
-            self,
-            base_mesh,
-            solver_parameters,
-            exact_goal=exact_eigenvalue,
-            post_iteration_callback=post_iteration_callback,)
-
-        # Handles the PETSc/SLEPc parameters and options prefix.
-        OptionsManager.__init__(
-            self,
-            solver_parameters,
-            options_prefix,)
-
-        # Eigenproblem data.
-        self.problem = problem
-        self.target = target
-        self.epsilon = epsilon
-        self._lam_h = None
-        self._u_h = None
-        self._lam_p = None
-        self._u_p = None
-        self._z_h = None
-        self._z_p = None
-        self._z_err = None
-
-        # 2. Maggie Change - extra for Matt's algorithm 
-        self.signed_error = None
-        self.corrected_eigenvalue = None
-
-    # 3. Maggie Change - new make options (created with chat)
-    def _make_options(self, data):
-    
-        # If its already in format of EigenOptions do nothing
-        if isinstance(data, GoalAdaptiveEigenOptions):
-            return data
-
-        # If given no inputs, set the default
-        if data is None:
-            return GoalAdaptiveEigenOptions()
-
-        #  If a dictionary, extract the adaptive part
-        if isinstance(data, dict):
-            eigen_data = data.get("goal_adaptive", {})
-            return GoalAdaptiveEigenOptions(**eigen_data)
-
-        # If we dont know what to do with it raise an error 
-        raise TypeError("Expected GoalAdaptiveEigenOptions or a solver-parameter dictionary.")
-
-
-    # 4. Maggie change - instead of current solution in nonlinear variational problem, return current eigenpair
-    # Set what we mean by the current eigenpair
-    # Could be changed to return the enriched result
-    def _current_eigenpair(self):
-        """Return the most recently computed low-order eigenpair."""
-        if self._lam_h is None or self._u_h is None:
-            raise RuntimeError("No eigenpair has been computed yet.")
-        return self._lam_h, self._u_h
-
-    # Solve setup
-    # def solve(self):
-    #     """Run the adaptive loop and return the eigenvalue and error estimate.
-    #     Returns
-    #     -------
-    #     tuple[float, float]
-    #         ``(lam_h, error_estimate)`` on the finest mesh.
-    #     """
-    #     super().solve()
-    #     # return self._lam_h, self.etah_vec[-1]
-    #     return self._lam_h
-
-
-
-    # Stopping criteria for folded operators
-    def should_refine(self, it, eta_h, eta):
-        """ The stopping criteria we want the base to use to decide when to refine """
-
-        lam_h = self._lam_h    
-
-        # Compute and Correct Matt's phi value
-        self.matts_phi = np.sqrt(lam_h)
-        corrected = lam_h + self.signed_error
-
-        if corrected >= 0:
-            self.corrected_phi = np.sqrt(corrected)
-        else:
-            self.corrected_phi = float("nan")
-
-        self.print(f'Matts phi value is {self.matts_phi}')
-        self.print(f'The (error) corrected phi value is {self.corrected_phi}')
-
-        # Check if L2 alignement failed 
-        if self.check_up:
-            self.print(GREEN % f'The L2 aligned enriched soln was very small (in norm) - red flag!!')
-            self.print(GREEN % f'As a result, we will adapt the eigensolve')
-            return True 
-        
-        # Check pseudospectral info
-        gap_spec = self.matts_phi  - self.epsilon 
-        gap_correct = self.corrected_phi - self.epsilon
-        if gap_spec * gap_correct < 0:
-            self.print(GREEN % f'The corrected phi and original phi disagree')
-            self.print(GREEN % f'As a result, we will adapt the eigensolve')
-            return True 
-        
-        # Otherwise, dont adapt
-        else:
-            self.print(GREEN % f'The corrected and original phi match')
-            self.print(GREEN % f'No need to do an adaptive solve')
-            self.print(GREEN % f'But I will adapt anyways for now')
-            return True
-
-
-    # 5. Maggie change - Rewrite solve and step like in nonlinear code
-    def solve(self):
-        """Run the adaptive loop and return the final computed eigenpair."""
-        super().solve()
-        return self._current_eigenpair()
-
-    
-    # A step method
-    def step(self, it=None):
-        """Run one adaptive eigenvalue iteration and return the current eigenpair."""
-        if it is None:
-            V = self.problem.output_space
-            _, it = get_level(V.mesh())
-        super().step(it)
-        return self._current_eigenpair()
-        #  if it is None:
-        #     V = self.problem.u.function_space()
-        #     _, it = get_level(V.mesh())
-        # super().step(it)
-        # return self._current_solution()
-
-
-    def solve_and_estimate(self):
-
-        """Solve the eigenproblem at two polynomial degrees, match eigenfunctions,
-        and compute a global error estimate for the eigenvalue."""
-
-
-        opts = self.options
-        problem = self.problem
-        V = problem.output_space
-        self.Ndofs_vec.append(V.dim())
-        self.print(f"Solving eigenproblem (degree: {V.ufl_element().degree()}, dofs: {V.dim()}) ...")
-
-        #sp_target = dict(self.sp)
-        sp_target = dict(self.parameters) # needed change?
-        if opts.self_adjoint: # if self adjoint then tell the solver
-            sp_target.setdefault("eps_gen_hermitian", None)
-        sp_target["eps_target"] = self.target
-
-        # Solve at degree p
-        lams, vecs = _solve_eigs(problem, opts.nev, sp_target)
-        self._lam_h = lams[0]
-        self._u_h = vecs[0]
-        self.print(f'{"Computed eigenvalue:":40s}{self._lam_h:15.12f}')
-
-        # 6. Maggie change - adding in some checks
-        # Some checks for a self adjoint problem
-        if opts.self_adjoint:
-            # Check that lam_h is real 
-            if abs(self._lam_h.imag) > 1.0e-8:
-                print(RED % f"Warning: computed folded eigenvalue has nontrivial imaginary part: {self._lam_h}")
-                print(RED % f"We will take the real part")
-                self._lam_h = self._lam_h.real
-            # Check that lam_h is nonnegative
-            # neg_tol = 1e-8
-            # if self._lam_h < 0:
-            #     print(RED % f"WARNING - the min eigenval is negative: lambda_min = {self._lam_h}")
-            #     if abs(self._lam_h) <= neg_tol:
-            #         print(RED % f"Since the eigenvalue is small and negative, we set lambda_min = 0")
-            #         self._lam_h = 0.0
-            #     else:
-            #         raise ValueError(RED % f"The eigenvalue is significantly negative and thats an issue so we quit!")
-
-
-
-        # Solve at degree p + dual_extra_degree (enriched primal)
-        # dual_extra_degree or primal_extra_degree??
-        high_problem = _reconstruct_eig_degree(problem, opts.dual_extra_degree) # Might need to change for mixed spaces
-        self.print(f"Solving enriched eigenproblem (dofs: {high_problem.output_space.dim()}) ...")
-        lams_p, vecs_p = _solve_eigs(high_problem, opts.nev, sp_target)
-        self._lam_p = lams_p[0]
-
-
-        
-        # 7. Maggie Change - checking multiplicity
-        # Check multiplicity based on lower degree solve
-        mult_lower = 1
-        tolerance = 0.01 
-        for i in range(1, len(vecs)):
-            if abs(lams[i] - self._lam_h) <= tolerance:
-                mult_lower += 1
-        self.print(f"Lower degree solve multiplicity: {mult_lower}")
-
-
-        # check multiplicity based on enriched solve
-        self.mult = 1
-        tolerance = 0.01 
-        for i in range(1, len(vecs_p)):
-            if abs(lams_p[i] - lams_p[0]) <= tolerance:
-                self.mult += 1
-        self.print(f"Enriched solve multiplicity: {self.mult}")
-        self.enriched_cluster = vecs_p[:self.mult] 
-
-        # Compare multiplicities
-        if mult_lower != self.mult:
-            self.print(RED % f'Warning - the lower degree and enriched multiplicities dont match')
-        
-        # 8. Maggie change - L2 matching
-        # I will need to update this matching!!
-        # self._lam_p, self._u_p = match_best(self._u_h, vecs_p, lams_p)
-        self.print("Matching eigenfunctions with L2 projection (Maggie Change)...")
-        if is_mixed_space(V): # Assumes mixed space has 2 subspaces for now (Maxwell example)
-            # Set the enriched bases (mixed space) for the L2 projection code
-            self.enriched_basis_E = [self.enriched_cluster[i].subfunctions[0] for i in range(self.mult)]
-            self.enriched_basis_H = [self.enriched_cluster[i].subfunctions[1] for i in range(self.mult)]
-            # L2 enriched matching
-            self._u_p = match_best_mixed(self._u_h, self.enriched_basis_E, self.enriched_basis_H, self.mult, high_problem.output_space) # is this the right call to V_high?
-        # If not, just do L2 projection without any splitting:
-        else:
-            self._u_p = match_best_notmixed(self._u_h, self.enriched_cluster, self.mult, high_problem.output_space)
-
-
-        # Check the size of the enriched result
-        check_nrm = m_norm(self._u_p)
-        self.check_up = False
-        if check_nrm < 1e-12:
-            print(RED % f'Since the L2 aligned enriched vector is small (in norm) we will want to adapt!!')
-            self.check_up = True
-
-
-        if opts.self_adjoint: # if self adjoint we dont need to dual problem
-            self._z_h = self._u_h
-            self._z_p = self._u_p
-
-
-        else: # if not need adjoint problem # Maggie never touched this because folded operator is self adjoint
-            # Adjoint eigenproblem at degree p
-            adj_problem = _make_adjoint_eig_problem(problem)
-            self.print(f"Solving adjoint eigenproblem (dofs: {adj_problem.output_space.dim()}) ...")
-            lamz, zs = _solve_eigs(adj_problem, opts.nev, sp_target)
-            _, self._z_h = match_best(self._u_h, zs, lamz)
-
-            # Adjoint at degree p + dual_extra_degree
-            adj_high = _reconstruct_eig_degree(adj_problem, opts.dual_extra_degree)
-            self.print(f"Solving enriched adjoint eigenproblem (dofs: {adj_high.output_space.dim()}) ...")
-            lamzp, zsp = _solve_eigs(adj_high, opts.nev, sp_target)
-            _, self._z_p = match_best(self._u_h, zsp, lamzp)
-
-        # 9. Maggie change - Making z_err a function so we can split it later
-        # Pablo: Dual error representative (UFL expression, may span two spaces)
-        # I think this is wrong!!
-        # My change to make it a function
-        self._z_err = Function(self._z_p.function_space())
-        self._z_err.interpolate(self._z_p - self._z_h)
-        # self._z_err = self._z_p - self._z_h
-
-        # Compute the errors
-        eta_h, eta = self._estimate_eigenvalue_error()
-        return eta_h, eta
-
-
-    
-
-    def _estimate_eigenvalue_error(self):
-
-        """Compute global error estimate for the eigenvalue (Larson–Bengzon formula)."""
-        from firedrake.assemble import assemble
-
-
-        u_h, u_p = self._u_h, self._u_p
-        z_h, z_p = self._z_h, self._z_p
-        lam_h = self._lam_h
-        A = self.problem._original_A
-        M = self.problem._original_M
-
-        # Low-order primal representative in the base space
-        phi_h = Function(u_h.function_space())
-        phi_h.interpolate(u_p)
-        e = u_p - phi_h     # primal enrichment error (UFL expression)
-        e_sigma = u_p - u_h # for the remainder term
-
-        # 10. Maggie change - m_norm in error
-        if self.options.self_adjoint:
-            #sigma_h = 0.5 * float(assemble(inner(e_sigma, e_sigma) * dx))
-            sigma_h = 0.5 * m_norm(e_sigma)**2 # Maggie change for now
-            rhs = assemble(replace_both_args(A, u_h, e)
-                                 - lam_h * replace_both_args(M, u_h, e)) # took float out
-
-        else: # Maggie never touched this because folded operator is self adjoint
-            e_adj = z_p - z_h
-            sigma_h = 0.5 * float(assemble(inner(e_sigma, e_adj) * dx))
-            rhs = 0.5 * (
-                float(assemble(replace_both_args(A, u_h, e_adj)))
-                - lam_h * float(assemble(replace_both_args(M, u_h, e_adj)))
-                + float(assemble(replace_both_args(adjoint(A), z_h, e)))
-                - lam_h * float(assemble(replace_both_args(M, z_h, e)))
-            )
-
-        # 11. Maggie change - signed error, phi_value, and its correction.
-        denom = 1.0 - sigma_h
-        self.signed_error = rhs/denom if abs(denom) > 1e-14 else float("nan")
-
-        # a bunch of checks:
-        m_hh = assemble(replace_both_args(M, u_h, u_h))
-        m_pp = assemble(replace_both_args(M, u_p, u_p))
-        m_hp = assemble(replace_both_args(M, u_h, u_p))
-        print("m(u_h, u_h) =", m_hh)
-        print("m(u_p, u_p) =", m_pp)
-        print("m(u_h, u_p) =", m_hp)
-        print('top of estimate =', rhs)
-        print('bottom of estimate =', denom)
-        print('extra checks')
-        a_hp = assemble(replace_both_args(A, u_h, u_p))
-        a_ph = assemble(replace_both_args(A, u_p, u_h))
-        m_hp = assemble(replace_both_args(M, u_h, u_p))
-        m_ph = assemble(replace_both_args(M, u_p, u_h))
-        print("a(u_h, u_p) =", a_hp)
-        print("conj(a(u_p, u_h)) =", np.conj(a_ph))
-        print("A Hermitian defect =", a_hp - np.conj(a_ph))
-        print("m(u_h, u_p) =", m_hp)
-        print("conj(m(u_p, u_h)) =", np.conj(m_ph))
-        print("M Hermitian defect =", m_hp - np.conj(m_ph))
-        a_pp = assemble(replace_both_args(A, u_p, u_p))
-        m_pp = assemble(replace_both_args(M, u_p, u_p))
-        lam_p_rayleigh = a_pp / m_pp
-        print("Rayleigh quotient of matched u_p =", lam_p_rayleigh)
-        print('even more checks')
-        u_h_high = Function(u_p.function_space())
-        for uh_high_i, uh_i in zip(
-            u_h_high.subfunctions,
-            u_h.subfunctions,
-        ):
-            uh_high_i.interpolate(uh_i)
-
-        a_hp = assemble(
-            replace_both_args(A, u_h_high, u_p)
-        )
-
-        a_ph = assemble(
-            replace_both_args(A, u_p, u_h_high)
-        )
-
-        m_hp = assemble(
-            replace_both_args(M, u_h_high, u_p)
-        )
-
-        m_ph = assemble(
-            replace_both_args(M, u_p, u_h_high)
-        )
-
-        print("A Hermitian defect:", a_hp - np.conj(a_ph))
-        print("M Hermitian defect:", m_hp - np.conj(m_ph))
-
-        # Maggie change 11.5 - Check if imaginary
-        if abs(self.signed_error.imag) > 1.0e-10:
-                self.print(RED % f"Error estimate has a nontrivial imaginary part and we will take real part: {self.signed_error}")
-                self.signed_error = self.signed_error.real 
-
-
-        eta_h = abs(rhs / denom) if abs(denom) > 1e-14 else float("nan")
-        self.etah_vec.append(eta_h)
-        self.print(f'{"Predicted magnitude of error:":40s}{eta_h: 15.12e}')
-        self.print(f'{"Predicted signed error:":40s}{self.signed_error: 15.12e}')
-
-        
-        # # Correct Matt's phi value
-        # self.matts_phi = sqrt(lam_h)
-        # corrected = lam_h + self.signed_error
-        # if corrected >= 0:
-        #     self.corrected_phi = sqrt(corrected)
-        # else:
-        #     self.corrected_phi = float("nan")
-        # print(f'Matts phi value is {self.matts_phi}')
-        # print(f'The (error) corrected phi value is {self.corrected_phi}')
-
-        eta = None
-        if self.goal_exact is not None:
-            eta = abs(self.goal_exact - lam_h)
-            self.eta_vec.append(eta)
-            self.print(f'{"Exact eigenvalue:":40s}{self.goal_exact: 15.12f}')
-            self.print(f'{"True error:":40s}{eta: 15.12e}')
-
-        return eta_h, eta
-
-
-    def compute_error_indicators(self):
-        """Compute cell/facet residual indicators for the eigenvalue problem."""
-        A = self.problem._original_A
-        M = self.problem._original_M
-        u_h = self._u_h
-        lam_h = self._lam_h
-        z_err = self._z_err
-        # Residual linear form: A(u_h, v) - lam_h * M(u_h, v)
-        _, trial = A.arguments()
-        F_eig = replace(A, {trial: u_h}) - lam_h * replace(M, {trial: u_h})
-        return _compute_residual_indicators(F_eig, z_err, self.options)
-
-    
-
-    # I will use the base refinement for now!
-
-    # def refine_problem(self, markers):
-    #     """Refine the mesh and reconstruct the :class:`~.LinearEigenproblem`."""
-    #     mesh = markers.function_space().mesh()
-    #     new_mesh = mesh.refine_marked_elements(markers)
-    #     amh, _ = get_level(mesh)
-    #     amh.add_mesh(new_mesh)
-    #     coef_map = {}
-    #     self.problem = refine(self.problem, refine, coefficient_mapping=coef_map)
-
-
-    # def write_solution(self, it):
-    #     ws = self.options.write_solution
-    #     if ws is False:
-    #         return
-    #     elif ws is True:
-    #         should_write = True
-    #     elif isinstance(ws, Integral):
-    #         should_write = (it % ws == 0)
-    #     else:
-    #         raise ValueError(f"write_solution must be False, True, or a positive integer, got {ws!r}")
-    #     if should_write:
-    #         output_dir = self.options.output_dir
-    #         run_name = self.options.run_name
-    #         self.print("Writing (primal) eigenfunction ...")
-    #         VTKFile(f"{output_dir}/{run_name}/{run_name}_eigenfunction_{it}.pvd"
-    #                 ).write(*self._u_h.subfunctions)
-
-
-# ---------------------------------------------------------------------------
-# Module-level helpers
-# ---------------------------------------------------------------------------
-
-def residual(F, test):
-    """Replace the test function argument of a linear Form."""
-    v, = F.arguments()
-    return replace(F, {v: test})
-
-
-def both(u):
-    """Add u on both sides of a facet."""
-    return u("+") + u("-")
-
-
-def as_mixed(exprs):
-    """Flatten a list of ufl.Expr objects into a vector."""
-    return as_vector([e[idx] for e in exprs for idx in np.ndindex(e.ufl_shape)])
-
-
-# # 23. Maggie change - passing mesh to reconstructor (needed for mixed spaces)
-# def reconstruct_degree(V, degree, mesh):
-#     """Reconstruct a FunctionSpace with a different polynomial degree."""
-#     element = PMGPC.reconstruct_degree(V.ufl_element(), degree)
-#     return V.reconstruct(mesh=mesh,element=element,)
-
-# Pablos version
-def reconstruct_degree(V, degree):
-    """Reconstruct a FunctionSpace with a different polynomial degree."""
-    return V.reconstruct(element=PMGPC.reconstruct_degree(V.ufl_element(), degree))
-
-
-def reconstruct_bcs(bcs, V):
-    """Reconstruct a list of BCs on a different FunctionSpace."""
-    return [bc.reconstruct(V=V, indices=bc._indices) for bc in bcs]
-
-
-def replace_both_args(bilinear_form, trial_coeff, test_coeff):
-    """Substitute both arguments of a bilinear form with coefficients.
-
-    Parameters
-    ----------
-    bilinear_form
-        A UFL bilinear form with two arguments.
-    trial_coeff
-        Coefficient to substitute for the trial (second) argument.
-    test_coeff
-        Coefficient to substitute for the test (first) argument.
-
-    Returns
-    -------
-    ufl.Form
-        A 0-form (scalar integral).
-    """
-    test, trial = bilinear_form.arguments()
-    return replace(bilinear_form, {test: test_coeff, trial: trial_coeff})
-
-
-def l2_normalize(f):
-    """L2-normalise a :class:`~.Function` in place and return it."""
-    from firedrake.assemble import assemble
-    nrm = float(assemble(inner(f, f) * dx)) ** 0.5
-    if nrm > 0:
-        f.assign(f / nrm)
-    return f
-
-
-# 12. Maggie change - Adding in mixed versions of inner products and norms
-# DO I NEED TO SPLIT THE INNER PRODUCT?
-def is_mixed_function(f):
-    return hasattr(f, "subfunctions") and len(f.subfunctions) > 1
-
-def is_mixed_space(V):
-    return hasattr(V, "subspaces") and len(V.subspaces) > 0
-
-def mixed_inner(a, b):
-    return sum(inner(ai, bi) for ai, bi in zip(split(a), split(b)))
-
-def mixed_weighted_inner(a, b, weight):
-    return sum(inner(ai, weight * bi) for ai, bi in zip(split(a), split(b)))
-
-# Here, m is the L2 inner product (folded operator)
-
-def m_inner(u, v):
-    from firedrake.assemble import assemble
-    if is_mixed_function(u):
-        return assemble(sum(inner(ui, vi) * dx for ui, vi in zip(u.subfunctions, v.subfunctions)))
-    else:
-        return assemble(inner(u, v) * dx)
-
-def m_norm(u):
-    val = m_inner(u, u)
-    return abs(val) ** 0.5
-
-def m_normalize(f):
-    nrm = m_norm(f)
-    if nrm < 1e-12:
-        print(RED % f"Warning - when m-normalizing, m norm is really small - {nrm}")
-        
-    else:
-        if is_mixed_function(f):
-            for fi in f.subfunctions:
-                fi.assign(fi / nrm)
-        else:
-            f.assign(f / nrm)
-    return f
-
-
-# 13. Maggie change - BIGGEST change 
-# Joe finds best match for uh in the computed enriched eigenbasis 
-# Instead, we are going to compute the best candidate in the span of the basis using
-# the L2 projection of uh onto the enriched eigenbasis.
-
-
-def match_best_mixed(target, E_candidates, H_candidates, mult, V_high):
-
-    from firedrake.assemble import assemble
-
-    # matching for a mixed problem
-    # target: Function; candidates: list[Function]; lambdas: list[...] or None
-    # mult: computed multiplicity from size of enriched cluster
-
-    # Create the Least squares problem:
-
-    # Assemble the K matrix 
-    K = np.zeros((mult, mult), dtype=complex)
-    for i in range(mult):
-        for j in range(mult):
-            # Double check Kij vs Kji indexing - I think it matters for complex numbers (conjugate in inner product)
-            K[i, j] = assemble(inner(E_candidates[j], E_candidates[i])*dx) + assemble(inner(H_candidates[j], H_candidates[i])*dx)
-
-    # Assemble the F vector
-    F = np.zeros((mult, 1), dtype=complex)
-    target_E, target_H = target.subfunctions
-    for i in range(mult):
-        F[i, 0] = assemble(inner(target_E, E_candidates[i])*dx) + assemble(inner(target_H, H_candidates[i])*dx)
-
-    # Solve the least squares numpy problem
-    X = np.linalg.solve(K, F)
-
-    # Reassemble the needed enriched basis function
-    chosen_enriched = Function(V_high)
-    for i in range(mult):
-        basis_coeff = complex(X[i,0])
-        chosen_enriched.subfunctions[0].interpolate(chosen_enriched.subfunctions[0] + basis_coeff * E_candidates[i])
-        chosen_enriched.subfunctions[1].interpolate(chosen_enriched.subfunctions[1] + basis_coeff * H_candidates[i])
-
-    # normalize chosen enriched result
-    print('Normalizing the least squares solution')
-    chosen_enriched.assign(m_normalize(chosen_enriched))
-    return chosen_enriched
-
-def match_best_notmixed(target, candidates, mult, V_high):
-
-    # matching for a non-mixed problem
-    # target: Function; candidates: list[Function]; lambdas: list[...] or None
-    # mult: computed multiplicity from size of enriched cluster
-
-    # Create the Least squares problem:
-
-    # Assemble the K matrix 
-    K = np.zeros((mult, mult), dtype=complex)
-    for i in range(mult):
-        for j in range(mult):
-            # Double check Kij vs Kji indexing - I think it matters for complex numbers (conjugate in inner product)
-            K[i, j] = assemble(inner(candidates[j], candidates[i])*dx)
-
-
-    # Assemble the F vector
-    F = np.zeros((mult, 1), dtype=complex)
-    for i in range(mult):
-        F[i, 0] = assemble(inner(target, candidates[i])*dx) 
-
-    # Solve the least squares numpy problem
-    X = np.linalg.solve(K, F)
-
-    # Reassemble the needed enriched basis function
-    chosen_enriched = Function(V_high)
-    for i in range(mult):
-        basis_coeff = complex(X[i,0])
-        chosen_enriched.interpolate(chosen_enriched + basis_coeff * candidates[i])
-
-    # normalize chosen enriched result
-    print('Normalizing the least squares solution')
-    chosen_enriched.assign(m_normalize(chosen_enriched))
-
-    return chosen_enriched
-
-
-# def match_best(target, candidates, lambdas=None):
-#     """Return the candidate best correlated with ``target`` in L2.
-
-#     Parameters
-#     ----------
-#     target
-#         Reference :class:`~.Function`.
-#     candidates
-#         List of candidate :class:`~.Function` objects.
-#     lambdas
-#         List of associated eigenvalues (optional).
-
-#     Returns
-#     -------
-#     tuple
-#         ``(lam, aligned)`` where ``lam`` is the eigenvalue of the best match
-#         (or its index if ``lambdas`` is ``None``) and ``aligned`` is a
-#         phase/sign-aligned copy of the best candidate in the same space.
-#     """
-#     from firedrake.assemble import assemble
-#     nt = float(assemble(inner(target, target) * dx)) ** 0.5
-#     scores = []
-#     for i, w in enumerate(candidates):
-#         nw = float(assemble(inner(w, w) * dx)) ** 0.5
-#         if nw == 0.0:
-#             continue
-#         c = complex(assemble(inner(target, w) * dx))
-#         scores.append((abs(c) / (nt * nw), i, c))
-
-#     if not scores:
-#         raise RuntimeError("No nonzero candidate found in match_best.")
-
-#     scores.sort(key=lambda t: t[0], reverse=True)
-#     _, best_i, best_c = scores[0]
-
-#     aligned = candidates[best_i].copy(deepcopy=True)
-#     if best_c != 0:
-#         phase = best_c.conjugate() / abs(best_c)
-#         aligned.assign(phase * aligned)
-
-#     lam = lambdas[best_i] if lambdas is not None else best_i
-#     return lam, aligned
-
-
-# Maggie change - m normalize
-def _solve_eigs(problem, nev, solver_parameters):
-    """Solve a :class:`~.LinearEigenproblem` and return L2-normalised eigenpairs.
-
-    Parameters
-    ----------
-    problem
-        :class:`~.LinearEigenproblem` to solve.
-    nev
-        Number of eigenvalue/eigenvector pairs to request.
-    solver_parameters
-        Dictionary of SLEPc solver parameters.
-
-    Returns
-    -------
-    tuple[list, list]
-        ``(eigenvalues, eigenfunctions)`` — both lists have length
-        ``min(nconv, nev)``.
-    """
-    from firedrake import LinearEigensolver
-    es = LinearEigensolver(problem, n_evals=nev, solver_parameters=solver_parameters)
-    nconv = es.solve()
-    lams, vecs = [], []
-    for i in range(min(nconv, nev)):
-        lams.append(es.eigenvalue(i))
-        vr, _ = es.eigenfunction(i)
-        # change to m normalize
-        # vecs.append(l2_normalize(vr))
-        vecs.append(m_normalize(vr))
-    return lams, vecs
-
-
-# 15. Maggie change - Construct higher degree space subspace by subspace
-def _reconstruct_eig_degree(problem, extra_degree):
-    """Return a new :class:`~.LinearEigenproblem` on a space of degree+extra_degree.
-
-    Uses the original unrestricted forms stored on ``problem._original_A/M/bcs``
-    to avoid double-restricting on the reconstructed problem.
-    """
-    from firedrake import LinearEigenproblem
-    A = problem._original_A
-    M = problem._original_M
-    bcs = problem._original_bcs
-    v, u = A.arguments()
-    V = u.function_space()
-
-    # Will change by accounting for Mixed spaces 
-    # old code:
-    # high_degree = V.ufl_element().degree() + extra_degree
-    # V_high = reconstruct_degree(V, high_degree)
-    # Build higher-order mixed space component by component
-    # high_spaces = []
-    # meshes = V.mesh()
-    # # Need to consider all subspaces (mixed formulation)
-    # # reconstruct_degree did not seem to work
-    # for i, V_i in enumerate(V.subspaces):
-    #     mesh_i = meshes[i]
-    #     element_i = V_i.ufl_element()
-    #     degree_i = element_i.degree()
-    #     high_degree = degree_i + extra_degree
-    #     Space_i = reconstruct_degree(V_i, high_degree, mesh = mesh_i)
-    #     high_spaces.append(Space_i)
-    # V_high = MixedFunctionSpace(high_spaces)
-    high_spaces = []
-    meshes = V.mesh()
-    for i, V_i in enumerate(V.subspaces):
-        mesh_i = meshes[i]
-        element_i = V_i.ufl_element()
-        degree_i = element_i.degree()
-        high_element_i = PMGPC.reconstruct_degree(element_i, degree_i + extra_degree)
-        high_spaces.append(FunctionSpace(mesh_i, high_element_i))
-    V_high = MixedFunctionSpace(high_spaces)
-
-    # new trial and test
-    u_high = TrialFunction(V_high)
-    v_high = TestFunction(V_high)
-    A_high = replace(A, {v: v_high, u: u_high}) # Is this swapped?
-    M_high = replace(M, {M.arguments()[0]: v_high, M.arguments()[1]: u_high}) # Is this swapped?
-
-    # Bc's
-    bcs_high = [bc.reconstruct(V=V_high, indices=bc._indices) for bc in bcs]
-
-    # New problem
-    return LinearEigenproblem(A_high, M_high, bcs=bcs_high,
-                              bc_shift=problem.bc_shift, restrict=problem.restrict)
-
-
-# Maggie leaving this alone because folded problem is self adjoint
-def _make_adjoint_eig_problem(problem):
-    """Return the adjoint of a :class:`~.LinearEigenproblem`.
-
-    For a self-adjoint problem this is identical to the primal.
-    """
-    from firedrake import LinearEigenproblem
-    A_adj = adjoint(problem._original_A)
-    return LinearEigenproblem(A_adj, problem._original_M,
-                              bcs=problem._original_bcs,
-                              bc_shift=problem.bc_shift, restrict=problem.restrict)
-
-
-
-
-
-def _compute_residual_indicators(F, z_err, options):
-    """Compute DG0 cell-wise error indicators via bubble/cone projections.
-
-    This implements the primal-residual indicator
-
-    .. math::
-
-        \\eta_K = \\int_K R_{\\text{cell}} \\cdot z_{\\text{err}}\\,\\mathrm{d}x
-                  + \\int_{\\partial K} R_{\\text{facet}} \\cdot z_{\\text{err}}\\,\\mathrm{d}s
-
-    for the residual form ``F`` against the dual error ``z_err``.
-
-    Parameters
-    ----------
-    F
-        Residual as a linear form (test function as its sole argument).
-    z_err
-        Dual error representative ``z_p - z_h`` (UFL expression or Function).
-    options
-        :class:`GoalAdaptiveOptions` (or subclass) instance for degree
-        parameters and solver parameters.
-
-    Returns
-    -------
-    Function
-        DG0 Function of absolute-value cell indicators.
-    """
-    from firedrake.assemble import assemble
-
-    v, = F.arguments()
-    V = v.function_space()
-    mesh = V.mesh().unique()
-    dim = mesh.topological_dimension
-    cell = mesh.ufl_cell()
-    variant = "integral"
-
-    # Will change for mixed spaces
-    # Old code:
-    # degree = V.ufl_element().degree()
-    # cell_residual_degree = degree + options.cell_residual_extra_degree
-    # facet_residual_degree = degree + options.facet_residual_extra_degree
-
-    # 16. Maggie change - taking degree as max degree of mixed space
-    # getting degree not so simple for mixed space?
-    # Here I take the max degree of the mixed space
-    # Select max degree of subspaces as our degree 
-    if is_mixed_space(V):
-        degrees = []
-        for V_i in V.subspaces:
-            d = V_i.ufl_element().degree()
-            if isinstance(d, tuple):
-                d = max(d)
-            degrees.append(int(d))
-        degree = max(degrees)
-    else:
-        d = element.degree()
-        if isinstance(d, tuple):
-            d = max(d)
-        degree = int(d)
-
-    # Then as before
-    cell_residual_degree = degree + options.cell_residual_extra_degree
-    facet_residual_degree = degree + options.facet_residual_extra_degree
-
-
-    # Bubble functions
-    B = FunctionSpace(mesh, "B", dim+1, variant=variant)
-    bubbles = Function(B).assign(1)
-
-    
-    # Accounting for mixed spaces when forming DG spaces
-    # Old code:
-    # if V.value_shape == ():
-    #     DG = FunctionSpace(mesh, "DG", cell_residual_degree, variant=variant)
-    # else:
-    #     DG = TensorFunctionSpace(mesh, "DG", cell_residual_degree, variant=variant, shape=V.value_shape)
-
-    # 17. Maggie change - DG for mixed spaces
-    if is_mixed_space(V):
-        DG_spaces = []
-        for Vi in V.subspaces:
-            if Vi.value_shape == ():
-                DG_spaces.append(FunctionSpace(mesh, "DG", cell_residual_degree, variant=variant))
-            else:
-                DG_spaces.append(TensorFunctionSpace(mesh, "DG", cell_residual_degree, variant=variant, shape=Vi.value_shape))
-        DG = MixedFunctionSpace(DG_spaces)
-    elif V.value_shape == ():
-        DG = FunctionSpace(mesh, "DG", cell_residual_degree, variant=variant)
-    else:
-        DG = TensorFunctionSpace(mesh, "DG", cell_residual_degree, variant=variant, shape=V.value_shape)
-                
-
-    uc = TrialFunction(DG)
-    vc = TestFunction(DG)
-
-    # 18. Maggie change -
-    # New code for ac if mixed space
-    # Old code:
-    # ac = inner(uc, bubbles*vc)*dx
-    if is_mixed_space(DG):
-        ac = mixed_weighted_inner(uc, vc, bubbles) * dx
-    else:
-        ac = inner(uc, bubbles * vc) * dx
-    
-    Lc = residual(F, bubbles*vc)
-    Rcell = Function(DG)
-    solve(ac == Lc, Rcell, solver_parameters=options.sp_cell)
-
-    FB = FunctionSpace(mesh, "FB", dim, variant=variant)
-    cones = Function(FB).assign(1)
-
-    # 19. Maggie change - DG for mixed spaces
-    # Another mixed change 
-    # old code:
-    # el = BrokenElement(FiniteElement("FB", cell=cell, degree=facet_residual_degree+dim, variant=variant))
-    # if V.value_shape == ():
-    #     Q = FunctionSpace(mesh, el)
-    # else:
-    #     Q = TensorFunctionSpace(mesh, el, shape=V.value_shape)
-    # New code:
-    el = BrokenElement(FiniteElement("FB", cell=cell, degree=facet_residual_degree+dim, variant=variant))
-    if is_mixed_space(V):
-        Q_spaces = []
-        for Vi in V.subspaces:
-            if Vi.value_shape == ():
-                Q_spaces.append(FunctionSpace(mesh, el))
-            else:
-                Q_spaces.append(TensorFunctionSpace(mesh, el, shape=Vi.value_shape))
-        Q = MixedFunctionSpace(Q_spaces)
-    elif V.value_shape == ():
-        Q = FunctionSpace(mesh, el)
-    else:
-        Q = TensorFunctionSpace(mesh, el, shape=V.value_shape)
-
-    Qtest = TestFunction(Q)
-    Qtrial = TrialFunction(Q)
-
-    # 20. Maggie change - for mixed spaces
-    # Another mixed change:
-    # Old code:
-    # Lf = residual(F, Qtest) - inner(Rcell, Qtest)*dx
-    # af = both(inner(Qtrial/cones, Qtest))*dS + inner(Qtrial/cones, Qtest)*ds
-    # New code:
-    if is_mixed_space(V):
-            Lf = residual(F, Qtest) - mixed_inner(Rcell, Qtest)*dx
-            facet_mass = mixed_weighted_inner(Qtrial, Qtest, 1/cones)
-            af = both(facet_mass) * dS + facet_mass * ds
-    else:
-        Lf = residual(F, Qtest) - inner(Rcell, Qtest)*dx
-        af = both(inner(Qtrial/cones, Qtest))*dS + inner(Qtrial/cones, Qtest)*ds
-
-    Rhat = Function(Q)
-    solve(af == Lf, Rhat, solver_parameters=options.sp_facet)
-    Rfacet = Rhat/cones
-    
-    
-    # Build cell-wise indicators
-    DG0 = FunctionSpace(mesh, "DG", degree=0)
-    test = TestFunction(DG0)
-
-    # 21. Maggie change - for mixed spaces
-    # Another change based on Mixed spaces
-    # Old code:
-    # eta_cell = assemble(
-    #     inner(inner(Rcell, z_err), test)*dx
-    #     + inner(avg(inner(Rfacet, z_err)), both(test))*dS
-    #     + inner(inner(Rfacet, z_err), test)*ds
-    # )
-    # New code
-    if is_mixed_space(V):
-        zerr_components = split(z_err)
-        Rcell_components = split(Rcell)
-        Rhat_components = split(Rhat)
-        cell_weight = sum(inner(Rcell_i, zerr_i) for Rcell_i, zerr_i in zip(Rcell_components, zerr_components))
-        facet_weight = sum(inner(Rhat_i / cones, zerr_i) for Rhat_i, zerr_i in zip(Rhat_components, zerr_components))
-
-    else:
-        cell_weight = inner(Rcell, z_err)
-        facet_weight = inner(Rfacet, z_err)
-    
-    # Then eta is 
-    eta_cell = assemble(inner(cell_weight, test)*dx + inner(avg(facet_weight), both(test))*dS + inner(facet_weight, test)*ds )
-
-    # Return abs value array of etas 
-    with eta_cell.dat.vec as evec:
-        evec.abs()
-    return eta_cell
-
-
-
-
-
-
-
-
 
 
 

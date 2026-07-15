@@ -335,7 +335,7 @@ class GoalAdaptiveSolverBase:
                 break
 
 
-    # 22. Maggie change - I seperate refinement criteria so I can overwrite it for the folded operator
+    # 0. Maggie change - I seperated refinement criteria so I can overwrite it for the folded operator
     def should_refine(self, it, eta_h, eta):
         """ Return true when refinement is needed """
         return abs(eta_h) >= self.options.tolerance
@@ -370,9 +370,11 @@ class GoalAdaptiveSolverBase:
 
 
         # SOLVE + ESTIMATE
-        eta_h, eta = self.solve_and_estimate() # defined in the subclass
+        self.eta_h, eta = self.solve_and_estimate() # defined in the subclass
         self.post_iteration(it) # user given actions
         
+        
+        # 1. Maggie changde - stopping criteria 
         # Stopping criteria
         # if abs(eta_h) < self.options.tolerance: # tolerance stopping criteria 
         #     self.print("Error estimate below tolerance, finished.")
@@ -380,7 +382,7 @@ class GoalAdaptiveSolverBase:
         # elif it == self.options.max_it - 1: # max iter stopping criteria
         #     self.print(f"Maximum iteration ({self.options.max_it}) reached. Exiting.")
         #     raise StopIteration
-        if not self.should_refine(it, eta_h, eta): # tolerance stopping criteria 
+        if not self.should_refine(it, self.eta_h, eta): # tolerance stopping criteria 
             self.print("We have decided not to adapt - we are done!.")
             raise StopIteration
         elif it == self.options.max_it - 1: # max iter stopping criteria
@@ -392,7 +394,7 @@ class GoalAdaptiveSolverBase:
         # MARK
         self.print("Computing local refinement indicators eta_K ...")
         eta_cell = self.compute_error_indicators() # defined in the subclass - local indicators
-        self.compute_efficiency_indices(eta_cell, eta_h, eta) # effectivity indices
+        self.compute_efficiency_indices(eta_cell, self.eta_h, eta) # effectivity indices
         markers = self.set_adaptive_cell_markers(eta_cell) # call the marking routine - in base class
 
 
@@ -915,7 +917,7 @@ class GoalAdaptiveFoldedEigensolver(SteadyGoalAdaptiveSolver, OptionsManager):
         check_nrm = m_norm(self._u_p)
         self.check_up = False
         if check_nrm < 1e-12:
-            print(RED % f'Since the L2 aligned enriched vector is small (in norm) we will want to adapt!!')
+            print(RED % f'Since the L2 aligned enriched vector is small (in norm) we may want to adapt!!')
             self.check_up = True
 
 
@@ -1145,6 +1147,7 @@ def l2_normalize(f):
 
 # 12. Maggie change - Adding in mixed versions of inner products and norms
 # DO I NEED TO SPLIT THE INNER PRODUCT?
+# SHOULD PROBABLY GENERALIZE? USER GIVEM m(,)?
 def is_mixed_function(f):
     return hasattr(f, "subfunctions") and len(f.subfunctions) > 1
 
@@ -1154,8 +1157,11 @@ def is_mixed_space(V):
 def mixed_inner(a, b):
     return sum(inner(ai, bi) for ai, bi in zip(split(a), split(b)))
 
-def mixed_weighted_inner(a, b, weight):
-    return sum(inner(ai, weight * bi) for ai, bi in zip(split(a), split(b)))
+def mixed_weighted_inner(a, b, weight, first_arg = False):
+    if first_arg:
+        return sum(inner(weight * ai, bi) for ai, bi in zip(split(a), split(b)))
+    else:
+        return sum(inner(ai, weight * bi) for ai, bi in zip(split(a), split(b)))
 
 # Here, m is the L2 inner product (folded operator)
 
@@ -1188,6 +1194,7 @@ def m_normalize(f):
 # Joe finds best match for uh in the computed enriched eigenbasis 
 # Instead, we are going to compute the best candidate in the span of the basis using
 # the L2 projection of uh onto the enriched eigenbasis.
+# SHOULD PROBABLY GENERALIZE USING mixed_inner? 
 
 
 def match_best_mixed(target, E_candidates, H_candidates, mult, V_high):
@@ -1385,7 +1392,7 @@ def _reconstruct_eig_degree(problem, extra_degree):
     # new trial and test
     u_high = TrialFunction(V_high)
     v_high = TestFunction(V_high)
-    A_high = replace(A, {v: v_high, u: u_high}) # Is this swapped?
+    A_high = replace(A, {v: v_high, u: u_high}) 
     M_high = replace(M, {M.arguments()[0]: v_high, M.arguments()[1]: u_high}) # Is this swapped?
 
     # Bc's
@@ -1557,7 +1564,7 @@ def _compute_residual_indicators(F, z_err, options):
     # New code:
     if is_mixed_space(V):
             Lf = residual(F, Qtest) - mixed_inner(Rcell, Qtest)*dx
-            facet_mass = mixed_weighted_inner(Qtrial, Qtest, 1/cones)
+            facet_mass = mixed_weighted_inner(Qtrial, Qtest, 1/cones, first_arg = True)
             af = both(facet_mass) * dS + facet_mass * ds
     else:
         Lf = residual(F, Qtest) - inner(Rcell, Qtest)*dx
@@ -1582,11 +1589,13 @@ def _compute_residual_indicators(F, z_err, options):
     # )
     # New code
     if is_mixed_space(V):
-        zerr_components = split(z_err)
-        Rcell_components = split(Rcell)
-        Rhat_components = split(Rhat)
-        cell_weight = sum(inner(Rcell_i, zerr_i) for Rcell_i, zerr_i in zip(Rcell_components, zerr_components))
-        facet_weight = sum(inner(Rhat_i / cones, zerr_i) for Rhat_i, zerr_i in zip(Rhat_components, zerr_components))
+        # zerr_components = split(z_err)
+        # Rcell_components = split(Rcell)
+        # Rhat_components = split(Rhat)
+        # cell_weight = sum(inner(Rcell_i, zerr_i) for Rcell_i, zerr_i in zip(Rcell_components, zerr_components))
+        # facet_weight = sum(inner(Rhat_i / cones, zerr_i) for Rhat_i, zerr_i in zip(Rhat_components, zerr_components))
+        cell_weight = mixed_inner(Rcell, z_err)
+        facet_weight = mixed_weighted_inner(Rhat, z_err, 1/cones, first_arg = True)
 
     else:
         cell_weight = inner(Rcell, z_err)

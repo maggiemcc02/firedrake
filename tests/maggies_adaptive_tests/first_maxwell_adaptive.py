@@ -141,11 +141,12 @@ solver_parameters = {
     "eps_type": "krylovschur",
     "eps_tol": 1.0e-8,
     "st_type": "sinvert",
-    "st_ksp_type": "preonly",
-    "st_pc_type": "lu",
+    #"st_ksp_type": "preonly",
+    #"st_pc_type": "lu",
     "eps_monitor": None,
     "eps_smallest_magnitude": None,
     "eps_target_real": None,
+    "eps_target": 0
 }
 
 
@@ -178,13 +179,17 @@ def my_output(self, it: int):
     Eout, Hout = u_h.subfunctions
     Eout.rename(f"E_primal_{it=}")
     Hout.rename(f"H_primal_{it=}")
-    VTKFile(f"{primal_dir}/it_{it}.pvd").write(Eout, Hout, time=float(z))
+    VTKFile(f"{primal_dir}/primal_it_{it}.pvd").write(Eout, Hout, time=float(z))
 
     # Save the current chosen enriched solution
     Eout_p, Hout_p = u_p.subfunctions
     Eout_p.rename(f"E_enriched_{it=}")
     Hout_p.rename(f"H_enriched_{it=}")
-    VTKFile(f"{enriched_dir}/it_{it}.pvd").write(Eout_p, Hout_p, time=float(z))
+    VTKFile(f"{enriched_dir}/enriched_it_{it}.pvd").write(Eout_p, Hout_p, time=float(z))
+
+    # Also save the error estimate at the current z
+    print(f'saving the magnitude of the error estimate {self.eta_h}')
+    error_ests.append(self.eta_h)
 
     print(BLUE % "Done saving user's desired output ...")
 
@@ -199,19 +204,19 @@ def my_output(self, it: int):
 h = 0.05 # grid spacing
 n = 1/h # n for Grid(n)
 
-grid = np.append(np.arange(3.5, 4.0, h),[4.0]) # Patrick makes this a list
+grid = np.append(np.arange(2.0, 4.0, h),[4.0]) # Patrick makes this a list
 smallest_eigvals = []
 phi_vals = []
 # enriched_phi_vals = []
 DWR_phi_vals = []
 DWR_errors = []
 
-
 for curr_z in grid:
 
 
     # Set z
     z.assign(curr_z)
+    error_ests = [] # new list to save errors
 
     # print(BLUE % f"- - - - - - - - - - - - - - - - - - - - - - - - - - - - [FOR z = {z}] - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
     print(BLUE % f"---------------------------- [FOR z = {z}] ----------------------------")
@@ -239,6 +244,15 @@ for curr_z in grid:
     print(BLUE % f"The error estimate, eta = rho/1-sigma, is: {error_lambda}")
     print(BLUE % f"The 'improved' bound is |dist(z, spectrum)| <= {phi_corr}")
     print()
+
+    # Save the error plot at the current z 
+    z_dir= f"output/"
+    os.makedirs(z_dir, exist_ok=True)
+    plt.plot([i for i in range(len(error_ests))], error_ests)
+    plt.xlabel(r"mesh")
+    plt.title(rf"Error estimate over each mesh for $z = {curr_z}$")
+    plt.savefig(f"{z_dir}/error_plot_for_z={float(z)}.pdf")
+    plt.close()
 
 
 

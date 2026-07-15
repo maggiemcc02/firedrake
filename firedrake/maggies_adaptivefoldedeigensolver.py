@@ -1,7 +1,6 @@
 # Here we make the skeleton for an adaptive eigensolver based on old eigensolver in Pablo's code (see commented code at end)
 # I am attempting to make an updated eigensolver that matches the current state of Pablo's code
 
-# Pablo's current imports:
 
 import numbers
 import numpy as np
@@ -9,6 +8,8 @@ from dataclasses import dataclass
 from typing import ClassVar
 
 from petsctools import OptionsManager
+
+from firedrake import warning
 
 from firedrake.assemble import assemble
 from firedrake import split
@@ -163,35 +164,6 @@ class GoalAdaptiveOptions:
 
 # The old code has special eigenoptions which we will need again
 # We will use an updated form using Pablo's dataclass approach
-class GoalAdaptiveEigenOptions(GoalAdaptiveOptions):
-    """Options for :class:`GoalAdaptiveEigensolver`.
-
-    Extends :class:`GoalAdaptiveOptions` with eigenproblem-specific parameters.
-
-    Parameters
-    ----------
-    self_adjoint
-        If ``True``, the eigenproblem is self-adjoint so the dual eigenproblem
-        equals the primal; only one set of eigensolves is performed per
-        iteration.  Defaults to ``False``.
-    nev
-        Number of eigenvalue/eigenvector pairs to compute at each solve.
-        The solver picks the one best correlated with the current eigenfunction
-        estimate via :func:`match_best`.  Defaults to ``5``.
-
-    Notes
-    -----
-    The options ``use_adjoint_residual``, ``primal_low_method``, and
-    ``dual_low_method`` inherited from :class:`GoalAdaptiveOptions` are not
-    used by :class:`GoalAdaptiveEigensolver`.
-    """
-
-    def __init__(self, *args, self_adjoint: bool = False, nev: int = 5, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.self_adjoint = self_adjoint
-        self.nev = nev
-
-
 # The extra options needed for an eigensolver
 @dataclass(frozen=True)
 class GoalAdaptiveEigenOptions(GoalAdaptiveOptions):
@@ -222,6 +194,7 @@ class GoalAdaptiveEigenOptions(GoalAdaptiveOptions):
 
     self_adjoint: bool = False
     nev: int = 5
+    mult_tol: float = 0.01 # Maggie addition - tolerance for computing cluster size.
 
 
 # Pablo's new solver base:
@@ -608,11 +581,18 @@ class GoalAdaptiveFoldedEigensolver(SteadyGoalAdaptiveSolver, OptionsManager):
     ----------
     problem
         A :class:`~.LinearEigenproblem` on the initial mesh.
+    m_form 
+        The symmetric semi-definite sesquilinear form m(,) corresponding to
+        M (usually the L 2 scalar product.
     target
         Target eigenvalue used by SLEPc for spectral targeting
         (``eps_target``).
     epsilon
-        the desired pseudospectral contour
+        The desired pseudospectral contour.
+    mult_tol
+        The tolerance used to compute a cluster size.
+    imag_tol
+        Tolerance for throwing out imaginary part of eigenvalue and error
     tolerance
         Terminate when ``|eta_h| < tolerance``.
     goal_adaptive_options
@@ -667,9 +647,12 @@ class GoalAdaptiveFoldedEigensolver(SteadyGoalAdaptiveSolver, OptionsManager):
     def __init__(
         self,
         problem,
-        target: float | complex,
         *,
-        epsilon: float = 1.0e-2,
+        m_form = None, # m(,) form
+        target: float = 0, # set zero for folded operator
+        epsilon: float = 1.0e-2, # default pseudospectral contour is 0.01
+        mult_tol: float = 1e-2, # default tol for cluster size is 0.01
+        imag_tol: float = 1.0e-12, # defualt tol for throwing out imgainary part is 1e-12
         solver_parameters: dict | None = None,
         options_prefix: str | None = None,
         exact_eigenvalue: float | complex | None = None,
@@ -692,8 +675,11 @@ class GoalAdaptiveFoldedEigensolver(SteadyGoalAdaptiveSolver, OptionsManager):
 
         # Eigenproblem data.
         self.problem = problem
+        self.m_form = m_form
         self.target = target
         self.epsilon = epsilon
+        self.mult_tol = mult_tol
+        self.imag_tol = imag_tol
         self._lam_h = None
         self._u_h = None
         self._lam_p = None
@@ -753,15 +739,19 @@ class GoalAdaptiveFoldedEigensolver(SteadyGoalAdaptiveSolver, OptionsManager):
     def should_refine(self, it, eta_h, eta):
         """ The stopping criteria we want the base to use to decide when to refine """
 
-        lam_h = self._lam_h    
+        lam_h = self._lam_h  
+        lam_p = self._lam_p  
 
         # Compute and Correct Matt's phi value
         self.matts_phi = np.sqrt(lam_h)
+        self.enriched_phi = np.sqrt(lam_p)    # Compute the enriched phi as well for comparison 
         corrected = lam_h + self.signed_error
         if corrected >= 0:
             self.corrected_phi = np.sqrt(corrected)
         else:
             self.corrected_phi = float("nan")
+
+
         
         self.print(BLUE % f'Eigenvalue before correction is {self._lam_h}')
         self.print(BLUE % f'Eigenvalue after correction is {corrected}')
@@ -832,7 +822,7 @@ class GoalAdaptiveFoldedEigensolver(SteadyGoalAdaptiveSolver, OptionsManager):
         sp_target["eps_target"] = self.target
 
         # Solve at degree p
-        lams, vecs = _solve_eigs(problem, opts.nev, sp_target)
+        lams, vecs = _solve_eigs(problem, opts.nev, sp_target, self.m_form)
         self._lam_h = lams[0]
         self._u_h = vecs[0]
         
@@ -841,13 +831,15 @@ class GoalAdaptiveFoldedEigensolver(SteadyGoalAdaptiveSolver, OptionsManager):
         # Some checks for a self adjoint problem
         if opts.self_adjoint:
             # Check that lam_h is real 
-            if abs(self._lam_h.imag) > 1.0e-10:
+            if abs(self._lam_h.imag) > self.imag_tol:
                 print(RED % f"Warning: computed folded eigenvalue has nontrivial imaginary part: {self._lam_h}")
                 print(RED % f"We will take the real part")
+                warning("Self-adjoint eigenproblem has complex eigenvalue with nontrivial imaginary part. We take its real part")
                 self._lam_h = self._lam_h.real
-            elif (abs(self._lam_h.imag) > 0 and abs(self._lam_h.imag) < 1.0e-10):
+            elif (abs(self._lam_h.imag) > 0 and abs(self._lam_h.imag) < self.imag_tol):
                 print(RED % f"Warning: computed folded eigenvalue has a small imaginary part: {self._lam_h}")
                 print(RED % f"We will take the real part")
+                warning("Self-adjoint eigenproblem has complex eigenvalue with small imaginary part. We take its real part")
                 self._lam_h = self._lam_h.real
             # Check that lam_h is nonnegative
             # neg_tol = 1e-8
@@ -865,7 +857,7 @@ class GoalAdaptiveFoldedEigensolver(SteadyGoalAdaptiveSolver, OptionsManager):
         # dual_extra_degree or primal_extra_degree??
         high_problem = _reconstruct_eig_degree(problem, opts.dual_extra_degree) # Might need to change for mixed spaces
         self.print(f"Solving enriched eigenproblem (dofs: {high_problem.output_space.dim()}) ...")
-        lams_p, vecs_p = _solve_eigs(high_problem, opts.nev, sp_target)
+        lams_p, vecs_p = _solve_eigs(high_problem, opts.nev, sp_target, self.m_form)
         self._lam_p = lams_p[0]
 
         # Prints
@@ -878,18 +870,16 @@ class GoalAdaptiveFoldedEigensolver(SteadyGoalAdaptiveSolver, OptionsManager):
         # 7. Maggie Change - checking multiplicity
         # Check multiplicity based on lower degree solve
         mult_lower = 1
-        tolerance = 0.01 
         for i in range(1, len(vecs)):
-            if abs(lams[i] - self._lam_h) <= tolerance:
+            if abs(lams[i] - self._lam_h) <= self.mult_tol:
                 mult_lower += 1
         self.print(BLUE % f"Lower degree solve multiplicity: {mult_lower}")
 
 
         # check multiplicity based on enriched solve
-        self.mult = 1
-        tolerance = 0.01 
+        self.mult = 1 
         for i in range(1, len(vecs_p)):
-            if abs(lams_p[i] - lams_p[0]) <= tolerance:
+            if abs(lams_p[i] - lams_p[0]) <= self.mult_tol:
                 self.mult += 1
         self.print(BLUE % f"Enriched solve multiplicity: {self.mult}")
         self.enriched_cluster = vecs_p[:self.mult] 
@@ -897,24 +887,27 @@ class GoalAdaptiveFoldedEigensolver(SteadyGoalAdaptiveSolver, OptionsManager):
         # Compare multiplicities
         if mult_lower != self.mult:
             self.print(RED % f'Warning - the lower degree and enriched multiplicities dont match')
+            warning("Smallest lower- and higher- degree eigenvalues have different cluster sizes")
         
         # 8. Maggie change - L2 matching
         # I will need to update this matching!!
         # self._lam_p, self._u_p = match_best(self._u_h, vecs_p, lams_p)
+        # self.print("Matching eigenfunctions with L2 projection (Maggie Change)...")
+        # if is_mixed_space(V): # Assumes mixed space has 2 subspaces for now (Maxwell example)
+        #     # Set the enriched bases (mixed space) for the L2 projection code
+        #     self.enriched_basis_E = [self.enriched_cluster[i].subfunctions[0] for i in range(self.mult)]
+        #     self.enriched_basis_H = [self.enriched_cluster[i].subfunctions[1] for i in range(self.mult)]
+        #     # L2 enriched matching
+        #     self._u_p = match_best_mixed(self._u_h, self.enriched_basis_E, self.enriched_basis_H, self.mult, high_problem.output_space) # is this the right call to V_high?
+        # # If not, just do L2 projection without any splitting:
+        # else:
+            # self._u_p = match_best_notmixed(self._u_h, self.enriched_cluster, self.mult, high_problem.output_space)
         self.print("Matching eigenfunctions with L2 projection (Maggie Change)...")
-        if is_mixed_space(V): # Assumes mixed space has 2 subspaces for now (Maxwell example)
-            # Set the enriched bases (mixed space) for the L2 projection code
-            self.enriched_basis_E = [self.enriched_cluster[i].subfunctions[0] for i in range(self.mult)]
-            self.enriched_basis_H = [self.enriched_cluster[i].subfunctions[1] for i in range(self.mult)]
-            # L2 enriched matching
-            self._u_p = match_best_mixed(self._u_h, self.enriched_basis_E, self.enriched_basis_H, self.mult, high_problem.output_space) # is this the right call to V_high?
-        # If not, just do L2 projection without any splitting:
-        else:
-            self._u_p = match_best_notmixed(self._u_h, self.enriched_cluster, self.mult, high_problem.output_space)
+        self._u_p = match_best(self._u_h, self.enriched_cluster, self.mult, high_problem.output_space, self.m_form)
 
 
         # Check the size of the enriched result
-        check_nrm = m_norm(self._u_p)
+        check_nrm = m_norm(self._u_p, self.m_form)
         self.check_up = False
         if check_nrm < 1e-12:
             print(RED % f'Since the L2 aligned enriched vector is small (in norm) we may want to adapt!!')
@@ -976,7 +969,7 @@ class GoalAdaptiveFoldedEigensolver(SteadyGoalAdaptiveSolver, OptionsManager):
         # 10. Maggie change - m_norm in error
         if self.options.self_adjoint:
             #sigma_h = 0.5 * float(assemble(inner(e_sigma, e_sigma) * dx))
-            sigma_h = 0.5 * m_norm(e_sigma)**2 # Maggie change for now
+            sigma_h = 0.5 * m_norm(e_sigma, self.m_form)**2 # Maggie change for now
             rhs = assemble(replace_both_args(A, u_h, e)
                                  - lam_h * replace_both_args(M, u_h, e)) # took float out
 
@@ -1009,11 +1002,13 @@ class GoalAdaptiveFoldedEigensolver(SteadyGoalAdaptiveSolver, OptionsManager):
         self.signed_error = rhs/denom if abs(denom) > 1e-14 else float("nan")
 
         # Maggie change 11.5 - Check if imaginary and how imaginary 
-        if abs(self.signed_error.imag) > 1.0e-10:
+        if abs(self.signed_error.imag) > self.imag_tol:
                 self.print(RED % f"Warning - Error estimate has a nontrivial imaginary part and we will take real part: {self.signed_error}")
+                warning('Self-adjoint problem has DWR estimate with nontrivial imaginary part. We took its real part')
                 self.signed_error = self.signed_error.real 
-        if (abs(self.signed_error.imag) < 1.0e-10 and abs(self.signed_error.imag) > 0):
+        if (abs(self.signed_error.imag) > 0 and abs(self.signed_error.imag) < self.imag_tol):
                 self.print(RED % f"Warning - Error estimate has a trivial imaginary part and we will take real part: {self.signed_error}")
+                warning('Self-adjoint problem has DWR estimate with  a small imaginary part. We took its real part')
                 self.signed_error = self.signed_error.real 
 
 
@@ -1136,26 +1131,29 @@ def replace_both_args(bilinear_form, trial_coeff, test_coeff):
     return replace(bilinear_form, {test: test_coeff, trial: trial_coeff})
 
 
-def l2_normalize(f):
-    """L2-normalise a :class:`~.Function` in place and return it."""
-    from firedrake.assemble import assemble
-    nrm = float(assemble(inner(f, f) * dx)) ** 0.5
-    if nrm > 0:
-        f.assign(f / nrm)
-    return f
+# def l2_normalize(f):
+#     """L2-normalise a :class:`~.Function` in place and return it."""
+#     from firedrake.assemble import assemble
+#     nrm = float(assemble(inner(f, f) * dx)) ** 0.5
+#     if nrm > 0:
+#         f.assign(f / nrm)
+#     return f
 
 
 # 12. Maggie change - Adding in mixed versions of inner products and norms
 # DO I NEED TO SPLIT THE INNER PRODUCT?
 # SHOULD PROBABLY GENERALIZE? USER GIVEM m(,)?
+
+
+# Grap function, grab its space, check is the space is mixed
 def is_mixed_function(f):
     return hasattr(f, "subfunctions") and len(f.subfunctions) > 1
 
 def is_mixed_space(V):
     return hasattr(V, "subspaces") and len(V.subspaces) > 0
 
-def mixed_inner(a, b):
-    return sum(inner(ai, bi) for ai, bi in zip(split(a), split(b)))
+def mixed_inner(u, v): # used in local indicators (seperate from m_form)
+    return sum(inner(ui, vi) for ui, vi in zip(split(u), split(v)))
 
 def mixed_weighted_inner(a, b, weight, first_arg = False):
     if first_arg:
@@ -1163,23 +1161,23 @@ def mixed_weighted_inner(a, b, weight, first_arg = False):
     else:
         return sum(inner(ai, weight * bi) for ai, bi in zip(split(a), split(b)))
 
-# Here, m is the L2 inner product (folded operator)
+# # # Default is that m is the L2 inner product (folded operator)
+# def m_form(u, v): # used for m-inner product (eventually user-defined)
+#     from firedrake.assemble import assemble
+#     if is_mixed_function(u):
+#         return assemble(sum(inner(ui, vi) * dx for ui, vi in zip(u.subfunctions, v.subfunctions)))
+#     else:
+#         return assemble(inner(u, v) * dx)
 
-def m_inner(u, v):
-    from firedrake.assemble import assemble
-    if is_mixed_function(u):
-        return assemble(sum(inner(ui, vi) * dx for ui, vi in zip(u.subfunctions, v.subfunctions)))
-    else:
-        return assemble(inner(u, v) * dx)
-
-def m_norm(u):
-    val = m_inner(u, u)
+def m_norm(u, m_form):
+    val = m_form(u, u)
     return abs(val) ** 0.5
 
-def m_normalize(f):
-    nrm = m_norm(f)
+def m_normalize(f, m_form):
+    nrm = m_norm(f, m_form)
     if nrm < 1e-12:
         print(RED % f"Warning - when m-normalizing, m norm is really small - {nrm}")
+        warning("When m-normalizing the input function has a small m-norm")
         
     else:
         if is_mixed_function(f):
@@ -1194,10 +1192,9 @@ def m_normalize(f):
 # Joe finds best match for uh in the computed enriched eigenbasis 
 # Instead, we are going to compute the best candidate in the span of the basis using
 # the L2 projection of uh onto the enriched eigenbasis.
-# SHOULD PROBABLY GENERALIZE USING mixed_inner? 
 
 
-def match_best_mixed(target, E_candidates, H_candidates, mult, V_high):
+def match_best(target, candidates, mult, V_high, m_form):
 
     from firedrake.assemble import assemble
 
@@ -1212,64 +1209,104 @@ def match_best_mixed(target, E_candidates, H_candidates, mult, V_high):
     for i in range(mult):
         for j in range(mult):
             # Double check Kij vs Kji indexing - I think it matters for complex numbers (conjugate in inner product)
-            K[i, j] = assemble(inner(E_candidates[j], E_candidates[i])*dx) + assemble(inner(H_candidates[j], H_candidates[i])*dx)
+            K[i, j] = m_form(candidates[j], candidates[i])
+
 
     # Assemble the F vector
     F = np.zeros((mult, 1), dtype=complex)
     target_E, target_H = target.subfunctions
     for i in range(mult):
-        F[i, 0] = assemble(inner(target_E, E_candidates[i])*dx) + assemble(inner(target_H, H_candidates[i])*dx)
+        F[i, 0] = m_form(target, candidates[i])
 
     # Solve the least squares numpy problem
     X = np.linalg.solve(K, F)
 
     # Reassemble the needed enriched basis function
     chosen_enriched = Function(V_high)
-    for i in range(mult):
-        basis_coeff = complex(X[i,0])
-        chosen_enriched.subfunctions[0].interpolate(chosen_enriched.subfunctions[0] + basis_coeff * E_candidates[i])
-        chosen_enriched.subfunctions[1].interpolate(chosen_enriched.subfunctions[1] + basis_coeff * H_candidates[i])
+    for i, candidate in enumerate(candidates):
+        basis_coeff = complex(X[i, 0])
+        chosen_enriched.assign(chosen_enriched + basis_coeff * candidate)
+
 
     # normalize chosen enriched result
     print('Normalizing the least squares solution')
-    chosen_enriched.assign(m_normalize(chosen_enriched))
+    chosen_enriched.assign(m_normalize(chosen_enriched, m_form))
     return chosen_enriched
 
-def match_best_notmixed(target, candidates, mult, V_high):
 
-    # matching for a non-mixed problem
-    # target: Function; candidates: list[Function]; lambdas: list[...] or None
-    # mult: computed multiplicity from size of enriched cluster
+# def match_best_mixed(target, E_candidates, H_candidates, mult, V_high):
 
-    # Create the Least squares problem:
+#     from firedrake.assemble import assemble
 
-    # Assemble the K matrix 
-    K = np.zeros((mult, mult), dtype=complex)
-    for i in range(mult):
-        for j in range(mult):
-            # Double check Kij vs Kji indexing - I think it matters for complex numbers (conjugate in inner product)
-            K[i, j] = assemble(inner(candidates[j], candidates[i])*dx)
+#     # matching for a mixed problem
+#     # target: Function; candidates: list[Function]; lambdas: list[...] or None
+#     # mult: computed multiplicity from size of enriched cluster
+
+#     # Create the Least squares problem:
+
+#     # Assemble the K matrix 
+#     K = np.zeros((mult, mult), dtype=complex)
+#     for i in range(mult):
+#         for j in range(mult):
+#             # Double check Kij vs Kji indexing - I think it matters for complex numbers (conjugate in inner product)
+#             K[i, j] = assemble(inner(E_candidates[j], E_candidates[i])*dx) + assemble(inner(H_candidates[j], H_candidates[i])*dx)
+
+#     # Assemble the F vector
+#     F = np.zeros((mult, 1), dtype=complex)
+#     target_E, target_H = target.subfunctions
+#     for i in range(mult):
+#         F[i, 0] = assemble(inner(target_E, E_candidates[i])*dx) + assemble(inner(target_H, H_candidates[i])*dx)
+
+#     # Solve the least squares numpy problem
+#     X = np.linalg.solve(K, F)
+
+#     # Reassemble the needed enriched basis function
+#     chosen_enriched = Function(V_high)
+#     for i in range(mult):
+#         basis_coeff = complex(X[i,0])
+#         chosen_enriched.subfunctions[0].interpolate(chosen_enriched.subfunctions[0] + basis_coeff * E_candidates[i])
+#         chosen_enriched.subfunctions[1].interpolate(chosen_enriched.subfunctions[1] + basis_coeff * H_candidates[i])
+
+#     # normalize chosen enriched result
+#     print('Normalizing the least squares solution')
+#     chosen_enriched.assign(m_normalize(chosen_enriched))
+#     return chosen_enriched
+
+# def match_best_notmixed(target, candidates, mult, V_high):
+
+#     # matching for a non-mixed problem
+#     # target: Function; candidates: list[Function]; lambdas: list[...] or None
+#     # mult: computed multiplicity from size of enriched cluster
+
+#     # Create the Least squares problem:
+
+#     # Assemble the K matrix 
+#     K = np.zeros((mult, mult), dtype=complex)
+#     for i in range(mult):
+#         for j in range(mult):
+#             # Double check Kij vs Kji indexing - I think it matters for complex numbers (conjugate in inner product)
+#             K[i, j] = assemble(inner(candidates[j], candidates[i])*dx)
 
 
-    # Assemble the F vector
-    F = np.zeros((mult, 1), dtype=complex)
-    for i in range(mult):
-        F[i, 0] = assemble(inner(target, candidates[i])*dx) 
+#     # Assemble the F vector
+#     F = np.zeros((mult, 1), dtype=complex)
+#     for i in range(mult):
+#         F[i, 0] = assemble(inner(target, candidates[i])*dx) 
 
-    # Solve the least squares numpy problem
-    X = np.linalg.solve(K, F)
+#     # Solve the least squares numpy problem
+#     X = np.linalg.solve(K, F)
 
-    # Reassemble the needed enriched basis function
-    chosen_enriched = Function(V_high)
-    for i in range(mult):
-        basis_coeff = complex(X[i,0])
-        chosen_enriched.interpolate(chosen_enriched + basis_coeff * candidates[i])
+#     # Reassemble the needed enriched basis function
+#     chosen_enriched = Function(V_high)
+#     for i in range(mult):
+#         basis_coeff = complex(X[i,0])
+#         chosen_enriched.interpolate(chosen_enriched + basis_coeff * candidates[i])
 
-    # normalize chosen enriched result
-    print('Normalizing the least squares solution')
-    chosen_enriched.assign(m_normalize(chosen_enriched))
+#     # normalize chosen enriched result
+#     print('Normalizing the least squares solution')
+#     chosen_enriched.assign(m_normalize(chosen_enriched))
 
-    return chosen_enriched
+#     return chosen_enriched
 
 
 # def match_best(target, candidates, lambdas=None):
@@ -1317,7 +1354,7 @@ def match_best_notmixed(target, candidates, mult, V_high):
 
 
 # Maggie change - m normalize
-def _solve_eigs(problem, nev, solver_parameters):
+def _solve_eigs(problem, nev, solver_parameters, m_form):
     """Solve a :class:`~.LinearEigenproblem` and return L2-normalised eigenpairs.
 
     Parameters
@@ -1344,7 +1381,7 @@ def _solve_eigs(problem, nev, solver_parameters):
         vr, _ = es.eigenfunction(i)
         # change to m normalize
         # vecs.append(l2_normalize(vr))
-        vecs.append(m_normalize(vr))
+        vecs.append(m_normalize(vr, m_form))
     return lams, vecs
 
 
@@ -2031,7 +2068,8 @@ class GoalAdaptiveNonlinearVariationalSolver(SteadyGoalAdaptiveSolver, OptionsMa
         solver_error = assemble(residual(F, -z_lo))
 
         if abs(solver_error) > abs(discretisation_error):
-            self.print(RED % 'Warning: solver error estimate greater than discretisation error estimate, refine solver tolerances')
+            # self.print(RED % 'Warning: solver error estimate greater than discretisation error estimate, refine solver tolerances')
+            warning('solver error estimate greater than discretisation error estimate, refine solver tolerances')
 
         # Final error estimate
         eta_h = discretisation_error + solver_error

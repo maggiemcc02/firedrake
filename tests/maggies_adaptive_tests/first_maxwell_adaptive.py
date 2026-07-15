@@ -52,6 +52,7 @@ mesh = Mesh(ngm)
 
 
 
+
 # The Mixed space
 V0 = VectorFunctionSpace(mesh, "CG", 1, dim=2)
 V1 = FunctionSpace(mesh, "CG", 1)
@@ -95,6 +96,14 @@ A = (
 
 # M form
 M = inner(E, F)*dx + inner(H, G)*dx
+
+# Define the m form used for norms, etc
+# Here, m is the L2 inner product (folded operator)
+def m_form(u, v): 
+    if hasattr(u, "subfunctions") and len(u.subfunctions) > 1: # then it is a mixed function
+        return assemble(sum(inner(ui, vi) * dx for ui, vi in zip(u.subfunctions, v.subfunctions)))
+    else:
+        return assemble(inner(u, v) * dx)
 
 
 # Maggie change - target eigenvalue and folder to first pair 
@@ -154,10 +163,6 @@ solver_parameters = {
 problem = LinearEigenproblem(A, M, bcs)
 
 
-# PseudoSpectral Contour
-epsilon = 0.01
-target = 0 # set slepc target eigenvalue 0
-
 # Set my desired output
 def my_output(self, it: int):
 
@@ -201,13 +206,13 @@ def my_output(self, it: int):
 
 # LOOP OVER COMPLEX GRID(N)
 ##################################################################
-h = 0.05 # grid spacing
+h = 0.02 # grid spacing
 n = 1/h # n for Grid(n)
 
 grid = np.append(np.arange(2.0, 4.0, h),[4.0]) # Patrick makes this a list
 smallest_eigvals = []
 phi_vals = []
-# enriched_phi_vals = []
+enriched_phi_vals = []
 DWR_phi_vals = []
 DWR_errors = []
 
@@ -222,7 +227,7 @@ for curr_z in grid:
     print(BLUE % f"---------------------------- [FOR z = {z}] ----------------------------")
 
     # Call the Adaptive eigensolver
-    solver = GoalAdaptiveFoldedEigensolver(problem, target=0.0, solver_parameters=solver_parameters, post_iteration_callback = my_output)
+    solver = GoalAdaptiveFoldedEigensolver(problem, m_form = m_form, target=0.0,epsilon = 1e-2, imag_tol = 1e-12, mult_tol = 1e-2, solver_parameters=solver_parameters, post_iteration_callback = my_output)
     solver.solve()
 
     # Pull the final results 
@@ -230,19 +235,20 @@ for curr_z in grid:
     error_lambda = solver.signed_error
     phi_h = solver.matts_phi
     phi_corr = solver.corrected_phi
-    # phi_enriched = solver.final_enriched_phi
+    phi_enriched = solver.enriched_phi
     
     # save to lists
     smallest_eigvals.append(lambda_h)
     phi_vals.append(phi_h)
     DWR_phi_vals.append(phi_corr)
     DWR_errors.append(error_lambda)
-    # enriched_phi_vals.append(phi_enriched)
+    enriched_phi_vals.append(phi_enriched)
 
     print(BLUE % f"At z = {curr_z} the lower-degree solve gives|dist(z, spectrum)| <= {phi_h}") # Patrick's output choice
     print(BLUE % f"The min eigenvalue from lower degree solve is: {lambda_h}")
     print(BLUE % f"The error estimate, eta = rho/1-sigma, is: {error_lambda}")
     print(BLUE % f"The 'improved' bound is |dist(z, spectrum)| <= {phi_corr}")
+    print(BLUE % f"The 'bound from the enriched solve |dist(z, spectrum)| <= {phi_enriched}")
     print()
 
     # Save the error plot at the current z 
@@ -270,7 +276,7 @@ z_dir= f"output/"
 os.makedirs(z_dir, exist_ok=True)
 plt.plot(grid, phi_vals, linewidth=2, label = r"$\Phi_n(z, A)$")
 plt.plot(exact_omega, 0*exact_omega, 'ok', markersize=5, label = r'exact $\omega$')
-# plt.plot(grid, enriched_phi_vals, label = r"Enriched $\Phi_n(z, A)$")
+plt.plot(grid, enriched_phi_vals, label = r"Enriched $\Phi_n(z, A)$")
 plt.plot(grid, DWR_phi_vals, linestyle = "--",label = r"DWR corrected $\Phi_n(z, A)$")
 plt.xlabel(r"$z$")
 plt.title(rf"Approximations of $\Phi_n(z, A)$ and $\omega$ ($N = {N}$)")

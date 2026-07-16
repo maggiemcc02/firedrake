@@ -2,7 +2,7 @@ from firedrake import *
 from netgen.occ import *
 import numpy as np
 import sys
-from firedrake.maggies_adaptivefoldedeigensolver import GoalAdaptiveFoldedEigensolver
+from firedrake.maggies_current_adaptivefoldedeigensolver import GoalAdaptiveFoldedEigenSolver
 from ufl import conj
 import os
 import matplotlib.pyplot as plt
@@ -19,15 +19,12 @@ import matplotlib.pyplot as plt
 ###################################################################
 
 # Mesh and spaces
-#mesh = Mesh(unit_square.GenerateMesh(maxh=1/nx))
+
 
 # Set the complex unit 
 complex_unit = Constant(1j)
 
-# Define initial mesh ---------------------
-# N = 32
-# mesh = SquareMesh(N, N, pi, quadrilateral=False)
-# Create the square domain
+# Define initial mesh (netgen) ---------------------
 N = 32
 square = WorkPlane().Rectangle(pi, pi).Face()
 # Maximum element size
@@ -62,8 +59,6 @@ u = TrialFunction(V)
 v = TestFunction(V)
 (F, G) = split(v)
 # # The BC's (zero tangential trace)
-# bcs = [DirichletBC(V.sub(0).sub(0), 0, (3, 4)),
-#           DirichletBC(V.sub(0).sub(1), 0, (1, 2))]
 bcs = [
     # E_x = 0 on horizontal edges
     DirichletBC(V.sub(0).sub(0), 0, (bottom, top)),
@@ -104,43 +99,19 @@ def m_form(u, v):
         return assemble(sum(inner(ui, vi) * dx for ui, vi in zip(u.subfunctions, v.subfunctions)))
     else:
         return assemble(inner(u, v) * dx)
+        
 
-
-# Maggie change - target eigenvalue and folder to first pair 
-
-# solver_parameters = {
-#     "max_iterations": 10,
-#     "output_dir": "output/folded_maxwell",
-#     "self_adjoint": True,
-#     "manual_indicators": False,
-#     "dual_extra_degree": 1,
-#     "use_adjoint_residual": True,
-#     "primal_low_method": "interpolate",
-#     "dual_low_method": "interpolate",
-#     #"uniform_refinement": True
-#     #"use_adjoint_residual": True
-# }
-
-# solver_parameters["goal_adaptive"] = {
-#     "tolerance": 1e-4,
-#     "max_it": 100,
-#     "dorfler_alpha": 0.5,
-#     "use_adjoint_residual": True,
-#     "dual_low_method": "solve",
-#     "primal_low_method": "solve",
-#     "dual_extra_degree": 1,
-# }
-
-
-# Not too sure how to set parameters - chat helped?
+# Not too sure how to set parameters 
 solver_parameters = {
     # Options for your adaptive eigensolver
     "goal_adaptive": {
         "tolerance": 1.0e-5,
         "max_it": 5,
         "dorfler_alpha": 0.5,
-        "primal_extra_degree": 1,
-        "dual_extra_degree": 1,
+        "primal_extra_degree": (1, 1),
+        "dual_extra_degree": (1, 1),
+        "cell_residual_extra_degree": (1, 1),
+        "facet_residual_extra_degree": (1, 1),
         "self_adjoint": True,
         "nev": 5,
         "verbose": True,
@@ -167,10 +138,11 @@ problem = LinearEigenproblem(A, M, bcs)
 def my_output(self, it: int):
 
 
-    print(BLUE % "Saving user's desired output ...")
+    print("Saving user's desired output ...")
 
     # Create the directory
-    z_dir= f"output/z-{float(z):.6f}"
+    zval = float(z.values()[0].real)
+    z_dir= f"output/z-{float(z.values()[0].real):.6f}"
     primal_dir = f"{z_dir}/primal"
     enriched_dir = f"{z_dir}/enriched"
     os.makedirs(z_dir, exist_ok=True)
@@ -184,21 +156,18 @@ def my_output(self, it: int):
     Eout, Hout = u_h.subfunctions
     Eout.rename(f"E_primal_{it=}")
     Hout.rename(f"H_primal_{it=}")
-    VTKFile(f"{primal_dir}/primal_it_{it}.pvd").write(Eout, Hout, time=float(z))
+    VTKFile(f"{primal_dir}/primal_it_{it}.pvd").write(Eout, Hout, time=zval)
 
     # Save the current chosen enriched solution
     Eout_p, Hout_p = u_p.subfunctions
     Eout_p.rename(f"E_enriched_{it=}")
     Hout_p.rename(f"H_enriched_{it=}")
-    VTKFile(f"{enriched_dir}/enriched_it_{it}.pvd").write(Eout_p, Hout_p, time=float(z))
+    VTKFile(f"{enriched_dir}/enriched_it_{it}.pvd").write(Eout_p, Hout_p, time=zval)
 
     # Also save the error estimate at the current z
-    print(f'saving the magnitude of the error estimate {self.eta_h}')
     error_ests.append(self.eta_h)
 
-    print(BLUE % "Done saving user's desired output ...")
-
-
+    print("Done saving user's desired output ...")
 
 
 
@@ -209,12 +178,13 @@ def my_output(self, it: int):
 h = 0.02 # grid spacing
 n = 1/h # n for Grid(n)
 
-grid = np.append(np.arange(2.0, 4.0, h),[4.0]) # Patrick makes this a list
+grid = np.append(np.arange(1.5, 4.0, h),[4.0]) # Patrick makes this a list
 smallest_eigvals = []
 phi_vals = []
 enriched_phi_vals = []
 DWR_phi_vals = []
 DWR_errors = []
+z_guesses = ()
 
 for curr_z in grid:
 
@@ -222,20 +192,19 @@ for curr_z in grid:
     # Set z
     z.assign(curr_z)
     error_ests = [] # new list to save errors
-
-    # print(BLUE % f"- - - - - - - - - - - - - - - - - - - - - - - - - - - - [FOR z = {z}] - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
     print(BLUE % f"---------------------------- [FOR z = {z}] ----------------------------")
 
     # Call the Adaptive eigensolver
-    solver = GoalAdaptiveFoldedEigensolver(problem, m_form = m_form, target=0.0,epsilon = 1e-2, imag_tol = 1e-12, mult_tol = 1e-2, solver_parameters=solver_parameters, post_iteration_callback = my_output)
+    solver = GoalAdaptiveFoldedEigenSolver(problem, m_form = m_form, initial_space = z_guesses, target=0.0,epsilon = 1e-2, imag_tol = 1e-12, mult_tol = 1e-2, solver_parameters=solver_parameters, post_iteration_callback = my_output)
     solver.solve()
 
     # Pull the final results 
-    lambda_h = solver._lam_h
+    lambda_h, uh = solver.get_eigenpair()
     error_lambda = solver.signed_error
     phi_h = solver.matts_phi
     phi_corr = solver.corrected_phi
     phi_enriched = solver.enriched_phi
+    eigfuncs = solver.vecs 
     
     # save to lists
     smallest_eigvals.append(lambda_h)
@@ -259,6 +228,18 @@ for curr_z in grid:
     plt.title(rf"Error estimate over each mesh for $z = {curr_z}$")
     plt.savefig(f"{z_dir}/error_plot_for_z={float(z)}.pdf")
     plt.close()
+
+    # Use the final found eigfuncs as initial guesses for next z solve
+    print(BLUE % f'Updating initial guesses for next z value')
+    z_guesses = []
+    for old_u in eigfuncs: # iterate over eigfuncs on last adapted mesh
+        new_u = Function(V)
+        solver.atm.inject(old_u, new_u) # inject from fine to coarse mesh?
+        z_guesses.append(new_u)
+    z_guesses = tuple(z_guesses) 
+
+
+
 
 
 

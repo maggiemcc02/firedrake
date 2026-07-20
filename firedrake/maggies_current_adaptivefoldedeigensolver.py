@@ -27,6 +27,7 @@ from firedrake import Constant
 from firedrake.preconditioners.pmg import PMGPC
 from firedrake.mg.utils import get_level
 from firedrake.mg.ufl_utils import refine
+from firedrake.utils import RealType
 from firedrake.mg.adaptive_hierarchy import AdaptiveMeshHierarchy
 from firedrake.mg.adaptive_transfer_manager import AdaptiveTransferManager
 
@@ -372,6 +373,14 @@ class GoalAdaptiveSolverBase:
         eta_cell = self.compute_error_indicators() # defined in the subclass - local indicators
         self.compute_efficiency_indices(eta_cell, self.eta_h, self.eta) # effectivity indices
         markers = self.set_adaptive_cell_markers(eta_cell) # call the marking routine - in base class
+        marker_values = markers.dat.data_ro
+        max_imag = float(np.max(np.abs(marker_values.imag))) # check size of imaginary part
+        self.print(f"Maximum imaginary part of cell markers is: {max_imag:.3e}")
+        if max_imag > self.imag_tol:
+            raise ValueError(f"Cell markers have a nontrivial nonzero imaginary part: {max_imag:.3e}")
+        else:
+            self.print("Do not worry about the throwing out imaginary part warning to follow:")
+  
 
 
         # REFINE
@@ -559,8 +568,8 @@ class SteadyGoalAdaptiveSolver(GoalAdaptiveSolverBase):
             eff2 = abs(eta_cell_total / eta)
             self.eff1_vec.append(eff1)
             self.eff2_vec.append(eff2)
-            self.print(f'{"Effectivity index:":40s}{eff1: 15.12f}')
-            self.print(f'{"Localisation efficiency:":40s}{eff2: 15.12f}')
+            self.print(BLUE % f'{"Effectivity index:":40s}{eff1: 15.12f}')
+            self.print(BLUE % f'{"Localisation efficiency:":40s}{eff2: 15.12f}')
         else:
             eff3 = eta_cell_total / abs(eta_h)
             self.eff3_vec.append(eff3)
@@ -771,6 +780,15 @@ class GoalAdaptiveFoldedEigenSolver(SteadyGoalAdaptiveSolver, OptionsManager):
         V_new = self.problem.output_space
         initial_space = []
 
+        # Optional check of the new mesh's coordinate Function
+        coordinates = V_new.mesh().coordinates.dat.data_ro
+        max_imag = (np.max(np.abs(coordinates.imag)))
+        self.print(f"Maximum imaginary part of mesh coordinates: {max_imag}")
+        if max_imag > 1.0e-12:\
+            raise ValueError(f"Mesh coordinates have nonzero imaginary parts: {max_imag}")
+        else:
+            self.print('The mesh coordinates have zero imaginary part so ignore the next warning:')
+
         for old_u in self.vecs: # iterate over eigfuncs on last mesh
             new_u = Function(V_new)
             self.atm.prolong(old_u, new_u) # prolong or interpolate?
@@ -871,7 +889,7 @@ class GoalAdaptiveFoldedEigenSolver(SteadyGoalAdaptiveSolver, OptionsManager):
             self.print(RED % f'Warning - the lower degree and enriched multiplicities dont match')
             warning("Smallest lower- and higher- degree eigenvalues have different cluster sizes")
         
-        # 16. Maggie change - L2 matching instead of Pablo/Joe's match best (phase/sign alignement)
+        # 16. Maggie change - L2 or m_form matching??? matching instead of Pablo/Joe's match best (phase/sign alignement)
         self.print("Matching eigenfunctions with L2 projection ...")
         self._u_p = match_best(self._u_h, self.enriched_cluster, self.mult, high_problem.output_space, self.m_form)
 
@@ -906,8 +924,13 @@ class GoalAdaptiveFoldedEigenSolver(SteadyGoalAdaptiveSolver, OptionsManager):
         # 19. Maggie change - Making z_err a function so we can split it later. Pablo had it as a ufl
         # MAGGIE QUESTION / ISSUE - SHOULDN'T THIS BE z_p - Ih z_p and not z_p - z_h ???
         # MAGGIE QUESTION / ISSUE - Will interpolation always work? We may need to project!
+        #self._z_err = Function(self._z_p.function_space())
+        #self._z_err.interpolate(self._z_p - self._z_h) 
+        # Dubugging - try something different
         self._z_err = Function(self._z_p.function_space())
-        self._z_err.interpolate(self._z_p - self._z_h) 
+        Ih_zp = Function(self._z_h.function_space()).interpolate(self._z_p)
+        self._z_err.interpolate(self._z_p - Ih_zp)
+
 
         # Compute the errors
         eta_h, eta = self._estimate_eigenvalue_error()
@@ -928,14 +951,19 @@ class GoalAdaptiveFoldedEigenSolver(SteadyGoalAdaptiveSolver, OptionsManager):
         A = self.problem._original_A
         M = self.problem._original_M
 
+        # 20. Maggie change - m_norm in error
+        # ISSUE - For mixed spaces and inner product do I need to interpolate e_sigma???!! Interpolation not reliable !!??
+        # But needed for mixed function buisness to work??
+
         # Low-order primal representative in the base space
         phi_h = Function(u_h.function_space())
         phi_h.interpolate(u_p) # Will interpolation always work? We may need to project.
         e = u_p - phi_h     # primal enrichment error (UFL expression)
-        e_sigma = u_p - u_h # for the remainder term
+        # e_sigma = u_p - u_h # for the remainder term
+        e_sigma = Function(u_p.function_space()).interpolate(u_p - u_h) 
 
 
-        # 20. Maggie change - m_norm in error
+
         if self.options.self_adjoint:
             #sigma_h = 0.5 * float(assemble(inner(e_sigma, e_sigma) * dx))
             sigma_h = 0.5 * m_norm(e_sigma, self.m_form)**2
@@ -1079,11 +1107,18 @@ def replace_both_args(bilinear_form, trial_coeff, test_coeff):
 # inner(,) may do this for me already
 
 
+
 def is_mixed_function(f):
     return hasattr(f, "subfunctions") and len(f.subfunctions) > 1
 
 def is_mixed_space(V):
     return hasattr(V, "subspaces") and len(V.subspaces) > 1
+
+def l2_inner(u, v):
+    if is_mixed_function(u):
+        return assemble(sum(inner(ui, vi) * dx for ui, vi in zip(u.subfunctions, v.subfunctions)))
+    else:
+        return assemble(inner(u, v) * dx)
 
 def mixed_inner(u, v): # used in local indicators (seperate from m_form)
     return sum(inner(ui, vi) for ui, vi in zip(split(u), split(v)))
@@ -1125,6 +1160,7 @@ def m_normalize(f, m_form):
 # Joe finds best match for uh in the computed enriched eigenbasis 
 # Instead, we are going to compute the best candidate in the span of the basis using
 # the L2 projection of uh onto the enriched eigenbasis.
+# QUESTION - Form matrices using L2 inner product or mass inner product?? (think mixed poisson)
 
 
 def match_best(target, candidates, mult, V_high, m_form):
@@ -1141,13 +1177,13 @@ def match_best(target, candidates, mult, V_high, m_form):
     K = np.zeros((mult, mult), dtype=complex)
     for i in range(mult):
         for j in range(mult):
-            K[i, j] = m_form(candidates[j], candidates[i]) # m_form should take care of mixed spaces
+            K[i, j] = l2_inner(candidates[j], candidates[i]) # l2_inner should take care of mixed spaces
 
 
     # Assemble the F vector
     F = np.zeros((mult, 1), dtype=complex)
     for i in range(mult):
-        F[i, 0] = m_form(target, candidates[i])
+        F[i, 0] = l2_inner(target, candidates[i])
 
     # Solve the least squares numpy problem
     X = np.linalg.solve(K, F)
@@ -1158,7 +1194,7 @@ def match_best(target, candidates, mult, V_high, m_form):
         basis_coeff = complex(X[i, 0])
         chosen_enriched.assign(chosen_enriched + basis_coeff * candidate)
 
-    # normalize chosen enriched result
+    # normalize chosen enriched result w.r.t mass inner product
     print('Normalizing the least squares solution ...')
     chosen_enriched.assign(m_normalize(chosen_enriched, m_form))
     return chosen_enriched
@@ -1186,6 +1222,8 @@ def _solve_eigs(problem, nev, solver_parameters, m_form, guess_space = ()):
     from firedrake import LinearEigensolver
     es = LinearEigensolver(problem, n_evals=nev, solver_parameters=solver_parameters)
 
+
+    print(f"Received {len(guess_space)} Firedrake initial guesses")
     # 26. Maggie change - Set initial guess space (could be over adapted meshes or over outer z loop)
     initial_vecs = []
     for guess in guess_space:
@@ -1197,7 +1235,10 @@ def _solve_eigs(problem, nev, solver_parameters, m_form, guess_space = ()):
         with slepc_guess.dat.vec_ro as v:
             initial_vecs.append(v.copy())
     if initial_vecs:
+        print("Calling EPS.setInitialSpace ...")
         es.es.setInitialSpace(initial_vecs)
+    else:
+        print("No initial space supplied: cold eigensolve")
 
     # Solve
     nconv = es.solve()
@@ -2076,7 +2117,7 @@ def vtk_output_callback(output_dir="./output", run_name="default"):
 
     Parameters
     ----------
-    output_dir
+    output
         Directory in which to write the VTK files.
     run_name
         Label prepended to filenames:

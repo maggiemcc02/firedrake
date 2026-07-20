@@ -2841,7 +2841,6 @@ def vtk_output_callback(output_dir="./output", run_name="default"):
 #     Lc = residual(F, bubbles*vc)
 #     Rcell = Function(DG)
 #     solve(ac == Lc, Rcell, solver_parameters=options.sp_cell)
-
 #     FB = FunctionSpace(mesh, "FB", dim, variant=variant)
 #     cones = Function(FB).assign(1)
 #     el = BrokenElement(FiniteElement("FB", cell=cell, degree=facet_residual_degree+dim, variant=variant))

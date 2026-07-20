@@ -142,7 +142,7 @@ def my_output(self, it: int):
 
     # Create the directory
     zval = float(z.values()[0].real)
-    z_dir= f"output/z-{float(z.values()[0].real):.6f}"
+    z_dir= f"folded_maxwell_output/z-{float(z.values()[0].real):.6f}"
     primal_dir = f"{z_dir}/primal"
     enriched_dir = f"{z_dir}/enriched"
     os.makedirs(z_dir, exist_ok=True)
@@ -178,7 +178,7 @@ def my_output(self, it: int):
 h = 0.02 # grid spacing
 n = 1/h # n for Grid(n)
 
-grid = np.append(np.arange(1.5, 4.0, h),[4.0]) # Patrick makes this a list
+grid = np.append(np.arange(2.0, 4.0, h),[4.0]) # Patrick makes this a list
 smallest_eigvals = []
 phi_vals = []
 enriched_phi_vals = []
@@ -221,7 +221,7 @@ for curr_z in grid:
     print()
 
     # Save the error plot at the current z 
-    z_dir= f"output/"
+    z_dir= f"folded_maxwell_output/"
     os.makedirs(z_dir, exist_ok=True)
     plt.plot([i for i in range(len(error_ests))], error_ests)
     plt.xlabel(r"mesh")
@@ -253,7 +253,7 @@ exact_omega = np.sort(exact_omega)
 midpoints = 0.5 * (exact_omega[1:] + exact_omega[:-1])
 
 # the plot
-z_dir= f"output/"
+z_dir= f"folded_maxwell_output/"
 os.makedirs(z_dir, exist_ok=True)
 plt.plot(grid, phi_vals, linewidth=2, label = r"$\Phi_n(z, A)$")
 plt.plot(exact_omega, 0*exact_omega, 'ok', markersize=5, label = r'exact $\omega$')

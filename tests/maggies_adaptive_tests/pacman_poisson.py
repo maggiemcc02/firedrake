@@ -1,5 +1,6 @@
 from firedrake import *
 from netgen.occ import *
+from netgen.geom2d import SplineGeometry
 import numpy as np
 import sys
 from firedrake.maggies_current_adaptivefoldedeigensolver import GoalAdaptiveFoldedEigenSolver
@@ -8,13 +9,18 @@ import os
 import matplotlib.pyplot as plt
 
 
-# Set the L-Shaped mesh (Patrick's code from Oxford 2026)
-# Make 2D rectangle from (0, 0) to (1, 2)
-rect1 = WorkPlane(Axes((0,0,0), n=Z, h=X)).Rectangle(1,2).Face()
-# Make 2D rectangle from (0, 1) to (2, 2)
-rect2 = WorkPlane(Axes((0,1,0), n=Z, h=X)).Rectangle(2,1).Face()
-L = rect1 + rect2
-geo = OCCGeometry(L, dim=2)
+# Set the pacman domain (Umberto's spectral course)
+geo = SplineGeometry()
+pnts = [(0, 0), (1, 0), (1, 1),
+        (0, 1), (-1, 1), (-1, 0),
+        (-1, -1), (0, -1)]
+p1, p2, p3, p4, p5, p6, p7, p8 = [geo.AppendPoint(*pnt) for pnt in pnts]
+curves = [[["line", p1, p2], "line"],
+          [["spline3", p2, p3, p4], "curve"],
+          [["spline3", p4, p5, p6], "curve"],
+          [["spline3", p6, p7, p8], "curve"],
+          [["line", p8, p1], "line"]]
+[geo.Append(c, bc=bc) for c, bc in curves]
 ngmesh = geo.GenerateMesh(maxh=0.1)
 mesh = Mesh(ngmesh)
 
@@ -42,7 +48,7 @@ solver_parameters = {
     # Options for your adaptive eigensolver
     "goal_adaptive": {
         "tolerance": 1.0e-5,
-        "max_it": 15,
+        "max_it": 10,
         "dorfler_alpha": 0.5,
         "primal_extra_degree": (1,),
         "dual_extra_degree": (1,),
@@ -63,7 +69,7 @@ solver_parameters = {
     #"eps_smallest_magnitude": None,
     "eps_smallest_real": None,
     #"eps_target_real": None,
-    "eps_target": 0
+    "eps_target": 11
 }
 
 # Set my desired output
@@ -72,7 +78,7 @@ def my_output(self, it: int):
     print("Saving user's desired output ...")
 
     # Create the directory
-    z_dir= f"debug_lshaped_output/logg_local"
+    z_dir= f"pacman_output"
     primal_dir = f"{z_dir}/primal"
     enriched_dir = f"{z_dir}/enriched"
     os.makedirs(z_dir, exist_ok=True)
@@ -103,8 +109,8 @@ etah_ests = []
 eta_ests = []
 dofs = []
 solver = GoalAdaptiveFoldedEigenSolver(problem, m_form = m_form, initial_space = (),\
- target=0.0, epsilon = 1e-2, imag_tol = 1e-12, mult_tol = 1e-2, \
- solver_parameters=solver_parameters, post_iteration_callback = my_output, exact_eigenvalue = 9.6397238440219)
+ target=11, epsilon = 1e-2, imag_tol = 1e-12, mult_tol = 1e-2, \
+ solver_parameters=solver_parameters, post_iteration_callback = my_output, exact_eigenvalue = 3.375610652693620492628**2)
 solver.solve()
 
 
@@ -112,13 +118,12 @@ solver.solve()
 # Pull the final results and plot 
 
 # Plot error vs. DOFS and approx slope
-z_dir= f"debug_lshaped_output/logg_local"
+z_dir= f"pacman_output"
 os.makedirs(z_dir, exist_ok=True)
 slope_h, intercept = np.polyfit(np.log10(dofs), np.log10(etah_ests), 1)
-slope, intercept = np.polyfit(np.log10(dofs), np.log10(eta_ests), 1)
+slope, intercept = np.polyfit(np.log10(dofs), np.log10(etah_ests), 1)
 plt.loglog(dofs, etah_ests, label = rf"Error estimate with slope {slope_h}")
 plt.loglog(dofs, eta_ests, label = rf"Actual error with slope {slope}" )
-plt.loglog(dofs, [1/i for i in dofs], label = r"$N^{-1}$")
 plt.title('Comparing Error Estimates')
 plt.xlabel('dof')
 plt.ylabel('error')
@@ -135,27 +140,3 @@ plt.ylabel('effectivity')
 plt.legend()
 plt.savefig(f"{z_dir}/effectivity_plot.pdf")
 plt.close()
-
-
-print()
-print(BLUE % f'_'*50)
-print(GREEN % f'CONVERGENCE DIAGNOTICS')
-print(BLUE % f'_'*50)
-
-# Add in iter-by-iter convergence rate calculations
-for i in range(1, len(dofs)):
-    rate_h = np.log10(etah_ests[i]/etah_ests[i-1]) / np.log10(dofs[i]/dofs[i-1])
-    rate = np.log10(eta_ests[i]/eta_ests[i-1]) / np.log10(dofs[i]/dofs[i-1])
-    print(GREEN % f'From iteration {i-1} to iteration {i} the dofs changed from {dofs[i-1]} to {dofs[i]}')
-    print(GREEN % f'The exact error changed from {eta_ests[i-1]} to {eta_ests[i]}')
-    print(GREEN % f'The error estimate changed from {etah_ests[i-1]} to {etah_ests[i]}')
-    print(GREEN % f'The rate of change for the exact error is {rate}')
-    print(GREEN % f'The rate of change for the error estimate is {rate_h}')
-    print()
-    
-
-
-
-
-
-

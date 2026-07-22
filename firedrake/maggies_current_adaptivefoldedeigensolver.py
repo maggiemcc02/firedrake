@@ -784,7 +784,7 @@ class GoalAdaptiveFoldedEigenSolver(SteadyGoalAdaptiveSolver, OptionsManager):
         coordinates = V_new.mesh().coordinates.dat.data_ro
         max_imag = (np.max(np.abs(coordinates.imag)))
         self.print(f"Maximum imaginary part of mesh coordinates: {max_imag}")
-        if max_imag > 1.0e-12:\
+        if max_imag > self.imag_tol:\
             raise ValueError(f"Mesh coordinates have nonzero imaginary parts: {max_imag}")
         else:
             self.print('The mesh coordinates have zero imaginary part so ignore the next warning:')
@@ -924,12 +924,12 @@ class GoalAdaptiveFoldedEigenSolver(SteadyGoalAdaptiveSolver, OptionsManager):
         # 19. Maggie change - Making z_err a function so we can split it later. Pablo had it as a ufl
         # MAGGIE QUESTION / ISSUE - SHOULDN'T THIS BE z_p - Ih z_p and not z_p - z_h ???
         # MAGGIE QUESTION / ISSUE - Will interpolation always work? We may need to project!
-        #self._z_err = Function(self._z_p.function_space())
-        #self._z_err.interpolate(self._z_p - self._z_h) 
-        # Dubugging - try something different
         self._z_err = Function(self._z_p.function_space())
-        Ih_zp = Function(self._z_h.function_space()).interpolate(self._z_p)
-        self._z_err.interpolate(self._z_p - Ih_zp)
+        self._z_err.interpolate(self._z_p - self._z_h) 
+        # Dubugging - try something different
+        #self._z_err = Function(self._z_p.function_space())
+        #Ih_zp = Function(self._z_h.function_space()).interpolate(self._z_p)
+        #self._z_err.interpolate(self._z_p - Ih_zp)
 
 
         # Compute the errors

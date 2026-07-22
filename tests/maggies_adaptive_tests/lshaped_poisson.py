@@ -72,7 +72,7 @@ def my_output(self, it: int):
     print("Saving user's desired output ...")
 
     # Create the directory
-    z_dir= f"debug_lshaped_output/logg_local"
+    z_dir= f"debug_lshaped_output/to_send_pablo_local"
     primal_dir = f"{z_dir}/primal"
     enriched_dir = f"{z_dir}/enriched"
     os.makedirs(z_dir, exist_ok=True)
@@ -112,7 +112,7 @@ solver.solve()
 # Pull the final results and plot 
 
 # Plot error vs. DOFS and approx slope
-z_dir= f"debug_lshaped_output/logg_local"
+z_dir= f"debug_lshaped_output/to_send_pablo_local"
 os.makedirs(z_dir, exist_ok=True)
 slope_h, intercept = np.polyfit(np.log10(dofs), np.log10(etah_ests), 1)
 slope, intercept = np.polyfit(np.log10(dofs), np.log10(eta_ests), 1)

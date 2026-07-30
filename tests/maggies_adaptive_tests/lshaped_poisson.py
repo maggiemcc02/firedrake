@@ -15,7 +15,7 @@ rect1 = WorkPlane(Axes((0,0,0), n=Z, h=X)).Rectangle(1,2).Face()
 rect2 = WorkPlane(Axes((0,1,0), n=Z, h=X)).Rectangle(2,1).Face()
 L = rect1 + rect2
 geo = OCCGeometry(L, dim=2)
-ngmesh = geo.GenerateMesh(maxh=0.1)
+ngmesh = geo.GenerateMesh(maxh=0.05)
 mesh = Mesh(ngmesh)
 
 # Set space
@@ -42,8 +42,8 @@ solver_parameters = {
     # Options for your adaptive eigensolver
     "goal_adaptive": {
         "tolerance": 1.0e-5,
-        "max_it": 15,
-        "dorfler_alpha": 0.5,
+        "max_it": 200,
+        "dorfler_alpha": 0.90,
         "primal_extra_degree": (1,),
         "dual_extra_degree": (1,),
         "cell_residual_extra_degree": (1,),
@@ -63,7 +63,7 @@ solver_parameters = {
     #"eps_smallest_magnitude": None,
     "eps_smallest_real": None,
     #"eps_target_real": None,
-    "eps_target": 0
+    "eps_target": 9.0
 }
 
 # Set my desired output
@@ -72,7 +72,7 @@ def my_output(self, it: int):
     print("Saving user's desired output ...")
 
     # Create the directory
-    z_dir= f"debug_lshaped_output/to_send_pablo_local"
+    z_dir= f"moreits_aggresive_mark_output/primal"
     primal_dir = f"{z_dir}/primal"
     enriched_dir = f"{z_dir}/enriched"
     os.makedirs(z_dir, exist_ok=True)
@@ -103,7 +103,7 @@ etah_ests = []
 eta_ests = []
 dofs = []
 solver = GoalAdaptiveFoldedEigenSolver(problem, m_form = m_form, initial_space = (),\
- target=0.0, epsilon = 1e-2, imag_tol = 1e-12, mult_tol = 1e-2, \
+ target=9.0, epsilon = 1e-2, imag_tol = 1e-12, mult_tol = 1e-2, \
  solver_parameters=solver_parameters, post_iteration_callback = my_output, exact_eigenvalue = 9.6397238440219)
 solver.solve()
 
@@ -112,7 +112,7 @@ solver.solve()
 # Pull the final results and plot 
 
 # Plot error vs. DOFS and approx slope
-z_dir= f"debug_lshaped_output/to_send_pablo_local"
+z_dir= f"moreits_aggresive_mark_output/primal"
 os.makedirs(z_dir, exist_ok=True)
 slope_h, intercept = np.polyfit(np.log10(dofs), np.log10(etah_ests), 1)
 slope, intercept = np.polyfit(np.log10(dofs), np.log10(eta_ests), 1)

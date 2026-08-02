@@ -781,13 +781,13 @@ class GoalAdaptiveFoldedEigenSolver(SteadyGoalAdaptiveSolver, OptionsManager):
         initial_space = []
 
         # Optional check of the new mesh's coordinate Function
-        coordinates = V_new.mesh().coordinates.dat.data_ro
-        max_imag = (np.max(np.abs(coordinates.imag)))
-        self.print(f"Maximum imaginary part of mesh coordinates: {max_imag}")
-        if max_imag > self.imag_tol:\
-            raise ValueError(f"Mesh coordinates have nonzero imaginary parts: {max_imag}")
-        else:
-            self.print('The mesh coordinates have zero imaginary part so ignore the next warning:')
+        # coordinates = V_new.mesh().coordinates.dat.data_ro
+        # max_imag = (np.max(np.abs(coordinates.imag)))
+        # self.print(f"Maximum imaginary part of mesh coordinates: {max_imag}")
+        # if max_imag > self.imag_tol:\
+        #     raise ValueError(f"Mesh coordinates have nonzero imaginary parts: {max_imag}")
+        # else:
+        #     self.print('The mesh coordinates have zero imaginary part so ignore the next warning:')
 
         for old_u in self.vecs: # iterate over eigfuncs on last mesh
             new_u = Function(V_new)
@@ -859,7 +859,7 @@ class GoalAdaptiveFoldedEigenSolver(SteadyGoalAdaptiveSolver, OptionsManager):
 
         # Solve
         self.print(f"Solving enriched eigenproblem (dofs: {high_problem.output_space.dim()}) ...")
-        lams_p, vecs_p = _solve_eigs(high_problem, opts.nev, sp_target, self.m_form, guess_space = enriched_guesses)
+        lams_p, self.vecs_p = _solve_eigs(high_problem, opts.nev, sp_target, self.m_form, guess_space = enriched_guesses)
         self._lam_p = lams_p[0]
 
         # Prints
@@ -878,12 +878,12 @@ class GoalAdaptiveFoldedEigenSolver(SteadyGoalAdaptiveSolver, OptionsManager):
         self.print(BLUE % f"Lower degree solve multiplicity: {mult_lower}")
         # check multiplicity based on enriched solve
         self.mult = 1 
-        for i in range(1, len(vecs_p)):
+        for i in range(1, len(self.vecs_p)):
             if abs(lams_p[i] - lams_p[0]) <= self.mult_tol:
                 self.mult += 1
         self.print(BLUE % f"Enriched solve multiplicity: {self.mult}")
         # Choose the multiplicity based on enriched solve (should be better)
-        self.enriched_cluster = vecs_p[:self.mult] 
+        self.enriched_cluster = self.vecs_p[:self.mult] 
         # Compare multiplicities
         if mult_lower != self.mult:
             self.print(RED % f'Warning - the lower degree and enriched multiplicities dont match')

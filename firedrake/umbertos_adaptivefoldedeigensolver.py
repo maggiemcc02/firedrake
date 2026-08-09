@@ -1036,11 +1036,11 @@ class GoalAdaptiveFoldedEigenSolver(SteadyGoalAdaptiveSolver, OptionsManager):
 
         # Low-order primal representative in the base space
         phi_h = Function(u_h.function_space())
-        # phi_h.interpolate(u_p) # Will interpolation always work? We may need to project.
-        if self.can_interp:
-            phi_h.interpolate(u_p)
-        else:
-            phi_h.project(u_p)
+        phi_h.interpolate(u_p) # Will interpolation always work? We may need to project.
+        # if self.can_interp:
+        #     phi_h.interpolate(u_p)
+        # else:
+        #     phi_h.project(u_p)
         e = u_p - phi_h     # primal enrichment error (UFL expression)
         # e_sigma = u_p - u_h # for the remainder term
         e_sigma = Function(u_p.function_space()).interpolate(u_p - u_h) 
@@ -1324,38 +1324,38 @@ def _solve_eigs(problem, nev, solver_parameters, m_form, guess_space = ()):
 
     #print(f"Received {len(guess_space)} Firedrake initial guesses")
     # 26. Maggie change - Set initial guess space (could be over adapted meshes or over outer z loop)
-    # initial_vecs = []
-    # for guess in guess_space:
-    #     # Accounting for potential restricted spaces:
-    #     if problem.restrict:
-    #         slepc_guess = Function(problem.restricted_space).interpolate(guess)
-    #     else:
-    #         slepc_guess = guess
-    #     with slepc_guess.dat.vec_ro as v:
-    #         initial_vecs.append(v.copy())
-    # if initial_vecs:
-    #     #print("Calling EPS.setInitialSpace ...")
-    #     es.es.setInitialSpace(initial_vecs)
-    #else:
-        #print("No initial space supplied: cold eigensolve")
     initial_vecs = []
     for guess in guess_space:
         # Accounting for potential restricted spaces:
         if problem.restrict:
-            slepc_guess = Function(problem.restricted_space)
-
-            if self.can_interp:
-                slepc_guess.interpolate(guess)
-            else:
-                slepc_guess.project(guess)
+            slepc_guess = Function(problem.restricted_space).interpolate(guess)
         else:
             slepc_guess = guess
-
         with slepc_guess.dat.vec_ro as v:
             initial_vecs.append(v.copy())
     if initial_vecs:
         #print("Calling EPS.setInitialSpace ...")
         es.es.setInitialSpace(initial_vecs)
+    # else:
+    #     print("No initial space supplied: cold eigensolve")
+    # initial_vecs = []
+    # for guess in guess_space:
+    #     # Accounting for potential restricted spaces:
+    #     if problem.restrict:
+    #         slepc_guess = Function(problem.restricted_space)
+
+    #         if self.can_interp:
+    #             slepc_guess.interpolate(guess)
+    #         else:
+    #             slepc_guess.project(guess)
+    #     else:
+    #         slepc_guess = guess
+
+    #     with slepc_guess.dat.vec_ro as v:
+    #         initial_vecs.append(v.copy())
+    # if initial_vecs:
+    #     #print("Calling EPS.setInitialSpace ...")
+    #     es.es.setInitialSpace(initial_vecs)
 
     # Solve
     nconv = es.solve()

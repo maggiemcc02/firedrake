@@ -1,0 +1,7 @@
+domain = square, element = CG1, epsilon = 0.2, maxh0 = 0.3, z-grid 5x5, diam_tol = 0.4, max_sweeps = 1, inner max_it = 2
+WARNING: diam_tol = 0.4 is out of reach.  The initial z-cell diameter is 0.5657 and halves every sweep, so no cell can qualify as 'contour' before sweep 1, i.e. it needs max_sweeps >= 2, not 1.  As set, the run will refine every band cell for 1 sweeps and then label the remainder 'contour' at h = 0.2828, 1x coarser than requested.
+base mesh: 256 cells, 447 dofs
+reference omega in view: 2.0000, 2.2361, 2.8284, 3.0000, 3.1623, 3.6056, 4.0000, 4.1231, 4.2426, 4.4721
+self-test max |Phi(x+iy)^2 - y^2 - Phi(x)^2| = 2.609e-15
+---- [SWEEP 0: 50 active cells] ----
+WARNING: inner max_it reached at z = 3.467-0.867j; iterations = 2

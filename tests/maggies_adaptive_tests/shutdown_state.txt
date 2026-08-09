@@ -1,0 +1,33 @@
+Sun  9 Aug 20:43:05 BST 2026
+    PID    PPID STAT     ELAPSED CMD
+1634471       1 S       10:38:47 sh /home/mccarthy/.vscode-server/cli/servers/Stable-fc3def6774c76082adf699d366f31a557ce5573f/server/bin/code-server --connection-token=remotessh --accept-server-license-terms --agent-host-bridge-port=41405 --agent-host-bridge-host=127.0.0.1 --agent-host-bridge-connection-token=c8bc0b84-0fb3-4cb9-a93a-e2bcc08e21e7 --start-server --enable-remote-auto-shutdown --socket-path=/tmp/code-a3c9ad8b-8ae0-4fd6-8a11-51bb26fa5125
+1634483 1634471 Sl      10:38:47 /home/mccarthy/.vscode-server/cli/servers/Stable-fc3def6774c76082adf699d366f31a557ce5573f/server/node /home/mccarthy/.vscode-server/cli/servers/Stable-fc3def6774c76082adf699d366f31a557ce5573f/server/out/server-main.js --connection-token=remotessh --accept-server-license-terms --agent-host-bridge-port=41405 --agent-host-bridge-host=127.0.0.1 --agent-host-bridge-connection-token=c8bc0b84-0fb3-4cb9-a93a-e2bcc08e21e7 --start-server --enable-remote-auto-shutdown --socket-path=/tmp/code-a3c9ad8b-8ae0-4fd6-8a11-51bb26fa5125
+1634607 1634483 Sl      10:38:45 /home/mccarthy/.vscode-server/cli/servers/Stable-fc3def6774c76082adf699d366f31a557ce5573f/server/node /home/mccarthy/.vscode-server/cli/servers/Stable-fc3def6774c76082adf699d366f31a557ce5573f/server/out/bootstrap-fork --type=ptyHost --logsPath /home/mccarthy/.vscode-server/data/logs/20260809T100419
+1635330 1634607 Ss+     10:38:35 /bin/bash --init-file /home/mccarthy/.vscode-server/cli/servers/Stable-fc3def6774c76082adf699d366f31a557ce5573f/server/out/vs/workbench/contrib/terminal/common/scripts/shellIntegration-bash.sh
+2177477       1 Ss    7-06:36:53 /usr/lib/systemd/systemd --user
+2177479 2177477 S     7-06:36:53 (sd-pam)
+2177492 2177477 Ssl   7-06:36:53 /usr/bin/pipewire
+2177493 2177477 Ssl   7-06:36:53 /usr/bin/pipewire -c filter-chain.conf
+2177494 2177477 Ssl   7-06:36:53 /usr/bin/wireplumber
+2177495 2177477 Ssl   7-06:36:53 /usr/bin/pipewire-pulse
+2177502 2177477 Ss    7-06:36:53 bash /mi/bin/krenewd 25751
+2177510 2177477 Ss    7-06:36:53 /usr/bin/dbus-daemon --session --address=systemd: --nofork --nopidfile --systemd-activation --syslog-only
+2177603       1 Ssl   7-06:36:53 /home/mccarthy/.vscode-server/code-fc3def6774c76082adf699d366f31a557ce5573f --cli-data-dir /home/mccarthy/.vscode-server/cli agent host
+2872614 1634483 Sl      04:46:19 /home/mccarthy/.vscode-server/cli/servers/Stable-fc3def6774c76082adf699d366f31a557ce5573f/server/node --dns-result-order=ipv4first /home/mccarthy/.vscode-server/cli/servers/Stable-fc3def6774c76082adf699d366f31a557ce5573f/server/out/bootstrap-fork --type=extensionHost --transformURIs --useHostProxy=false
+2872710 1634483 Sl      04:46:19 /home/mccarthy/.vscode-server/cli/servers/Stable-fc3def6774c76082adf699d366f31a557ce5573f/server/node /home/mccarthy/.vscode-server/cli/servers/Stable-fc3def6774c76082adf699d366f31a557ce5573f/server/out/bootstrap-fork --type=fileWatcher
+2873221 2872614 Sl      04:46:11 /home/mccarthy/.vscode-server/extensions/openai.chatgpt-26.803.41515-linux-x64/bin/linux-x86_64/codex -c features.code_mode_host=true app-server --analytics-default-enabled
+3445559 1634607 Ss      02:02:37 /bin/bash --init-file /home/mccarthy/.vscode-server/cli/servers/Stable-fc3def6774c76082adf699d366f31a557ce5573f/server/out/vs/workbench/contrib/terminal/common/scripts/shellIntegration-bash.sh
+3866756 2177502 S          00:56 sleep 300
+3866929 4034992 S          00:52 sleep 60
+3872826 3872011 S          00:33 sshd: mccarthy@notty
+3872859 3872826 Ss         00:33 -bash
+3872873 3872859 S          00:32 sh
+3872891 3872873 Sl         00:32 /home/mccarthy/.vscode-server/code-fc3def6774c76082adf699d366f31a557ce5573f command-shell --cli-data-dir /home/mccarthy/.vscode-server/cli --parent-process-id 3872873 --on-host=127.0.0.1 --on-port
+3872926 3872873 S          00:32 sleep 180
+3873017 1634483 Sl         00:30 /home/mccarthy/.vscode-server/cli/servers/Stable-fc3def6774c76082adf699d366f31a557ce5573f/server/node --dns-result-order=ipv4first /home/mccarthy/.vscode-server/cli/servers/Stable-fc3def6774c76082adf699d366f31a557ce5573f/server/out/bootstrap-fork --type=extensionHost --transformURIs --useHostProxy=false
+3873046 1634483 Sl         00:30 /home/mccarthy/.vscode-server/cli/servers/Stable-fc3def6774c76082adf699d366f31a557ce5573f/server/node /home/mccarthy/.vscode-server/cli/servers/Stable-fc3def6774c76082adf699d366f31a557ce5573f/server/out/bootstrap-fork --type=fileWatcher
+3873524 3873017 Sl         00:23 /home/mccarthy/.vscode-server/extensions/openai.chatgpt-26.803.41515-linux-x64/bin/linux-x86_64/codex -c features.code_mode_host=true app-server --analytics-default-enabled
+3874918 3445559 R+         00:00 ps -u mccarthy -o pid,ppid,stat,etime,cmd
+4016379       1 Rl    4-06:31:14 python -u umbertos_maxwell.py
+4016516 4016379 Ssl   4-06:31:13 orted --hnp --set-sid --report-uri 8 --singleton-died-pipe 9 -mca state_novm_select 1 -mca ess hnp -mca pmix ^s1,s2,cray,isolated
+4034992       1 S     4-06:27:39 bash -c  run="$1" pid=$(cat "$run/pid") limit_kib=$((100 * 1024 * 1024))  echo "Guard started: memory limit = 100 GiB" > "$run/guard.log"  while kill -0 "$pid" 2>/dev/null; do     rss=$(ps -o rss= -p "$pid" | tr -d " ")      if [ -n "$rss" ]; then         printf "%s: RSS = %.2f GiB\n" \           "$(date "+%Y-%m-%d %H:%M:%S")" \           "$(awk "BEGIN {print $rss / 1024 / 1024}")" >> "$run/guard.log"          if [ "$rss" -ge "$limit_kib" ]; then             echo "100 GiB limit reached; stopping process $pid" \               >> "$run/guard.log"             kill -TERM "$pid"             break         fi     fi      sleep 60 done  echo "Guard finished." >> "$run/guard.log"  guard /scratch/mccarthy/main_complex/firedrake/tests/maggies_adaptive_tests/umberto_maxwell_output/second_try_maxwell_square_full_20260805_141045

@@ -13,3 +13,7 @@
 [1;37;31m---- [SWEEP 5: 11376 active cells on 4 ranks] ----[0m
 [1;37;32msweep 5: 2326 in, 2880 out, 0 contour, 6170 refined; inner its avg 1.87, final cells avg 33, final cells max 64, final dofs avg 135, final dofs max 258, marked fraction avg 1.00, peak RSS across ranks 0.86 GB[0m
 [1;37;31m---- [SWEEP 6: 24680 active cells on 4 ranks] ----[0m
+[1;37;32msweep 6: 6068 in, 6818 out, 11794 contour, 0 refined; inner its avg 2.41, final cells avg 57, final cells max 128, final dofs avg 231, final dofs max 514, marked fraction avg 1.00, peak RSS across ranks 2.32 GB[0m
+[1;37;32mclassified 35408 cells, 0 misclassified against the reference epsilon-disks[0m
+[1;37;32mfield assembled from 35408 barycentre evaluations[0m
+[1;37;32mwrote poisson1d_dwr_local VTK files[0m

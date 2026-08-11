@@ -590,66 +590,6 @@ def plot_progress(sweep, records, active, field_samples):
         fig.savefig(f"{OUT}/field_sweep{sweep}.pdf")
         plt.close(fig)
 
-
-# Chatgpt help - save data per sweep so we can remake the plots later
-def save_outer_sweep(sweep, records, active, field_samples, counts, its_hist, dofs_hist, marked_hist, cells_hist, filename=None): 
-
-    """
-    sweep : current sweep number
-    records: classifications 
-    active: active triangles
-    field_samples: corrected phi values at barycentres
-    its_hist: inner solve iteration
-    counts: count ins, outs, contours, refines
-    dofs_hist: inner dof list
-    marked_hist: marking fractions from DWR
-    cells_hist: final adapted mesh cell count
-
-    """
-
-    # converts [z1, z2, z3] to coordinate pairs
-    # ex: [1+0.2j, 2+0.2j, 1.5+0.8j] becomes [[1, 0.2], [2, 0.2], [1.5, 0.8]]
-    # resulting shape is (num tri, 3 vertices, two coords)
-    completed_tri = np.asarray([[[p.real, p.imag] for p in r["tri"]] for r in records],dtype=float).reshape((-1, 3, 2)) 
-
-    # Save the classifications for each triangle
-    completed_cls = np.asarray([r["cls"] for r in records],dtype="U8")
-
-    # Do same conversion for active triangles
-    active_tri = np.asarray([[[p.real, p.imag] for p in t] for t in active],dtype=float).reshape((-1, 3, 2))
-
-    # Extract barycentre coordinates
-    field_points = np.asarray([[x, y] for x, y in field_samples.keys()],dtype=float).reshape((-1, 2))
-
-    # Extract corrected phi values
-    field_values = np.asarray(list(field_samples.values()))
-
-    # Check filename
-    if filename is None:
-        filename = f"{OUT}/outer_sweep_{sweep:03d}.npz"
-
-    # Save it all for later
-    np.savez_compressed(
-        filename,
-        completed_triangles=completed_tri,
-        completed_classes=completed_cls,
-        completed_phi=np.asarray([r["phi"] for r in records]),
-        completed_R=np.asarray([r["R"] for r in records]),
-        active_triangles=active_tri,
-        field_points=field_points,
-        field_values=field_values,
-        counts=np.asarray([
-            counts["in"], counts["out"],
-            counts["contour"], counts["refine"]
-        ]),
-        inner_iterations=np.asarray(its_hist),
-        final_dofs=np.asarray(dofs_hist),
-        marked_fractions=np.asarray(marked_hist),
-        final_cells=np.asarray(cells_hist),
-    )
-
-
-
 # SELF-TEST: Phi_h(x+iy)^2 = Phi_h(x)^2 + y^2 holds exactly on V_h
 ##################################################################
 
@@ -750,20 +690,11 @@ while len(triangles) > 0 and sweep < max_sweeps:
     plot_progress(sweep, records, triangles, field_samples)
     sweep += 1
 
-
-# We hit max sweeps
 if len(triangles):
     log_line(RED % f"max_sweeps hit with {len(triangles)} cells left, "
                     "kept as contour")
     for t in triangles:
         records.append({"tri": t, "phi": np.nan, "R": np.nan, "cls": "contour"})
-        
-    # update counts
-    counts["contour"] += len(triangles)
-
-    # do a final save
-    save_outer_sweep(sweep, records, [],field_samples, counts,[], [], [], [], filename = f"{OUT}/outer_sweep_final.npz")
-
 
 # VALIDATE AGAINST THE REFERENCE DISKS
 ##################################################################

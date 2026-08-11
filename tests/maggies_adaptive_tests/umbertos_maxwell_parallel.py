@@ -11,6 +11,7 @@ from ufl import conj
 import os
 import re
 import gc
+import sys
 import resource
 
 # import outerloop_adaptivefoldedeigensolver as _maggie
@@ -56,6 +57,22 @@ from firedrake.umbertos_adaptivefoldedeigensolver import GoalAdaptiveFoldedEigen
 # nearly everything -- the machinery is validated but not showcased.  The run
 # records the marked fraction per refinement so this is measured, not asserted.
 
+
+
+# ADDED PARALLEL STUFF
+##########################################################################
+from mpi4py import MPI
+WORLD = MPI.COMM_WORLD # distributes z values
+RANK = WORLD.rank 
+NPROCS = WORLD.size
+# Every rank solves its assigned z values independently and serially.
+# So, we need a communicator
+LOCAL_COMM = MPI.COMM_SELF
+
+
+# SETUP
+########################################################################
+
 DOMAIN = os.environ.get("DOMAIN", "square")            # "lshape" | "square"
 ELEMENT = os.environ.get("ELEMENT",
                          "N1curl" if DOMAIN == "lshape" else "CG")
@@ -82,6 +99,7 @@ Ny = int(os.environ.get("NY", 5 if SMOKE else 10))
 diam_tol = float(os.environ.get("DIAM_TOL", 0.4 if SMOKE else 0.01))
 max_sweeps = int(os.environ.get("MAX_SWEEPS", 1 if SMOKE else 10))
 max_it = int(os.environ.get("MAX_IT", 2 if SMOKE else 15)) # Maggie changes to 15 from 8
+max_dofs = int(os.environ.get("MAX_DOFS", 20000)) # Use a max dof to speed things up
 
 # OUTDIR overrides the destination -- point a smoke test somewhere scratch so
 # it cannot overwrite the plates of a real run into the same domain's directory
@@ -95,13 +113,22 @@ os.makedirs(OUT, exist_ok=True)
 # colour codes, one line per event.  `tail -f` on it is the cheapest way to
 # watch a sweep from another shell.
 _PROGRESS = f"{OUT}/progress.txt"
-open(_PROGRESS, "w").close()
+# open(_PROGRESS, "w").close()
+# def log_line(msg):
+#     PETSc.Sys.Print(msg)
+#     with open(_PROGRESS, "a") as f:
+#         f.write(re.sub(r"\x1b\[[0-9;]*m", "", str(msg)) + "\n")
 
+if RANK == 0:
+    os.makedirs(OUT, exist_ok=True)
+    open(_PROGRESS, "w").close()
+
+WORLD.barrier()
 def log_line(msg):
-    PETSc.Sys.Print(msg)
-    with open(_PROGRESS, "a") as f:
-        f.write(re.sub(r"\x1b\[[0-9;]*m", "", str(msg)) + "\n")
-
+    if RANK == 0:
+        PETSc.Sys.Print(msg)
+        with open(_PROGRESS, "a") as f:
+            f.write(re.sub(r"\x1b\[[0-9;]*m", "", str(msg)) + "\n")
 
 log_line(GREEN % (
     f"domain = {DOMAIN}, element = {ELEMENT}{deg}, epsilon = {epsilon}, "
@@ -139,7 +166,7 @@ if _sweeps_needed > max_sweeps:
 # Maggie note - this is a bit different than how I made the mesh
 # But I trust umberto can deal with netgen better than me lol
 
-def make_mesh(maxh):
+def make_mesh(maxh, comm=COMM_WORLD):
     g = SplineGeometry()
     if DOMAIN == "square":
         pts = [(0, 0), (pi, 0), (pi, pi), (0, pi)]
@@ -153,7 +180,7 @@ def make_mesh(maxh):
     for i in range(n):
         g.Append(["line", ids[i], ids[(i + 1) % n]],
                  bc=("horiz" if i % 2 == 0 else "vert"))
-    return Mesh(g.GenerateMesh(maxh=maxh))
+    return Mesh(g.GenerateMesh(maxh=maxh), comm=comm)
 
 NEDGE = 4 if DOMAIN == "square" else 6
 HORIZ = tuple(range(1, NEDGE + 1, 2))   # E_x = 0 there (tangent is e_x)
@@ -292,6 +319,7 @@ sp = {
     "goal_adaptive": {
         "tolerance": 1.0e-5,
         "max_it": max_it,
+        "max_dofs" : max_dofs,
         "dorfler_alpha": 0.5,
         "primal_extra_degree": (1, 1),
         "dual_extra_degree": (1, 1),
@@ -309,7 +337,7 @@ sp = {
 
 # The base problem is permanent, so its enriched reconstruction is worth
 # caching; the adapted meshes are transient and caching them would only leak
-base_mesh = make_mesh(maxh0)
+base_mesh = make_mesh(maxh0, comm=COMM_SELF)
 base_problem = make_problem(base_mesh)
 _reconstruct_orig = _maggie._reconstruct_eig_degree
 _base_enriched = {}
@@ -349,18 +377,31 @@ def dwr_solve(zval, hK):
     #     corr = phi
     # eta = float(abs(solver.signed_error))
     # return phi, corr, eta, solver
+    # phi = solver.matts_phi
+    # if not np.isfinite(phi): 
+    #     print(RED % f"WARNING - the phi was saved as NAN or INF!!")
+    #     # phi = float(np.sqrt(max((solver._lam_h), 0.0)))
+    # corr = solver.corrected_phi # pull the corrected phi
+    # if not np.isfinite(corr): 
+    #     print(RED % f"WARNING - the corrected phi was saved as NAN or INF!!")
+    #     # corr = phi
+    # eta = abs(solver.signed_error) # pull |error est|
+    # if not np.isfinite(eta): 
+    #     print(RED % f"WARNING - the signed error estimate was saved as NAN or INF!!")
+    # return phi, corr, eta, solver
+
     phi = solver.matts_phi
-    if not np.isfinite(phi): 
-        print(RED % f"WARNING - the phi was saved as NAN or INF!!")
-        # phi = float(np.sqrt(max((solver._lam_h), 0.0)))
-    corr = solver.corrected_phi # pull the corrected phi
-    if not np.isfinite(corr): 
-        print(RED % f"WARNING - the corrected phi was saved as NAN or INF!!")
-        # corr = phi
-    eta = abs(solver.signed_error) # pull |error est|
-    if not np.isfinite(eta): 
-        print(RED % f"WARNING - the signed error estimate was saved as NAN or INF!!")
-    return phi, corr, eta, solver
+    corr = solver.corrected_phi
+    eta = abs(solver.signed_error)
+
+    status = {
+        "phi_nonfinite": not np.isfinite(phi),
+        "corr_nonfinite": not np.isfinite(corr),
+        "eta_nonfinite": not np.isfinite(eta),}
+
+    return phi, corr, eta, solver, status
+
+
 
 # A REFERENCE SPECTRUM, INDEPENDENT OF THE FOLDING
 ##################################################################
@@ -653,16 +694,18 @@ def save_outer_sweep(sweep, records, active, field_samples, counts, its_hist, do
 # SELF-TEST: Phi_h(x+iy)^2 = Phi_h(x)^2 + y^2 holds exactly on V_h
 ##################################################################
 
-dev = 0.0
-# probe = [1.1 + 0.35j, 2.3 - 0.4j] if SMOKE else \
-#         [0.7 + 0.3j, 1.6 - 0.35j, 2.6 + 0.3j, 3.4 - 0.25j]
-probe = [2.1 + 0.35j, 3.3 - 0.4j] if SMOKE else \
-        [2.7 + 0.3j, 2.6 - 0.35j, 3.6 + 0.3j, 3.4 - 0.25j]
-for zval in probe:
-    phi_c, _, _, _ = dwr_solve(zval, 0.35)
-    phi_r, _, _, _ = dwr_solve(zval.real, 0.35)
-    dev = max(dev, abs((phi_c**2 - zval.imag**2) - phi_r**2))
-log_line(GREEN % f"self-test max |Phi(x+iy)^2 - y^2 - Phi(x)^2| = {dev:.3e}")
+if RANK == 0:
+    dev = 0.0
+    # probe = [1.1 + 0.35j, 2.3 - 0.4j] if SMOKE else \
+    #         [0.7 + 0.3j, 1.6 - 0.35j, 2.6 + 0.3j, 3.4 - 0.25j]
+    probe = [2.1 + 0.35j, 3.3 - 0.4j] if SMOKE else \
+            [2.7 + 0.3j, 2.6 - 0.35j, 3.6 + 0.3j, 3.4 - 0.25j]
+    for zval in probe:
+        phi_c, corr_c, _, _, _ = dwr_solve(zval, 0.35)
+        phi_r, _, _, _, _ = dwr_solve(zval.real, 0.35)
+        dev = max(dev, abs((phi_c**2 - zval.imag**2) - phi_r**2))
+    log_line(GREEN % f"self-test max |Phi(x+iy)^2 - y^2 - Phi(x)^2| = {dev:.3e}")
+WORLD.barrier() # wait runtil rank 0 has tested
 
 # THE OUTER LOOP
 ##################################################################
@@ -670,89 +713,201 @@ log_line(GREEN % f"self-test max |Phi(x+iy)^2 - y^2 - Phi(x)^2| = {dev:.3e}")
 triangles = initial_triangulation(xmin, ymin, xmax, ymax, Nx, Ny)
 records = []
 field_samples = {}
-showcase = {}     # representative adapted meshes for the inner-mesh figure
+# showcase = {}     # representative adapted meshes for the inner-mesh figure (not using right now)
 sweep = 0
 
 while len(triangles) > 0 and sweep < max_sweeps:
+
+
     barycentres = get_barycentres(triangles)
     diameters = get_diameters(triangles)
-    log_line(RED % f"---- [SWEEP {sweep}: {len(triangles)} active cells] ----")
-
-    new_triangles = []
-    counts = {"in": 0, "out": 0, "contour": 0, "refine": 0}
-    its_hist, dofs_hist, marked_hist, cells_hist = [], [], [], []
+    log_line(f"--- sweep {sweep}: {len(triangles)} active cells on "f"{NPROCS} ranks ---")
 
 
-    for k in range(len(triangles)):
 
-        # Inner loop
-        zK, hK = barycentres[k], diameters[k]
-        phi, corr, eta, solver = dwr_solve(zK, hK)
+    # Inside the k loop: one independent z solve
+    local_results = []
+    for k in range(RANK, len(triangles), NPROCS):
 
-        # see if we hit maxits
-        inner_hit_maxit = (getattr(solver, "termination_reason", None) == "max_it_reached")
-        if inner_hit_maxit:
-            log_line(RED % (
-                f"WARNING: inner max_it reached at z = {zK:.3f}; "
-                f"iterations = {len(solver.Ndofs_vec)}"))
-        
-        # Refinement radius
-        R = hK + np.sqrt(eta)
 
-        field_samples[(round(zK.real, 8), round(zK.imag, 8))] = corr
-        its_hist.append(len(solver.Ndofs_vec))
-        dofs_hist.append(solver.Ndofs_vec[-1])
-        marked_hist.extend(getattr(solver, "marked_fractions", []))
+        zK = barycentres[k]
+        hK = diameters[k]
+        phi, corr, eta, solver, status = dwr_solve(zK, hK)
         final_mesh = unique_mesh(solver.problem.output_space)
-        cells_hist.append(final_mesh.num_cells())
 
-        # Cases 1-3 of the notes, on the DWR radius alone -- no Phi >= gamma
-        # shortcut, which would only be valid for conforming discretisations
-        if phi + R < epsilon:
-            cls = "in"
-        elif phi - R > epsilon:
-            cls = "out"
-        elif hK < diam_tol:
-            cls = "contour"
-        else:
-            cls = "refine"
-            new_triangles.extend(refine_tri(triangles[k]))
-        counts[cls] += 1
-        if cls != "refine":
-            records.append({"tri": triangles[k], "phi": phi, "R": R, "cls": cls})
+        # # check if we hit maxits
+        inner_hit_maxit = (getattr(solver, "termination_reason", None) == "max_it_reached")
+        # if inner_hit_maxit:
+        #     log_line(RED % (
+        #         f"WARNING: inner max_it reached at z = {zK:.3f}; "
+        #         f"iterations = {len(solver.Ndofs_vec)}"))
+        
+        # # Check our dof
+        dof_limited = (getattr(solver, "termination_reason", None)== "max_dofs_reached")
+        # if dof_limited:
+        #     log_line(RED % (
+        #         f"WARNING: inner max_dof reached at z = {zK:.3f}; "
+        #         f"dofs = {solver.Ndofs_vec[-1]}"))
+        
 
-        # keep the most-refined adapted mesh near each reference omega
-        if len(solver.Ndofs_vec) > 1 and abs(zK.imag) < 0.3:
-            key = int(np.round(zK.real * 2))
-            if key not in showcase or len(solver.Ndofs_vec) > showcase[key][3]:
-                coords = np.real(final_mesh.coordinates.dat.data_ro).copy()
-                cells = final_mesh.coordinates.function_space() \
-                                  .cell_node_map().values.copy()
-                showcase[key] = (zK, coords, cells, len(solver.Ndofs_vec))
 
-        PETSc.Sys.Print(BLUE % (
-            f"[sweep {sweep}] z = {zK:.3f}: Phi = {phi:.4f}, corr = {corr:.4f}, "
-            f"eta = {eta:.2e}, its = {len(solver.Ndofs_vec)}, "
-            f"cells = {final_mesh.num_cells()}, dofs = {solver.Ndofs_vec[-1]}, "
-            f"h = {hK:.3f} -> {cls}"))
+        local_results.append({
+            "cell": int(k),
+            "phi": float(np.real(phi)),
+            "corr": float(np.real(corr)),
+            "eta": float(np.real(eta)),
+            "iterations": len(solver.Ndofs_vec),
+            "dofs": solver.Ndofs_vec[-1],
+            "cells": final_mesh.num_cells(),
+            "max_it_limited": inner_hit_maxit,
+            "dof_limited": dof_limited,
+            "phi_nonfinite": status["phi_nonfinite"],
+            "corr_nonfinite": status["corr_nonfinite"],
+            "eta_nonfinite": status["eta_nonfinite"],
+            "marked_fractions": [float(x) for x in getattr(solver, "marked_fractions", [])],})
 
-    rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1e9
-    log_line(GREEN % (
-        f"sweep {sweep}: {counts['in']} in, {counts['out']} out, "
-        f"{counts['contour']} contour, {counts['refine']} refined; "
-        f"inner its avg {np.mean(its_hist):.2f}, "
-        f"final cells avg {np.mean(cells_hist):.0f}, "
-        f"final dofs avg {np.mean(dofs_hist):.0f}, "
-        f"marked fraction avg "
-        f"{np.mean(marked_hist) if marked_hist else 0:.2f}, "
-        f"peak RSS {rss:.2f} GB"))
-    triangles = np.array(new_triangles, dtype=complex)
-    plot_progress(sweep, records, triangles, field_samples)
+
+
+
+    # Measure usage
+    # Every rank measures its own peak memory after its assigned z-solves
+    rss_local = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    # macOS reports bytes; Linux commonly reports kilobytes
+    if sys.platform == "darwin":
+        rss_local_gb = rss_local / 1e9
+    else:
+        rss_local_gb = rss_local / 1e6
+    rss_max = WORLD.reduce( rss_local_gb,op=MPI.MAX,root=0 )
+
+
+    # Still inside the sweep, but after the k loop
+    gathered = WORLD.gather(local_results, root=0)
+
+    # combine results from each rank
+    if RANK == 0:
+
+        # Save the results over each rank
+        results = [result for rank_results in gathered for result in rank_results]
+        results.sort(key=lambda result: result["cell"])
+        its_hist = [result["iterations"] for result in results]
+        dofs_hist = [result["dofs"] for result in results]
+        cells_hist = [result["cells"] for result in results]
+        marked_hist = [fraction for result in results for fraction in result["marked_fractions"]]
+
+
+
+        # Classify time!!
+        new_triangles = []
+        counts = {"in": 0, "out": 0,"contour": 0,"refine": 0,}
+
+         # Classify every completed z-cell
+        for result in results:
+
+            # Set k and zk
+            k = result["cell"]
+            zK = barycentres[k]
+
+
+            # Check inner loop max its and dof
+            if result["max_it_limited"]:
+                log_line(RED % (f"WARNING: max_it reached at cell "f"{result['cell']}"))
+
+            if result["dof_limited"]:
+                log_line(RED % (
+                        f"WARNING: max_dofs reached at cell "
+                        f"{result['cell']}, "
+                        f"dofs = {result['dofs']}"))
+
+            # Check for nans and infs
+            if result["phi_nonfinite"]:
+                log_line(RED % (
+                f"WARNING: WE QUIT because phi is NaN or infinite at "
+                f"cell {k}, z = {zK:.3f}"))
+                WORLD.Abort(1)
+
+            if result["corr_nonfinite"]:
+                log_line(RED % (
+                    f"WARNING: WE QUIT because corrected phi is NaN or infinite at "
+                    f"cell {k}, z = {zK:.3f}"))
+                WORLD.Abort(1)
+
+
+            if result["eta_nonfinite"]:
+                log_line(RED % (
+                    f"WARNING: WE QUIT because error estimate is NaN or infinite at "
+                    f"cell {k}, z = {zK:.3f}"))
+                WORLD.Abort(1)
+
+
+            # Pull needed results
+            triangle = triangles[k]
+            hK = diameters[k]
+            phi = result["phi"]
+            corr = result["corr"]
+            eta = result["eta"]
+
+            
+
+            # save correction
+            field_samples[(round(zK.real, 8), round(zK.imag, 8))] = corr
+
+            # Refinement radius
+            R = hK + np.sqrt(eta)
+
+            # Classify
+            if phi + R < epsilon:
+                cls = "in"
+            elif phi - R > epsilon:
+                cls = "out"
+            elif hK < diam_tol:
+                cls = "contour"
+            else: # still active (refine)
+                cls = "refine"
+                new_triangles.extend(refine_tri(triangle))
+
+            # Update classification counts
+            counts[cls] += 1
+            # Save classified triangles
+            if cls != "refine":records.append({"tri": triangle,"phi": phi,"R": R,"cls": cls,})
+
+        
+        # Print a report
+        log_line(GREEN % (
+            f"sweep {sweep}: "
+            f"{counts['in']} in, "
+            f"{counts['out']} out, "
+            f"{counts['contour']} contour, "
+            f"{counts['refine']} refined; "
+            f"inner its avg {np.mean(its_hist):.2f}, "
+            f"final cells avg {np.mean(cells_hist):.0f}, "
+            f"final cells max {np.max(cells_hist):.0f}, "
+            f"final dofs avg {np.mean(dofs_hist):.0f}, "
+            f"final dofs max {np.max(dofs_hist):.0f}, "
+            f"marked fraction avg "
+            f"{np.mean(marked_hist) if marked_hist else 0:.2f}, "
+            f"peak RSS across ranks {rss_max:.2f} GB"))
+
+        # New triangle list
+        triangles = np.asarray(new_triangles, dtype=complex)
+
+        # Rank 0 alone writes logs, plots, and snapshots
+        save_outer_sweep(sweep, records, triangles, field_samples, counts, its_hist, dofs_hist, marked_hist, cells_hist)
+        plot_progress(sweep, records, triangles, field_samples)
+
+    else:
+        triangles = None
+
+    # Outside the k loop and after rank-0 processing:
+    # give every rank the next sweep's triangles
+    triangles = WORLD.bcast(triangles, root=0)
     sweep += 1
 
 
+
+
 # We hit max sweeps
-if len(triangles):
+if RANK==0 and len(triangles):
+
     log_line(RED % f"max_sweeps hit with {len(triangles)} cells left, "
                     "kept as contour")
     for t in triangles:
@@ -762,115 +917,121 @@ if len(triangles):
     counts["contour"] += len(triangles)
 
     # do a final save
-    save_outer_sweep(sweep, records, [],field_samples, counts,[], [], [], [], filename = f"{OUT}/outer_sweep_final.npz")
+    save_outer_sweep(sweep, records,[], field_samples, counts, [], [], [], [], filename=f"{OUT}/outer_sweep_final.npz",)
 
 
 # VALIDATE AGAINST THE REFERENCE DISKS
 ##################################################################
 
-if len(spec):
-    mis = 0
-    for r in records:
-        pts = list(r["tri"]) + [r["tri"].mean()]
-        if r["cls"] == "in" and any(exact_gamma(p) >= epsilon for p in pts):
-            mis += 1
-        if r["cls"] == "out" and any(exact_gamma(p) <= epsilon for p in pts):
-            mis += 1
-    log_line(GREEN % f"classified {len(records)} cells, {mis} "
-                    "misclassified against the reference epsilon-disks")
+if RANK == 0:
+    if len(spec):
+        mis = 0
+        for r in records:
+            pts = list(r["tri"]) + [r["tri"].mean()]
+            if r["cls"] == "in" and any(exact_gamma(p) >= epsilon for p in pts):
+                mis += 1
+            if r["cls"] == "out" and any(exact_gamma(p) <= epsilon for p in pts):
+                mis += 1
+        log_line(GREEN % f"classified {len(records)} cells, {mis} "
+                        "misclassified against the reference epsilon-disks")
 
-# OUTPUT 1: THE DWR-CORRECTED FIELD, VTK + PDF
+
+# OUTPUT:
 ##################################################################
 
-pts, vals = [], []
-for (px, py), v in field_samples.items():
-    pts.append(complex(px, py))
-    vals.append(v)
-pts = np.array(pts)
-residual_f = np.array(vals)
-triang = Triangulation(pts.real, pts.imag)
-log_line(GREEN % f"field assembled from {len(pts)} barycentre "
-                "evaluations (no extra solves)")
+if RANK == 0:
 
-_write_triangulated_vtk(f"{OUT}/maxwell2d_dwr_local_pseudospectra.vtk",
-                        pts.real, pts.imag, triang.triangles, residual_f)
-_write_eigenvalues_vtk(f"{OUT}/maxwell2d_dwr_local_eigenvalues.vtk",
-                       [complex(w) for w in spec if xmin <= w <= xmax])
-PETSc.Sys.Print(GREEN % "wrote maxwell2d_dwr_local VTK files")
+    # OUTPUT 1: THE DWR-CORRECTED FIELD, VTK + PDF
+    ##################################################################
 
-eigs = spec[in_view(spec)] if len(spec) else np.array([])
-vmin, vmax = float(residual_f.min()), float(residual_f.max())
-fig, ax = plt.subplots(figsize=FIGSIZE, constrained_layout=True)
-cf = ax.tricontourf(triang, residual_f, levels=np.linspace(vmin, vmax, 25),
-                    cmap=PV_MANA, vmin=vmin, vmax=vmax)
-ax.tricontour(triang, residual_f, levels=np.linspace(vmin, vmax, 9)[1:-1],
-              colors="k", linewidths=0.35, alpha=0.4)
-if len(eigs):
-    ax.scatter(eigs, 0*eigs, s=28, marker="o", facecolors="white",
-               edgecolors="black", linewidths=1.2, zorder=5)
-ax.set_xlabel(r"$\operatorname{Re}(z)$")
-ax.set_ylabel(r"$\operatorname{Im}(z)$")
-s0 = (xmax - xmin) / Nx
-ax.set_xlim(xmin + s0/2, xmax - s0/2)
-ax.set_ylim(ymin + s0/2, ymax - s0/2)
-ax.set_aspect("equal")
-ax.tick_params(direction="in", which="both")
-cbar = fig.colorbar(cf, ax=ax, pad=0.02, extend="neither")
-cbar.set_label(r"$\sigma_{\min}(A - z)$")
-ax.set_title(rf"Folded Maxwell on the {DOMAIN}, {ELEMENT}$_{deg}$, "
-             r"local DWR adaptivity", fontsize=10)
-for ext in ("png", "pdf"):
-    fig.savefig(f"{OUT}/pseudospectra_field.{ext}", dpi=300)
-plt.close(fig)
+    pts, vals = [], []
+    for (px, py), v in field_samples.items():
+        pts.append(complex(px, py))
+        vals.append(v)
+    pts = np.array(pts)
+    residual_f = np.array(vals)
+    triang = Triangulation(pts.real, pts.imag)
+    log_line(GREEN % f"field assembled from {len(pts)} barycentre "
+                    "evaluations (no extra solves)")
 
-# OUTPUT 2: THE OUTER-LOOP MESH, WITH ONLY THE CONTOUR GUESS
-##################################################################
+    _write_triangulated_vtk(f"{OUT}/maxwell2d_dwr_local_pseudospectra.vtk",
+                            pts.real, pts.imag, triang.triangles, residual_f)
+    _write_eigenvalues_vtk(f"{OUT}/maxwell2d_dwr_local_eigenvalues.vtk",
+                        [complex(w) for w in spec if xmin <= w <= xmax])
+    PETSc.Sys.Print(GREEN % "wrote maxwell2d_dwr_local VTK files")
 
-fig, ax = plt.subplots(figsize=FIGSIZE)
-ax.add_collection(PolyCollection(
-    [np.column_stack([r["tri"].real, r["tri"].imag]) for r in records],
-    facecolor="none", edgecolor="0.75", linewidth=0.2))
-contour_polys = [np.column_stack([r["tri"].real, r["tri"].imag])
-                 for r in records if r["cls"] == "contour"]
-if contour_polys:
-    ax.add_collection(PolyCollection(contour_polys, facecolor="#2e7d32",
-                                     edgecolor="#2e7d32", linewidth=0.2))
-ax.plot(eigs, 0*eigs, 'ok', markersize=4)
-ax.set_xlim(xmin, xmax)
-ax.set_ylim(ymin, ymax)
-ax.set_aspect("equal")
-ax.set_xlabel(r"$\mathrm{Re}\, z$")
-ax.set_ylabel(r"$\mathrm{Im}\, z$")
-ax.set_title(rf"Outer-loop mesh and contour guess, $\epsilon = {epsilon}$, "
-             rf"Maxwell on the {DOMAIN} (local DWR)")
-fig.tight_layout()
-fig.savefig(f"{OUT}/pseudospectra_contour.pdf")
-plt.close(fig)
-
-# OUTPUT 3: THE ADAPTED INNER MESHES
-##################################################################
-
-if showcase:
-    keys = sorted(showcase)[:6]
-    ncol = min(3, len(keys))
-    nrow = int(np.ceil(len(keys) / ncol))
-    fig, axes = plt.subplots(nrow, ncol, figsize=(4*ncol, 4*nrow),
-                             squeeze=False)
-    for ax, key in zip(axes.ravel(), keys):
-        zK, coords, cells, nits = showcase[key]
-        tri = Triangulation(coords[:, 0], coords[:, 1], cells)
-        ax.triplot(tri, linewidth=0.35, color="0.25")
-        ax.set_aspect("equal")
-        ax.set_title(rf"$z = {zK:.2f}$: {len(cells)} cells, {nits} its",
-                     fontsize=9)
-        ax.tick_params(labelsize=7)
-    for ax in axes.ravel()[len(keys):]:
-        ax.axis("off")
-    fig.suptitle(f"Adapted inner meshes (local DWR marking), {DOMAIN}",
-                 fontsize=11)
-    fig.tight_layout()
-    fig.savefig(f"{OUT}/inner_meshes.pdf")
+    eigs = spec[in_view(spec)] if len(spec) else np.array([])
+    vmin, vmax = float(residual_f.min()), float(residual_f.max())
+    fig, ax = plt.subplots(figsize=FIGSIZE, constrained_layout=True)
+    cf = ax.tricontourf(triang, residual_f, levels=np.linspace(vmin, vmax, 25),
+                        cmap=PV_MANA, vmin=vmin, vmax=vmax)
+    ax.tricontour(triang, residual_f, levels=np.linspace(vmin, vmax, 9)[1:-1],
+                colors="k", linewidths=0.35, alpha=0.4)
+    if len(eigs):
+        ax.scatter(eigs, 0*eigs, s=28, marker="o", facecolors="white",
+                edgecolors="black", linewidths=1.2, zorder=5)
+    ax.set_xlabel(r"$\operatorname{Re}(z)$")
+    ax.set_ylabel(r"$\operatorname{Im}(z)$")
+    s0 = (xmax - xmin) / Nx
+    ax.set_xlim(xmin + s0/2, xmax - s0/2)
+    ax.set_ylim(ymin + s0/2, ymax - s0/2)
+    ax.set_aspect("equal")
+    ax.tick_params(direction="in", which="both")
+    cbar = fig.colorbar(cf, ax=ax, pad=0.02, extend="neither")
+    cbar.set_label(r"$\sigma_{\min}(A - z)$")
+    ax.set_title(rf"Folded Maxwell on the {DOMAIN}, {ELEMENT}$_{deg}$, "
+                r"local DWR adaptivity", fontsize=10)
+    for ext in ("png", "pdf"):
+        fig.savefig(f"{OUT}/pseudospectra_field.{ext}", dpi=300)
     plt.close(fig)
-    PETSc.Sys.Print(GREEN % f"wrote inner_meshes.pdf with {len(keys)} examples")
 
-log_line(GREEN % f"all output in {OUT}/")
+    # OUTPUT 2: THE OUTER-LOOP MESH, WITH ONLY THE CONTOUR GUESS
+    ##################################################################
+
+    fig, ax = plt.subplots(figsize=FIGSIZE)
+    ax.add_collection(PolyCollection(
+        [np.column_stack([r["tri"].real, r["tri"].imag]) for r in records],
+        facecolor="none", edgecolor="0.75", linewidth=0.2))
+    contour_polys = [np.column_stack([r["tri"].real, r["tri"].imag])
+                    for r in records if r["cls"] == "contour"]
+    if contour_polys:
+        ax.add_collection(PolyCollection(contour_polys, facecolor="#2e7d32",
+                                        edgecolor="#2e7d32", linewidth=0.2))
+    ax.plot(eigs, 0*eigs, 'ok', markersize=4)
+    ax.set_xlim(xmin, xmax)
+    ax.set_ylim(ymin, ymax)
+    ax.set_aspect("equal")
+    ax.set_xlabel(r"$\mathrm{Re}\, z$")
+    ax.set_ylabel(r"$\mathrm{Im}\, z$")
+    ax.set_title(rf"Outer-loop mesh and contour guess, $\epsilon = {epsilon}$, "
+                rf"Maxwell on the {DOMAIN} (local DWR)")
+    fig.tight_layout()
+    fig.savefig(f"{OUT}/pseudospectra_contour.pdf")
+    plt.close(fig)
+
+    # OUTPUT 3: THE ADAPTED INNER MESHES
+    ##################################################################
+    # if showcase:
+    #     keys = sorted(showcase)[:6]
+    #     ncol = min(3, len(keys))
+    #     nrow = int(np.ceil(len(keys) / ncol))
+    #     fig, axes = plt.subplots(nrow, ncol, figsize=(4*ncol, 4*nrow),
+    #                              squeeze=False)
+    #     for ax, key in zip(axes.ravel(), keys):
+    #         zK, coords, cells, nits = showcase[key]
+    #         tri = Triangulation(coords[:, 0], coords[:, 1], cells)
+    #         ax.triplot(tri, linewidth=0.35, color="0.25")
+    #         ax.set_aspect("equal")
+    #         ax.set_title(rf"$z = {zK:.2f}$: {len(cells)} cells, {nits} its",
+    #                      fontsize=9)
+    #         ax.tick_params(labelsize=7)
+    #     for ax in axes.ravel()[len(keys):]:
+    #         ax.axis("off")
+    #     fig.suptitle(f"Adapted inner meshes (local DWR marking), {DOMAIN}",
+    #                  fontsize=11)
+    #     fig.tight_layout()
+    #     fig.savefig(f"{OUT}/inner_meshes.pdf")
+    #     plt.close(fig)
+    #     PETSc.Sys.Print(GREEN % f"wrote inner_meshes.pdf with {len(keys)} examples")
+
+    log_line(GREEN % f"all output in {OUT}/")

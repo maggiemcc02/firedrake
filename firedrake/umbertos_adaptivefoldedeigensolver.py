@@ -6,6 +6,11 @@
 # 4. MAKE LAM_H A CONSTANT IN F_{EIG} IN COMPUTE_ERROR_INDICATORS SO THAT WE DONT HAVE TO RECOMPILE FOR EVERY NEW LAMBDA (COST SAVE)
 
 
+# MY MOST RECENT CHANGES
+# MADE GLOBAL ERROR USE WEIGHT up - uh
+# USE MAX DOF
+
+
 
 
 
@@ -86,6 +91,9 @@ class GoalAdaptiveOptions:
         Maximum number of SOLVE–ESTIMATE–MARK–REFINE cycles.  The loop also
         terminates early if the error estimate falls below the requested tolerance.
         Defaults to ``10``.
+    max_dofs
+        Maximum number of dofs we will allows the meshes to have. This will 
+        avoid long adaptive loops.
     dorfler_alpha
         Threshold parameter for Dörfler (bulk) marking: cells whose local error
         indicator exceeds ``dorfler_alpha * max_indicator`` are marked for
@@ -154,6 +162,7 @@ class GoalAdaptiveOptions:
     # dataclass will build the desired init with the below info? 
     tolerance: float = 1e-4
     max_it: int = 10
+    max_dofs: int | None = None
     dorfler_alpha: float = 0.5
     primal_extra_degree: int = 1
     dual_extra_degree: int = 1
@@ -377,12 +386,21 @@ class GoalAdaptiveSolverBase:
         # Stopping criteria
         # if abs(eta_h) < self.options.tolerance: # tolerance stopping criteria 
         #     self.print("Error estimate below tolerance, finished.")
-        #     raise StopIteration
+        #     raise StopIterations
         if not self.should_refine(it, self.eta_h, self.eta): # tolerance stopping criteria 
             self.print("We have decided not to adapt - we are done!.")
             self.inner_converged = True
             self.termination_reason = "error_target_reached"
             raise StopIteration
+
+        # RECENT CHANGE - MAX DOF
+        elif (self.options.max_dofs is not None and self.Ndofs_vec[-1] >= self.options.max_dofs):
+            self.print(f"Maximum DOF limit ({self.options.max_dofs}) reached: "f"{self.Ndofs_vec[-1]} DOFs. Exiting.")
+            self.inner_converged = False
+            self.termination_reason = "max_dofs_reached"
+            raise StopIteration
+
+
         elif it == self.options.max_it - 1: # max iter stopping criteria
             self.print(f"Maximum iteration ({self.options.max_it}) reached. Exiting.")
             self.inner_converged = False
@@ -1041,7 +1059,9 @@ class GoalAdaptiveFoldedEigenSolver(SteadyGoalAdaptiveSolver, OptionsManager):
         #     phi_h.interpolate(u_p)
         # else:
         #     phi_h.project(u_p)
-        e = u_p - phi_h     # primal enrichment error (UFL expression)
+        # MAGGIE RECENT CHANG 
+        # e = u_p - phi_h     # primal enrichment error (UFL expression)
+        e = u_p - u_h
         # e_sigma = u_p - u_h # for the remainder term
         e_sigma = Function(u_p.function_space()).interpolate(u_p - u_h) 
 

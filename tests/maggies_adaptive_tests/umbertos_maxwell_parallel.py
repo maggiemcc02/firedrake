@@ -98,8 +98,8 @@ Ny = int(os.environ.get("NY", 5 if SMOKE else 10))
 # diam_tol = float(os.environ.get("DIAM_TOL", 0.4 if SMOKE else 0.005))
 diam_tol = float(os.environ.get("DIAM_TOL", 0.4 if SMOKE else 0.01))
 max_sweeps = int(os.environ.get("MAX_SWEEPS", 1 if SMOKE else 10))
-max_it = int(os.environ.get("MAX_IT", 2 if SMOKE else 15)) # Maggie changes to 15 from 8
-max_dofs = int(os.environ.get("MAX_DOFS", 20000)) # Use a max dof to speed things up
+max_it = int(os.environ.get("MAX_IT", 2 if SMOKE else 50)) # Make it high for now
+max_dofs = int(os.environ.get("MAX_DOFS", 5000)) # Use a max dof to speed things up
 
 # OUTDIR overrides the destination -- point a smoke test somewhere scratch so
 # it cannot overwrite the plates of a real run into the same domain's directory
@@ -166,7 +166,7 @@ if _sweeps_needed > max_sweeps:
 # Maggie note - this is a bit different than how I made the mesh
 # But I trust umberto can deal with netgen better than me lol
 
-def make_mesh(maxh, comm=COMM_WORLD):
+def make_mesh(maxh, comm=LOCAL_COMM):
     g = SplineGeometry()
     if DOMAIN == "square":
         pts = [(0, 0), (pi, 0), (pi, pi), (0, pi)]
@@ -787,6 +787,10 @@ while len(triangles) > 0 and sweep < max_sweeps:
     if RANK == 0:
 
         # Save the results over each rank
+        # First list comprehension is same as 
+        # for rank_results in gathered:
+        #    for result in rank_results:
+        #       results.append(result)
         results = [result for rank_results in gathered for result in rank_results]
         results.sort(key=lambda result: result["cell"])
         its_hist = [result["iterations"] for result in results]
@@ -870,6 +874,12 @@ while len(triangles) > 0 and sweep < max_sweeps:
             # Save classified triangles
             if cls != "refine":records.append({"tri": triangle,"phi": phi,"R": R,"cls": cls,})
 
+
+        
+        # Check how many times we hit maxits or maxdof
+        n_max_it = sum(result["max_it_limited"] for result in results)
+        n_max_dofs = sum(result["dof_limited"] for result in results)
+
         
         # Print a report
         log_line(GREEN % (
@@ -883,6 +893,8 @@ while len(triangles) > 0 and sweep < max_sweeps:
             f"final cells max {np.max(cells_hist):.0f}, "
             f"final dofs avg {np.mean(dofs_hist):.0f}, "
             f"final dofs max {np.max(dofs_hist):.0f}, "
+            f"max_it limited {n_max_it}, "
+            f"max_dofs limited {n_max_dofs}, "
             f"marked fraction avg "
             f"{np.mean(marked_hist) if marked_hist else 0:.2f}, "
             f"peak RSS across ranks {rss_max:.2f} GB"))

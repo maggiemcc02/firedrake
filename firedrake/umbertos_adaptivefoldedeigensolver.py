@@ -394,11 +394,11 @@ class GoalAdaptiveSolverBase:
             raise StopIteration
 
         # RECENT CHANGE - MAX DOF
-        elif (self.options.max_dofs is not None and self.Ndofs_vec[-1] >= self.options.max_dofs):
-            self.print(f"Maximum DOF limit ({self.options.max_dofs}) reached: "f"{self.Ndofs_vec[-1]} DOFs. Exiting.")
-            self.inner_converged = False
-            self.termination_reason = "max_dofs_reached"
-            raise StopIteration
+        # elif (self.options.max_dofs is not None and self.Ndofs_vec[-1] >= self.options.max_dofs):
+        #     self.print(f"Maximum DOF limit ({self.options.max_dofs}) reached: "f"{self.Ndofs_vec[-1]} DOFs. Exiting.")
+        #     self.inner_converged = False
+        #     self.termination_reason = "max_dofs_reached"
+        #     raise StopIteration
 
 
         elif it == self.options.max_it - 1: # max iter stopping criteria
@@ -428,6 +428,15 @@ class GoalAdaptiveSolverBase:
         self.print("Transferring problem to new mesh ...")
         self.refine_problem(markers) # refine the problem (base class)
 
+        # CHECK MAX DOF:
+        new_dof = self.problem.output_space.dim()
+        if (self.options.max_dofs is not None and new_dof >= self.options.max_dofs):
+            self.print(f"Maximum DOF limit ({self.options.max_dofs}) reached on refined mesh: "f"{new_dof} DOFs. Exiting.")
+            self.inner_converged = False
+            self.termination_reason = "max_dofs_reached"
+            raise StopIteration
+
+
         # 2. Maggie change - Allow subclasses to transfer solutions/eigenfunctions.
         self.post_refinement()
 
@@ -445,6 +454,7 @@ class GoalAdaptiveSolverBase:
         Invokes the subclass's ``post_refinement``, if any."""
         if self.post_refinement is not None:
             self.post_refinement(self)
+
 
     # ------------------------------------------------------------------
     # Common machinery (mark + refine + efficiency)

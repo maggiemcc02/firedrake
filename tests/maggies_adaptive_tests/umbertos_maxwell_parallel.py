@@ -99,7 +99,7 @@ Ny = int(os.environ.get("NY", 5 if SMOKE else 10))
 diam_tol = float(os.environ.get("DIAM_TOL", 0.4 if SMOKE else 0.01))
 max_sweeps = int(os.environ.get("MAX_SWEEPS", 1 if SMOKE else 10))
 max_it = int(os.environ.get("MAX_IT", 2 if SMOKE else 50)) # Make it high for now
-max_dofs = int(os.environ.get("MAX_DOFS", 5000)) # Use a max dof to speed things up
+max_dofs = int(os.environ.get("MAX_DOFS", 10000)) # Use a max dof to speed things up
 
 # OUTDIR overrides the destination -- point a smoke test somewhere scratch so
 # it cannot overwrite the plates of a real run into the same domain's directory
@@ -133,7 +133,7 @@ def log_line(msg):
 log_line(GREEN % (
     f"domain = {DOMAIN}, element = {ELEMENT}{deg}, epsilon = {epsilon}, "
     f"maxh0 = {maxh0}, z-grid {Nx}x{Ny}, diam_tol = {diam_tol}, "
-    f"max_sweeps = {max_sweeps}, inner max_it = {max_it}"))
+    f"max_sweeps = {max_sweeps}, inner max_it = {max_it}, max_dof = {max_dofs}"))
 
 # diam_tol is a PER-CELL stopping test, not a loop bound: a z-cell is only
 # labelled "contour" once its own diameter falls below it, and what actually

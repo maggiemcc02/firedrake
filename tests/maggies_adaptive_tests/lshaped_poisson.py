@@ -2,6 +2,8 @@ from firedrake import *
 from netgen.occ import *
 import numpy as np
 import sys
+#from firedrake.maggies_current_adaptivefoldedeigensolver import GoalAdaptiveFoldedEigenSolver
+from firedrake.innerloop_adaptivefoldedeigensolver import GoalAdaptiveFoldedEigenSolver
 from firedrake.maggies_current_adaptivefoldedeigensolver import GoalAdaptiveFoldedEigenSolver
 from ufl import conj
 import os
@@ -42,8 +44,8 @@ solver_parameters = {
     # Options for your adaptive eigensolver
     "goal_adaptive": {
         "tolerance": 1.0e-5,
-        "max_it": 200,
-        "dorfler_alpha": 0.90,
+        "max_it": 50,
+        "dorfler_alpha": 0.50,
         "primal_extra_degree": (1,),
         "dual_extra_degree": (1,),
         "cell_residual_extra_degree": (1,),
@@ -129,6 +131,7 @@ plt.close()
 # Effectivity plot
 plt.plot(dofs[:-1], solver.eff1_vec, label = rf"$|\eta_h| / |\eta|$")
 plt.plot(dofs[:-1], solver.eff2_vec, label = rf"$\sum |\eta_K| / |\eta|$" )
+plt.plot(dofs[:-1], solver.eff3_vec, label = rf"$\sum |\eta_K| / |\eta_h|$" )
 plt.title('Effectivity Indices')
 plt.xlabel('dof')
 plt.ylabel('effectivity')

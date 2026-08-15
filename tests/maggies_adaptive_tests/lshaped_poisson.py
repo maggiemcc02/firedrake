@@ -17,7 +17,7 @@ rect1 = WorkPlane(Axes((0,0,0), n=Z, h=X)).Rectangle(1,2).Face()
 rect2 = WorkPlane(Axes((0,1,0), n=Z, h=X)).Rectangle(2,1).Face()
 L = rect1 + rect2
 geo = OCCGeometry(L, dim=2)
-ngmesh = geo.GenerateMesh(maxh=0.05)
+ngmesh = geo.GenerateMesh(maxh=0.1)
 mesh = Mesh(ngmesh)
 
 # Set space
@@ -44,7 +44,7 @@ solver_parameters = {
     # Options for your adaptive eigensolver
     "goal_adaptive": {
         "tolerance": 1.0e-5,
-        "max_it": 50,
+        "max_it": 30,
         "dorfler_alpha": 0.50,
         "primal_extra_degree": (1,),
         "dual_extra_degree": (1,),
@@ -74,7 +74,7 @@ def my_output(self, it: int):
     print("Saving user's desired output ...")
 
     # Create the directory
-    z_dir= f"effectivity_poisson_output"
+    z_dir= f"effectivity_poisson_output/choice_zero"
     primal_dir = f"{z_dir}/primal"
     enriched_dir = f"{z_dir}/enriched"
     os.makedirs(z_dir, exist_ok=True)
@@ -114,7 +114,7 @@ solver.solve()
 # Pull the final results and plot 
 
 # Plot error vs. DOFS and approx slope
-z_dir= f"effectivity_poisson_output"
+z_dir= f"effectivity_poisson_output/choice_zero"
 os.makedirs(z_dir, exist_ok=True)
 slope_h, intercept = np.polyfit(np.log10(dofs), np.log10(etah_ests), 1)
 slope, intercept = np.polyfit(np.log10(dofs), np.log10(eta_ests), 1)
@@ -136,7 +136,7 @@ plt.title('Effectivity Indices')
 plt.xlabel('dof')
 plt.ylabel('effectivity')
 plt.legend()
-plt.savefig(f"{z_dir}/effectivity_plot.pdf")
+plt.savefig(f"{z_dir}/effectivity_plot_zero.pdf")
 plt.close()
 
 

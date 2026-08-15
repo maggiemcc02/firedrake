@@ -1,8 +1,8 @@
 # Here we make the skeleton for an adaptive eigensolver based on old eigensolver in Pablo's code (see commented code at end)
 # I am attempting to make an updated eigensolver that matches the current state of Pablo's code
 
-# RECENT CHANGES
-# Changed global error estimate to use uh^p - uh 
+# CURRENT TEST FUNCTION
+# phi_h = Ih uh^+
 
 
 import numbers
@@ -573,10 +573,15 @@ class SteadyGoalAdaptiveSolver(GoalAdaptiveSolverBase):
             self.eff2_vec.append(eff2)
             self.print(BLUE % f'{"Effectivity index:":40s}{eff1: 15.12f}')
             self.print(BLUE % f'{"Localisation efficiency:":40s}{eff2: 15.12f}')
-        else:
-            eff3 = eta_cell_total / abs(eta_h)
-            self.eff3_vec.append(eff3)
-            self.print(BLUE % f'{"Localisation efficiency:":40s}{eff3: 15.12f}')
+
+        # RECENT MAGGIE CHANGE - I WANT EFF3
+        eff3 = eta_cell_total / abs(eta_h)
+        self.eff3_vec.append(eff3)
+        self.print(BLUE % f'{"Localisation efficiency:":40s}{eff3: 15.12f}')
+        # else:
+        #     eff3 = eta_cell_total / abs(eta_h)
+        #     self.eff3_vec.append(eff3)
+        #     self.print(BLUE % f'{"Localisation efficiency:":40s}{eff3: 15.12f}')
 
 
 
@@ -927,12 +932,13 @@ class GoalAdaptiveFoldedEigenSolver(SteadyGoalAdaptiveSolver, OptionsManager):
         # 19. Maggie change - Making z_err a function so we can split it later. Pablo had it as a ufl
         # MAGGIE QUESTION / ISSUE - SHOULDN'T THIS BE z_p - Ih z_p and not z_p - z_h ???
         # MAGGIE QUESTION / ISSUE - Will interpolation always work? We may need to project!
-        self._z_err = Function(self._z_p.function_space())
-        self._z_err.interpolate(self._z_p - self._z_h) 
-        # Dubugging - try something different
         #self._z_err = Function(self._z_p.function_space())
-        #Ih_zp = Function(self._z_h.function_space()).interpolate(self._z_p)
-        #self._z_err.interpolate(self._z_p - Ih_zp)
+        #self._z_err.interpolate(self._z_p - self._z_h) 
+        # Dubugging - try something different
+        self._z_err = Function(self._z_p.function_space())
+        Ih_zp = Function(self._z_h.function_space()).interpolate(self._z_p)
+        self._z_err.interpolate(self._z_p - Ih_zp)
+        #self._z_err.interpolate(self._z_p) # zero choice
 
 
         # Compute the errors
@@ -961,8 +967,9 @@ class GoalAdaptiveFoldedEigenSolver(SteadyGoalAdaptiveSolver, OptionsManager):
         # Low-order primal representative in the base space
         phi_h = Function(u_h.function_space())
         phi_h.interpolate(u_p) # Will interpolation always work? We may need to project.
-        # e = u_p - phi_h     # primal enrichment error (UFL expression)
-        e = u_p - u_h # UFL
+        e = u_p - phi_h     # primal enrichment error (UFL expression)
+        #e = u_p # zero choice
+        # e = u_p - u_h # UFL
         # e_sigma = u_p - u_h # for the remainder term
         e_sigma = Function(u_p.function_space()).interpolate(u_p - u_h)  # FUNCTION
 

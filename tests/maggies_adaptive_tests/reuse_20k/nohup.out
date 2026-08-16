@@ -1,0 +1,441 @@
+nohup: ignoring input
+2026-08-16T19:35:48+02:00 RAM usage: 0.01 GiB; limit: 100.00 GiB
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+Authorization required, but no authorization protocol specified
+
+firedrake:WARNING OMP_NUM_THREADS is not set or is set to a value greater than 1, we suggest setting OMP_NUM_THREADS=1 to improve performance
+RUN PARAMETERS:
+  domain = square
+  element = CG1
+  epsilon = 0.2
+  maxh0 = 0.3
+  region = [2.0, 4.0] x [-1.0, 1.0]
+  Nx = 10
+  Ny = 10
+  diam_tol = 0.02
+  max_sweeps = 10
+  max_dofs = 20000
+  MPI ranks = 4
+SOLVER PARAMETERS:
+  tolerance = 1e-05
+  max_it = 50
+  max_dofs = 20000
+  dorfler_alpha = 0.5
+  primal_extra_degree = (1, 1)
+  dual_extra_degree = (1, 1)
+  cell_residual_extra_degree = (1, 1)
+  facet_residual_extra_degree = (1, 1)
+  self_adjoint = True
+  nev = 5
+  eps_type = krylovschur
+  eps_tol = 1e-08
+  st_type = sinvert
+  eps_target = 0
+[1;37;32mbase mesh: 256 cells, 447 dofs[0m
+[1;37;32mreference omega in view: 2.0000, 2.2361, 2.8284, 3.0000, 3.1623, 3.6056, 4.0000, 4.1231, 4.2426, 4.4721[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.3323150112788381-7.798513537116278e-16j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.2679442789608881+6.88687311013846e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.19867824835176065-4.3549134342846555e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.1360279225431087+1.0184853505753965e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.11456018154420727+1.9076359099773162e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.332315011278911-1.8385575166556171e-16j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.2679442789608898+3.339470565493702e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.1986782483517614+5.93653537158585e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.13602792254310941-1.9575850123737212e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.11456018154420759+6.649529456959724e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.2142399574865571+1.1811522927043783e-15j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.17589605639215825-1.011692140481522e-16j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.16502264438567596-2.4381452796007342e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.15669611838680175-8.03840249461688e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.15377168640365824-1.5387280099348362e-15j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.15091419213351456+1.497028053613134e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.14723696078788556+4.3515412200616356e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.1423108134579467+1.038448941319491e-16j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.12858935241455088+1.0140756763445998e-16j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.11600822904117054+6.896696860883113e-18j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.21423995748696845-1.8495027172827047e-16j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.17589605639213823+1.0471320328454265e-16j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.16502264438567676-2.139521552446386e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.15669611838681244-1.1971951792681567e-16j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.15377168640288444+4.768628912818251e-16j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.15091419213352875+3.4089652453973527e-16j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.14723696078731244-1.9115690549501788e-16j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.1423108134581252+9.20147633239231e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.12858935241463146+1.0654770382390445e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.11600822904116662-1.012297585160121e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.7418789969150941+2.058407778930862e-15j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.68753744855599+5.751366748186522e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.5400782220638416-1.1902185228746799e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.46573241689231965-1.1612139913398177e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.390242384005036-1.8491281972246076e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.3255959112114952+1.2363903953078164e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.29122103569490904-4.104248196057592e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.2860346418944063-7.079825131390264e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.21503395322364624-1.7343920754791295e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.16626864998092017+3.886996014386898e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.13327826342361704-2.609183625508816e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.11646597457061607-7.89846155808075e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.7418789969151143+1.588150691116232e-15j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.6875374485559659+2.5158998272432422e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.5400782220638861-2.5409265518957744e-16j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.46573241689223543-1.241435344519342e-16j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.39024238400503164+6.17347399659803e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.3255959112115059-1.843109027476939e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.291221035694891+4.0931224098261187e-17j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.286034641894406-5.1905814538441555e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.21503395322368202-9.265489869626521e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.16626864998090662-2.979593334571718e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.13327826342363944-5.9494597728962554e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.11646597457062034-5.741377466593048e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.5493375204942735-2.1308598924868033e-16j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.44580144922619663+6.82883604791578e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.29974121784590096+4.424692569322579e-16j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.2443318154744775-1.5384604988951917e-15j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.19669119881736863-1.4880628757091393e-15j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.1437421859732606+8.622418669142399e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.13502843346531201-6.21067175434674e-16j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.1182350068804282-2.179489092273021e-16j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.5493375204941916+1.643422083293642e-16j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.44580144922619414+6.047662752820993e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.29974121784582275-2.1673049298276003e-16j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.2443318154748827-9.867092224588394e-16j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.19669119881740368+1.0466739086512956e-16j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.14374218597329447-2.9992766481947377e-16j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.1350284334652097-3.0499662812411627e-16j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.11823500688054431+1.9387226935585133e-15j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;32mself-test max |Phi(x+iy)^2 - y^2 - Phi(x)^2| = 7.994e-15[0m
+--- sweep 0: 200 active cells on 4 ranks ---
+sweep 0: 200 active triangles, 20 distinct Re(z) values, 180 eigensolves avoided
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.08494787274367435-5.379650209163074e-19j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+Traceback (most recent call last):
+  File "/home/mccarthy/projects/firedrake_main_complex/firedrake/tests/maggies_adaptive_tests/speedup_maxwell.py", line 817, in <module>
+    phi_x, corr_x, eta, solver, status = dwr_solve(z_real,h_column)
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mccarthy/projects/firedrake_main_complex/firedrake/tests/maggies_adaptive_tests/speedup_maxwell.py", line 415, in dwr_solve
+    solver.solve()
+  File "/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/umbertos_adaptivefoldedeigensolver.py", line 837, in solve
+    super().solve()
+  File "/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/umbertos_adaptivefoldedeigensolver.py", line 342, in solve
+    self.step(it=it)
+  File "/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/umbertos_adaptivefoldedeigensolver.py", line 845, in step
+    super().step(it)
+  File "/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/umbertos_adaptivefoldedeigensolver.py", line 429, in step
+    self.refine_problem(markers) # refine the problem (base class)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mccarthy/projects/firedrake_main_complex/firedrake/tests/maggies_adaptive_tests/speedup_maxwell.py", line 295, in refine_problem
+    self.problem = make_problem(new_mesh) # Use the given make problem
+                   ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mccarthy/projects/firedrake_main_complex/firedrake/tests/maggies_adaptive_tests/speedup_maxwell.py", line 244, in make_problem
+    - (conj(z) + z) * inner(j*rot_v(H), F)*dx
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+  File "/home/mccarthy/projects/firedrake_main_complex/venv-firedrake/lib/python3.12/site-packages/ufl/measure.py", line 486, in __rmul__
+    raise ValueError("This integral is missing an integration domain.")
+ValueError: This integral is missing an integration domain.
+--------------------------------------------------------------------------
+MPI_ABORT was invoked on rank 0 in communicator MPI_COMM_WORLD
+with errorcode 1.
+
+NOTE: invoking MPI_ABORT causes Open MPI to kill all MPI processes.
+You may or may not see output from other processes, depending on
+exactly when Open MPI kills them.
+--------------------------------------------------------------------------

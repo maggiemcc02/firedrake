@@ -130,10 +130,24 @@ def log_line(msg):
         with open(_PROGRESS, "a") as f:
             f.write(re.sub(r"\x1b\[[0-9;]*m", "", str(msg)) + "\n")
 
-log_line(GREEN % (
-    f"domain = {DOMAIN}, element = {ELEMENT}{deg}, epsilon = {epsilon}, "
-    f"maxh0 = {maxh0}, z-grid {Nx}x{Ny}, diam_tol = {diam_tol}, "
-    f"max_sweeps = {max_sweeps}, inner max_it = {max_it}, max_dof = {max_dofs}"))
+# log_line(GREEN % (
+#     f"domain = {DOMAIN}, element = {ELEMENT}{deg}, epsilon = {epsilon}, "
+#     f"maxh0 = {maxh0}, z-grid {Nx}x{Ny}, diam_tol = {diam_tol}, "
+#     f"max_sweeps = {max_sweeps}, inner max_it = {max_it}, max_dof = {max_dofs}"))
+
+log_line("RUN PARAMETERS:")
+log_line(f"  domain = {DOMAIN}")
+log_line(f"  element = {ELEMENT}{deg}")
+log_line(f"  epsilon = {epsilon}")
+log_line(f"  maxh0 = {maxh0}")
+log_line(f"  region = [{xmin}, {xmax}] x [{ymin}, {ymax}]")
+log_line(f"  Nx = {Nx}")
+log_line(f"  Ny = {Ny}")
+log_line(f"  diam_tol = {diam_tol}")
+log_line(f"  max_sweeps = {max_sweeps}")
+log_line(f"  max_dofs = {max_dofs}")
+log_line(f"  MPI ranks = {NPROCS}")
+
 
 # diam_tol is a PER-CELL stopping test, not a loop bound: a z-cell is only
 # labelled "contour" once its own diameter falls below it, and what actually
@@ -243,6 +257,10 @@ def make_problem(mesh):
     return problem
 
 
+# CHANGES TO SOLVER FOR SPEED UP
+##################################################################
+
+
 # Helper for pulling needed mesh
 # In mixed spaces, this will give us the one mesh we need to work with
 def unique_mesh(V):
@@ -315,6 +333,9 @@ def m_form(a, b):
     else:
         return assemble(inner(a, b) * dx)
 
+# ADAPTIVE PARAMETERS
+##################################################################
+
 sp = {
     "goal_adaptive": {
         "tolerance": 1.0e-5,
@@ -334,6 +355,27 @@ sp = {
     "st_type": "sinvert",
     "eps_target": 0,
 }
+
+# Log the setup
+log_line("SOLVER PARAMETERS:")
+log_line(f"  tolerance = {sp['goal_adaptive']['tolerance']}")
+log_line(f"  max_it = {sp['goal_adaptive']['max_it']}")
+log_line(f"  max_dofs = {sp['goal_adaptive']['max_dofs']}")
+log_line(f"  dorfler_alpha = {sp['goal_adaptive']['dorfler_alpha']}")
+log_line(f"  primal_extra_degree = {sp['goal_adaptive']['primal_extra_degree']}")
+log_line(f"  dual_extra_degree = {sp['goal_adaptive']['dual_extra_degree']}")
+log_line(f"  cell_residual_extra_degree = {sp['goal_adaptive']['cell_residual_extra_degree']}")
+log_line(f"  facet_residual_extra_degree = {sp['goal_adaptive']['facet_residual_extra_degree']}")
+log_line(f"  self_adjoint = {sp['goal_adaptive']['self_adjoint']}")
+log_line(f"  nev = {sp['goal_adaptive']['nev']}")
+log_line(f"  eps_type = {sp['eps_type']}")
+log_line(f"  eps_tol = {sp['eps_tol']}")
+log_line(f"  st_type = {sp['st_type']}")
+log_line(f"  eps_target = {sp['eps_target']}")
+
+
+# THE BASE PROBLEM
+##################################################################
 
 # The base problem is permanent, so its enriched reconstruction is worth
 # caching; the adapted meshes are transient and caching them would only leak
@@ -355,6 +397,10 @@ log_line(GREEN % (
     f"{base_problem.output_space.dim()} dofs"))
 
 _ncalls = [0]
+
+
+# THE INNER LOOP
+##################################################################
 
 def dwr_solve(zval, hK):
     _ncalls[0] += 1
@@ -716,6 +762,10 @@ field_samples = {}
 # showcase = {}     # representative adapted meshes for the inner-mesh figure (not using right now)
 sweep = 0
 
+# THE FOLLOWING ITS CHATS SUGGESTED SPEED UP STRATEGY WHERE WE ONLY
+# NEED TO DO AN EXPENSIVE EIGENSOLVE FOR EACH RE(Z) AND REUSE IT FOR DIFFERENT IMAGINARY PARTS!
+
+
 while len(triangles) > 0 and sweep < max_sweeps:
 
 
@@ -723,70 +773,118 @@ while len(triangles) > 0 and sweep < max_sweeps:
     diameters = get_diameters(triangles)
     log_line(f"--- sweep {sweep}: {len(triangles)} active cells on "f"{NPROCS} ranks ---")
 
+    # ------------------------------------------------------------
+    # Group active outer cells by Re(z)
+    # ------------------------------------------------------------
 
+    groups = {}
+    for k, zK in enumerate(barycentres):
+        # round only for constructing the dictionary key
+        xkey = round(float(np.real(zK)), 12)
+        if xkey not in groups:
+            groups[xkey] = []
+        groups[xkey].append(k)
+    # Fixed ordering is important so every MPI rank sees
+    # exactly the same list of groups
+    columns = sorted(groups.items())
 
-    # Inside the k loop: one independent z solve
+    log_line(
+    f"sweep {sweep}: {len(triangles)} active triangles, "
+    f"{len(columns)} distinct Re(z) values, "
+    f"{len(triangles) - len(columns)} eigensolves avoided")
+
+    # ------------------------------------------------------------
+    # One independent inner eigensolve per Re(z)
+    # ------------------------------------------------------------
+
     local_results = []
-    for k in range(RANK, len(triangles), NPROCS):
+    for j in range(RANK, len(columns), NPROCS):
 
 
-        zK = barycentres[k]
-        hK = diameters[k]
-        phi, corr, eta, solver, status = dwr_solve(zK, hK)
+        xkey, cell_indices = columns[j]
+
+        # Use the actual x-coordinate rather than the rounded key
+        x = float(np.real(barycentres[cell_indices[0]]))
+
+        # Strictest outer tolerance required anywhere in this column.
+        #
+        # In your present outer algorithm these should normally all
+        # be the same anyway, but this makes the code safe.
+        h_column = min(diameters[k] for k in cell_indices)
+
+        # ONE expensive adaptive eigensolve for this whole vertical column
+        z_real = complex(x, 0.0)
+        phi_x, corr_x, eta, solver, status = dwr_solve(z_real,h_column)
+
         final_mesh = unique_mesh(solver.problem.output_space)
 
-        # # check if we hit maxits
         inner_hit_maxit = (getattr(solver, "termination_reason", None) == "max_it_reached")
-        # if inner_hit_maxit:
-        #     log_line(RED % (
-        #         f"WARNING: inner max_it reached at z = {zK:.3f}; "
-        #         f"iterations = {len(solver.Ndofs_vec)}"))
-        
-        # # Check our dof
         dof_limited = (getattr(solver, "termination_reason", None)== "max_dofs_reached")
-        # if dof_limited:
-        #     log_line(RED % (
-        #         f"WARNING: inner max_dof reached at z = {zK:.3f}; "
-        #         f"dofs = {solver.Ndofs_vec[-1]}"))
-        
+
+        # --------------------------------------------------------
+        # Quantities shared by the entire vertical column
+        # --------------------------------------------------------
+
+        phi_x = float(np.real(phi_x))
+        corr_x = float(np.real(corr_x))
+        eta = float(np.real(eta))
+
+        # phi_x^2 is the discrete folded eigenvalue mu_h(x)
+        mu_x = phi_x**2
+
+        # If corr is your corrected Phi value, corr_x^2 is the
+        # corresponding corrected folded eigenvalue at x
+        mu_corr_x = corr_x**2
+
+         # --------------------------------------------------------
+        # Create an ordinary result for EVERY outer triangle
+        # in this vertical column
+        # --------------------------------------------------------
+
+        for k in cell_indices:
+
+            zK = barycentres[k]
+            hK = diameters[k]
+            y = float(np.imag(zK))
+
+            # Exact self-adjoint shift:
+            #
+            # mu_h(x + iy) = mu_h(x) + y^2
+            #
+            # hence
+            #
+            # Phi_h(x + iy) = sqrt(mu_h(x) + y^2)
+            phi = np.sqrt(mu_x + y**2)
+            # Same transformation for your corrected Phi
+            corr = np.sqrt(mu_corr_x + y**2)
+
+            # eta is the DWR estimator for the folded eigenvalue mu.
+            # It is IDENTICAL along the whole vertical column.
+            eta_target = hK**2
+            eta_ratio = eta / eta_target if eta_target > 0 else np.inf
+
+            # Save the local results
+            local_results.append({
+                "cell": int(k),
+                "zK": complex(zK),
+                "hK": float(hK),
+                "phi": float(np.real(phi)),
+                "corr": float(np.real(corr)),
+                "eta": float(np.real(eta)),
+                "eta_target": float(eta_target),
+                "eta_ratio": float(eta_ratio),
+                "iterations": len(solver.Ndofs_vec),
+                "dofs": solver.Ndofs_vec[-1],
+                "cells": final_mesh.num_cells(),
+                "max_it_limited": inner_hit_maxit,
+                "dof_limited": dof_limited,
+                "phi_nonfinite": status["phi_nonfinite"],
+                "corr_nonfinite": status["corr_nonfinite"],
+                "eta_nonfinite": status["eta_nonfinite"],
+                "marked_fractions": [
+                    float(x) for x in getattr(solver, "marked_fractions", [])],})
 
 
-        # local_results.append({
-        #     "cell": int(k),
-        #     "phi": float(np.real(phi)),
-        #     "corr": float(np.real(corr)),
-        #     "eta": float(np.real(eta)),
-        #     "iterations": len(solver.Ndofs_vec),
-        #     "dofs": solver.Ndofs_vec[-1],
-        #     "cells": final_mesh.num_cells(),
-        #     "max_it_limited": inner_hit_maxit,
-        #     "dof_limited": dof_limited,
-        #     "phi_nonfinite": status["phi_nonfinite"],
-        #     "corr_nonfinite": status["corr_nonfinite"],
-        #     "eta_nonfinite": status["eta_nonfinite"],
-        #     "marked_fractions": [float(x) for x in getattr(solver, "marked_fractions", [])],})
-
-        eta_target = hK**2
-        eta_ratio = float(np.real(eta)) / eta_target if eta_target > 0 else np.inf
-        local_results.append({
-            "cell": int(k),
-            "zK": complex(zK),
-            "hK": float(hK),
-            "phi": float(np.real(phi)),
-            "corr": float(np.real(corr)),
-            "eta": float(np.real(eta)),
-            "eta_target": float(eta_target),
-            "eta_ratio": float(eta_ratio),
-            "iterations": len(solver.Ndofs_vec),
-            "dofs": solver.Ndofs_vec[-1],
-            "cells": final_mesh.num_cells(),
-            "max_it_limited": inner_hit_maxit,
-            "dof_limited": dof_limited,
-            "phi_nonfinite": status["phi_nonfinite"],
-            "corr_nonfinite": status["corr_nonfinite"],
-            "eta_nonfinite": status["eta_nonfinite"],
-            "marked_fractions": [
-                float(x) for x in getattr(solver, "marked_fractions", [])],})
 
 
 
@@ -815,73 +913,6 @@ while len(triangles) > 0 and sweep < max_sweeps:
         #       results.append(result)
         results = [result for rank_results in gathered for result in rank_results]
         results.sort(key=lambda result: result["cell"])
-
-
-
-
-
-
-
-        # TESTING HYPOTHESIS THAT RESULTS MATCH FOR SHARED REAL PARTS
-        # THE FOLLOWING IS A TEST GENERATED BY CHAT
-        # ------------------------------------------------------------
-        # TEST: results should agree along vertical columns
-        # ------------------------------------------------------------
-
-        column_groups = {}
-
-        for result in results:
-
-            xkey = round(result["zK"].real, 8)
-            hkey = round(result["hK"], 8)
-            key = (xkey, hkey)
-            if key not in column_groups:
-                column_groups[key] = []
-            column_groups[key].append(result)
-
-
-        for (x, hK), group in column_groups.items():
-
-            # Need at least two different y-values to test anything
-            if len(group) < 2:
-                continue
-            mu_values = []
-            eta_values = []
-            for result in group:
-
-                y = result["zK"].imag
-                phi = result["phi"]
-                eta = result["eta"]
-
-                # If the hypothesis is right, this is independent of y
-                mu_x = phi**2 - y**2
-
-                mu_values.append(mu_x)
-                eta_values.append(eta)
-
-
-            mu_values = np.array(mu_values)
-            eta_values = np.array(eta_values)
-
-            mu_spread = np.max(mu_values) - np.min(mu_values)
-            eta_spread = np.max(eta_values) - np.min(eta_values)
-
-            log_line(
-                f"COLUMN TEST: "
-                f"x={x:.8f}, "
-                f"hK={hK:.4e}, "
-                f"n={len(group)}, "
-                f"mu spread={mu_spread:.3e}, "
-                f"eta spread={eta_spread:.3e}"
-            )
-
-
-
-
-
-
-
-
         its_hist = [result["iterations"] for result in results]
         dofs_hist = [result["dofs"] for result in results]
         cells_hist = [result["cells"] for result in results]

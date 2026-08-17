@@ -11118,3 +11118,654 @@ firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary p
 [1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.00935442404294925-3.7188872521723873e-17j)[0m
 [1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.003649047487785307-8.825630175836863e-18j)[0m
 firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.007818345131360838-1.4727481093504955e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.005463025399063063+8.805521362844586e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.004275009938754232-5.5998527058304254e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.006055150051175015-1.3635704357882749e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0048737468340875004-4.211135510363734e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.005685984244677101-3.695509824904031e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.002997990451584232-4.2405644676322865e-19j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.004190011429763308-1.3788060185287125e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0034278799615774826+2.3549018454841196e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.004486306726872273+5.7848809665893625e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.003570672842296467-1.05168993197106e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0028925240306421907-1.889393609034562e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.004009196650570592+7.530995840102911e-18j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0030311553110076417+2.9924364734332303e-17j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0035690345580413297+1.3264351613068942e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0031244467382172-1.2078196048021136e-17j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0023399046722076683-2.0896591584159028e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0028596338368967376-2.0194211946444027e-17j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0030862410442200057-4.386216476994326e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0028607058709971826+2.838504850093362e-17j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0024671998915043337+2.840803666314838e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0021687232887003982-8.449069109203834e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.002617855270126865+1.7490340954917305e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0023610502815854043+3.2592117377428364e-18j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.002465731318361289+1.0593046108590923e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0022105489989667293-2.344352761178292e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.001964035970272069+9.565344641509586e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.002271617743459668-1.6499161904113904e-17j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.34207213688587845+7.880298852863545e-16j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.27882326473605834-6.284846371038883e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.22396259991423342+4.0382310190336605e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.13618115559588378-2.7422999250684762e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.11488260777639969+1.5041140001262903e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.09690312890280953-4.4046080247509196e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.07673879399363615+1.6253651865607352e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.05787286864555929-4.039844780821553e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.04649101567869473-1.716671905498218e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.03873587135466539-1.02019314071455e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.03229325303249138-1.890380033615203e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.025786789543758886+1.537328843027191e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.021174259939317867+9.534676739459565e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.018165906821082288+9.008064712366568e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.014897119292403196-3.904237198037236e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0021260569078660387-6.088721416336755e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.012402004841067316-1.6643733965984825e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.010550204711961733-2.5443958752878634e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.3225219689905923+4.689921292947442e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.26350116226941855-1.801924895091925e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.18606918171738793-6.561972886360028e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.16305806225159575-1.3771027876222537e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.1041423869882587-1.4360522625317436e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.07990643224211456+2.566435722401807e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.057948809299273894+4.102351672258613e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.04482637514330609-8.187237857554948e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.03989362021985174+9.561549001965352e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.009578664358473548-3.5532386643135695e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.03372151700716972-1.327836279847699e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.001954893252372713+1.7647015860581303e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.028426774795343543-1.9440861164209936e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.02558543770302467+3.879320465538819e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.022648991931077753-2.8236380759477336e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.020891849435299207+1.2198000858863848e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.007899124002844676+1.1067347621871558e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.015465270230700339+8.47605230254056e-18j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.3631647700068655+2.3323577744483318e-17j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.2329151568245233+4.613583452567683e-17j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.1430519968686285+2.2743992290155782e-17j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.11570451093230574+6.4021395464395104e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.10007754381960242-8.062045564233917e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.08394534658059426+4.494758709921588e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0715693601160108-1.9604851301062144e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.002035572126832582+2.5995913584702998e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.05960778081125226+3.8583404319473055e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.053187380254763286+4.594315319540655e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.011484255202726031-1.3924474976673348e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.03728486803186403-1.5436034475335058e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.007254453637377908+2.3812312262444675e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.03357204696047255+4.869000495269201e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.02699823474635728-5.2487883795444295e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.019104178267112488+3.049623325491081e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.010563434632188534+3.915408866259486e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.351715542974251-3.9769475998282095e-17j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.28730227517284723+1.4425429328820546e-17j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.17823481457313753-1.907711628128035e-17j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.13119575918031445+2.115068599072871e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.11230497833354038+1.1075992952657216e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.08574978534815421+2.2567747766383137e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.015842016103955418+1.3730539902147522e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.08207780304240707+2.4047032928464863e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.06028435969947455-1.3838525588664963e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.051174067412900634+2.1353216135918293e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.045742485426467146+1.1186543343071248e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.00888814523838323-1.708415449851482e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.037085425908972+1.6638322672401327e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.013268265753082967-4.557478868121655e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.033474638101875204+7.674277232790012e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.005513691222273555+2.3613764193559003e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.02587079225696357-7.214004483769073e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.02369076589563055+1.0996090148081106e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.011667861350243725+4.6275920208888024e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.01875410718390999-2.009622293364442e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.01535500751061107+1.6616370586408573e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.007376752744610397-2.0002706621141628e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.010435718544024156+4.0297904354610255e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.013822363883442051+4.26470593365573e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.011795444807914765+4.312053741507606e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.008512294178139167-9.843824705150553e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.005318785823488143-1.4934663887102933e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.006770348679477896-4.841250183019791e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.011046775264969569+2.8924287972705646e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0071832501051328716-1.0795019988095794e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.008414889100539077+7.17482029513758e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.006182509333777106-8.871439608440999e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.004584031922469221+7.595426233449227e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.006786454177096941+9.497394240980916e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.007326054589785149+7.85644157061156e-18j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.004856482424915004+4.960236778101889e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.006027323789012866+9.567647720008389e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.006013736381787511-1.2635078141856604e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0040702923665457275+3.014850335294091e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.005493609843066424+3.346368181751942e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.005370487317699839-1.484033700744581e-20j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.004337207481255807-6.829569846652738e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.004815413676567153+2.2644603168921926e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0033959557817652966-7.46616560420014e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0044628421377289965+5.694632599017189e-18j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.004142784269839333-5.89165409699913e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.004526027780001475+1.2422959658749547e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.003799551891422059+1.8410933473884402e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0031395066354493327+1.3355385269974108e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.003663223349728875+5.239001653164173e-17j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0034971066580389387-8.735602018525291e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.003297168799015675+2.0587119801987285e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.003188774149212135-3.2231864037412903e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.002712891083846112+2.966720636761829e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0030895059461595142+5.776888003798909e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0031334533967194555+3.4727126644396925e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.002869324594055643-1.7832202734768954e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.002383675478400822-1.3813516535746537e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.002580938643322267-3.560523659328795e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0024625105837527317-2.408647993772427e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.002592241756077072+9.609997651668297e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0023860130781429597+6.9005791048103035e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0020124398935118222+2.3065040949130494e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.002365563056725038+2.616529020951244e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.364605854174851-1.7025150640450772e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.21796783926962748-1.4311717526427143e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.15517265697806648-7.542360243688368e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.12850643975667092-4.739117046525785e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.09367960845692161+5.2975611400649785e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.07167401772673222-3.5822197945214496e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.06109213420714778-3.923598601799307e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.05130065472863051-8.37738128674729e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0365218173597333+1.8097948380470146e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.03349096596697971+9.243822128980042e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.030087401390318017+2.6337308284494203e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.026848306833279056-3.1835938983533638e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.02314796710648097-8.139588943743568e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.018161437678399613-1.84065955199887e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.01612921771724367+9.00174310511576e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.002259692150796585-4.069762891856469e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.01218637747536711+5.1493026102533005e-20j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.01049384914201352-8.587646632572174e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.008674535161576246-6.767238657378569e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0074909460980665124+1.0593436278335898e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0019938653467048146+3.102586322373591e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0021060107437804944+9.542845097744927e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.007122778227024175+1.3661118363780925e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.364803947136843-1.993403097370312e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.21703058898948313-1.2847067216407838e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.12976022318966926-2.1109623654900426e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.3651093263467473-5.556016876748359e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.2173206624141972-3.491344554262645e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.14764462954940738+1.3080624645615527e-17j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.12265100451209586+1.4444696053277617e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.12991041689288255+5.4922513672003174e-18j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.10666058894712985-1.0046511340018418e-17j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0886273666982359-8.308521217094513e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.11721373292042929-6.700660067987085e-18j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.06852927226063071-8.180779163655442e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.08687473228726367-1.0097957665260978e-17j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.05598380537886538-1.1932356818817298e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.07000660630169102+5.095076032735174e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.05394978997753519-1.5336372355809746e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.041093166100985797+3.961350763025788e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.049436192635958616-7.535016725501405e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.036761937288121764+1.5532292938216538e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.03777790474639116-8.505080725961622e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.006868264438532348-1.739539133759555e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.03163123029857866-2.20658062824202e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0358633749433992-1.0828893187523897e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.02856063783123821+1.1711541017272964e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.024502595591516577+3.3423264590385424e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.02529723672750837+8.008318720292056e-19j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.021727690658496557-3.753280914472868e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.021421174912516848-1.4251344740592735e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.018509859790344016+1.5469468474938438e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.01905451547400091+9.194589114729717e-19j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0167288458445775+7.315220495317058e-20j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0021393213930212436-4.935142972111062e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.016947101611857137-1.2661836446530424e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.014771534441835085+7.051090957168097e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.014752672891571278+2.1002587764374002e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.00490338003143764-1.6860773703827728e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.01083696346410336-1.484824590392229e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.011855507793623682+3.1281565423552167e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.009888102146748984-1.058534024238999e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.01006694609200011-1.0127355194359323e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.009242419129574242-8.414936464028358e-19j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.009169919957640096-8.057775165545866e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0047703462515064-9.003114574185323e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.007969089035860142-5.144139820911929e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.007886709490126306+5.8417941706963626e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.006984823427760619+7.508088176456377e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.006970640708074856+5.458580745842489e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0038035686878406336-1.01119670207556e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.006284713722370947-3.348339000869374e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.006527991891056026-7.638714987161327e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0019609270869555737+4.621059887141765e-19j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0057278778123356815+5.001360741385633e-19j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0051313284328193525+1.871047773929207e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.3639554516661614+3.319221478863062e-17j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.22677871959834825-1.272946875290829e-17j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.17332311247442092-8.261039653676398e-18j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.13957462307502957+4.747018740606946e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.12287989606305075+1.072368963284762e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.09641987336291376+8.885403021937145e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.08022066089688573+7.171922677356492e-19j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.07142992638071724+1.8505385039360188e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.05339472764229079-3.9914204767017e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.04490165688834592-1.0832609524437929e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.038942625167632396+1.6657356401032034e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.03611858089212883+9.092429830483714e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0034071620501517695+3.6295941026600434e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.026642835602941017-1.2649280042870707e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.022599475262167188-1.718542947423679e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.019529068151219707+3.178408150432631e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0044868706320657665+3.6582967455958016e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.004584862666485979-2.263662994327705e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.01802245306605059-1.4290501704591102e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.013311954545287602+2.1423985060321216e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0122860383699949+5.578631236179201e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.010408621792744488-1.0746071351411706e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.004395469658759055+1.476403954964041e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.009557747614714993+1.7342143095608088e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.00395616315668157+8.580079253708473e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.008670677624613786+7.222011209669036e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0030170584812681746+2.2687908077649332e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.007485700675494957+2.7410420760008225e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.00675205523260271+2.360670489711659e-19j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0034738761144902292+6.088143191902793e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.003408512836941483-7.583461874975672e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.00615360152580461-8.538904680224056e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.002907743975096347-1.515691663048046e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.004802546089500297-1.2397384285006567e-17j)[0m
+2026-08-17T15:45:25+02:00 RAM usage: 95.74 GiB; limit: 200.00 GiB
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.002867703794394235+1.155074491270242e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0030470379501240526-4.817288654841554e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.004364075058976668+1.793073328631018e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0023340867486652157+1.0692940685111059e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.003695605700583341+6.412429137771786e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.002830755360295001+6.54515542743812e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.002704288686431206+7.387478597865786e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0031346614789856545+2.4993129729892137e-19j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0020844634427162638-1.9325047969393833e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0024160756501274403+7.213067093893778e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.3654557063340756-2.4940621372641068e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.21512845762043148+1.0233764671437957e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.1384843344846309+7.690535445284173e-19j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.12025685243337587-4.398602786310853e-19j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.08411821112540509+8.291512899950561e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.07184826025729006-1.3051597150745913e-19j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.06177489567017195+8.537918425939195e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.041883256672594425-1.2224883979823414e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.036979369962696615+1.73748073828664e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.03310733172978209+3.6779015431063685e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.028758159475101405+9.162785620096786e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0248769521289695-5.7249980245093284e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.02081392345434411-6.316387047240507e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0186479233088192-1.2711225364893637e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0029588764582146416-7.83321662455231e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.015874749836205425-7.497454565152458e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0022221059500370246-3.500065455725491e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.014327736477810764-1.2321192935371711e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.01360974243402749+6.45427720894117e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.009210845188900679+3.3904086410959563e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.008640319441184749+4.697118790078448e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.002220814426123834-8.329747417287312e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.006672685788646919-2.7347902272608094e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.3655538159087295+1.2887685262224965e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.2151010435106412+1.1733898546071533e-19j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.14498876746965478-1.2290397312321135e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.12291662883009034+2.5105875734987763e-18j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0956151311210866+1.2678321249195309e-17j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0024218932852621794-1.004851527430651e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.08476814162956828+9.143860809287083e-19j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.060765717716549365+8.174556890215667e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.04940568134135388+1.961934824953441e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.04041230417236222-1.3573481115128323e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.03534866764258093+3.847752859784811e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.029989714412502803-1.681280510304358e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.02554122576379356-3.0286236211927297e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.02000239221446628-7.636400364638526e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.006642973552791428-6.566087192542522e-19j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.01875596119324039+8.703587717985769e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.01717393973475242-3.1145328395239084e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.014282112163645874+2.9781577372045173e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0021106400835941915+9.355105184961617e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.012188078221053264-8.147281421495495e-19j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.005941519910050901-1.2900517625064682e-19j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.010161922839324586-5.915919178669522e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.36573217764335075-2.638828462139875e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.21127200417551803-2.245183865160175e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.14076335304740994+5.741421320359364e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.1187413184107557+9.041816944382188e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.09124600487142848-1.0460984842091711e-17j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0528972801957859+1.2687750520913809e-17j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.044988679074724966-9.827569657286671e-18j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.037065184968968115+9.640346769867358e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.03133849227827557-7.170651681823622e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.00887747596982541-6.828310842031032e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.02707779747108333-7.908808090392064e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0057634955678878145+7.173389629893181e-19j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.022519702546493024+8.360545197780862e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0022581640394279184+1.2658365474653449e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.01710670122125633+1.425510661579938e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.007314935827711509+1.584154635392684e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.015877579301740535+5.864042727127526e-20j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.36523553595042624-1.676861124993258e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.21791330189281855-5.840583530605377e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.13439212855545932-1.5097359890259018e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.11688651135217216+2.2153749135065964e-18j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.10242294337086544+5.602733210352695e-18j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.08569082928512345-1.5748893968349675e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.013645524589913855-6.841704925066569e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0749133986391959-6.265154714126308e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.06340377048686782+1.0261127521195068e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.04096315989735628-6.580442080209377e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.007003091391659476-4.352298423043262e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.03444098796966053-1.5212245467030047e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.029189741282201167-1.052606134134895e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.025274947059764487-4.1220020522299593e-19j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.011030393187771975-2.8221783774510997e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.005173177433123806-3.87372643522547e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.01907851949730427-9.720125013754794e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.01570966550325465-7.343603372552214e-19j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.009269083109261042-4.990473081809106e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.005834464913078886+7.696009445332653e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.012416851468632549+1.6121562875888009e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.01105881467977184-4.351860233279593e-19j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.008104359908301289-7.809315827175258e-19j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.010106892815574812-1.9496669596730947e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.004640256452198513+2.2385549546408136e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.005390239497409594+4.204227479910858e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.00719069412397743+1.0956952064559659e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.00830724806598199-1.1771455347748453e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.006750149929406902+2.4718620123192193e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.006869292733961183+5.3493047584714965e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.004548858663788574+1.2323547301773514e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.005155861593835927+2.8467333502848158e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.005835119734234048-5.493120435855126e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.006146259813137016-3.065735346473451e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.00404651349017288+1.3826082857469188e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.006015528038470225+1.0072610343226811e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.005499411921190267-1.5366274918640263e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0036087692610857302-9.265798044954809e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.005203395037048176+1.1915310751390598e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.00490698346585135-7.014363465662213e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0036468750367868734+4.6130488371189585e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0048822813314063195-7.578237184136864e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.004121165417918742+4.91774791755066e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.003371858833852922-7.232351656071112e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0042485509194741655-2.8839878804748994e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.003594006341188383+3.1050143136445325e-19j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0037601702951739965-2.8523795450433448e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.003097050942196189-1.4655003921398583e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.003426637454065317+6.547718592074891e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0032432986826379452+6.1726845441109465e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.003097569230562651-7.124478605065363e-19j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0030462408120414427+1.5081416808677504e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0028267685435071008+1.1220606956371068e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0029551092138688432+4.963889004374001e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.002913893351008297-3.710255851498497e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0026670188358237025-5.3788626059854884e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0023791502279555867+1.0887777004850815e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0026840722428573293+2.5930672116660557e-18j)[0m

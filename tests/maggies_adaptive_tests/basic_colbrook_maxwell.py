@@ -7,7 +7,7 @@ import os
 
 
 # Set a triangular mesh like in Matt's example (Fig 3.22)
-N = 128
+N = 32
 mesh = SquareMesh(N, N, pi, quadrilateral=False)
 
 
@@ -89,8 +89,10 @@ solver = LinearEigensolver(problem, n_evals=1, solver_parameters=sp) # ask for o
 cache_guess = Function(problem.restricted_space)
 
 # Set xs = Grid(n) and ys to hold Phi_n
-h = 0.01
-xs = list(np.arange(0.01, 4, h)) + [4]
+# h = 0.01
+# xs = list(np.arange(0.01, 4, h)) + [4]
+h = 0.02 # grid spacing
+xs = np.append(np.arange(2.0, 4.0, h),[4.0]) 
 ys = []
 # The loop for Matt's algorithm
 for x in xs:
@@ -107,23 +109,44 @@ for x in xs:
         solver.es.setInitialSpace(vec_r) # use the eigenfunction (in vec_r) as initial guess for next iter (next grid point)
 
 
-# Plotting routine
-plt.plot(xs, ys, linewidth=2, label = r'$\Phi_n(z, A)')
-nn = np.array([n**2 + m**2 for n in range(10) for m in range(10) if n**2 + m**2 < 4**2])
-plt.plot(np.sqrt(nn), 0*nn, 'ok', markersize=5, label = r'exact $\omega$')
-os.makedirs("basic_maxwell_output/", exist_ok=True)
-plt.xlabel(r'$z$')
-plt.legend()
-#plt.title(rf"Approximation of $\mathrm{{dist}}(x, \text{{spectrum}})$ ($N = {N}$)")
-plt.savefig(f"basic_maxwell_output/dist_plot_{N=}.pdf", dpi=300, bbox_inches="tight" )
-# plt.show()
 
-# Triplot the mesh
-nmarkers = len(mesh.exterior_facets.unique_markers)
-fig, ax = plt.subplots(figsize=(5, 5))
-triplot(mesh, axes=ax, \
-        interior_kw={"edgecolors": "black","linewidths": 0.7}, \
-        boundary_kw={"colors": ["black"] * nmarkers,"linewidths": 1.2},)
-ax.set_aspect("equal")
-ax.set_axis_off()
-plt.savefig(f"basic_maxwell_output/mesh_plot_{N=}.pdf", dpi=300, bbox_inches="tight" )
+# Exact results
+exact_omega_squared = np.array([n**2 + m**2 for n in range(10) for m in range(10) if n**2 + m**2 <= 4**2])
+exact_omega = np.unique(np.sqrt(exact_omega_squared)) # take our duplicates
+exact_omega = np.sort(exact_omega) # sort them
+exact_dist = np.min(np.abs(np.subtract.outer(xs, exact_omega)), axis=1)
+#error = np.abs(np.array(ys) - exact_dist)
+# Plotting routine
+# plt.plot(xs, ys, linewidth=2, label = r'$\Phi_n(z, A)')
+# #nn = np.array([n**2 + m**2 for n in range(10) for m in range(10) if n**2 + m**2 < 4**2])
+# #plt.plot(np.sqrt(nn), 0*nn, 'ok', markersize=5, label = r'exact $\omega$')
+# plt.plot(exact_omega, 0*exact_omega, 'ok', markersize=5, label = r'exact $\omega$')
+# plt.plot(xs, exact_dist, linestyle = '--', color = 'grey', label = r"Exact $\operatorname{dist}(z, \operatorname{Sp}(A))$")
+# os.makedirs("basic_maxwell_output/", exist_ok=True)
+# plt.xlabel(r'$z$')
+# plt.legend()
+# #plt.title(rf"Approximation of $\mathrm{{dist}}(x, \text{{spectrum}})$ ($N = {N}$)")
+# plt.savefig(f"basic_maxwell_output/dist_plot_{N=}.pdf", dpi=300, bbox_inches="tight" )
+# # plt.show()
+
+# # Triplot the mesh
+# nmarkers = len(mesh.exterior_facets.unique_markers)
+# fig, ax = plt.subplots(figsize=(5, 5))
+# triplot(mesh, axes=ax, \
+#         interior_kw={"edgecolors": "black","linewidths": 0.7}, \
+#         boundary_kw={"colors": ["black"] * nmarkers,"linewidths": 1.2},)
+# ax.set_aspect("equal")
+# ax.set_axis_off()
+# plt.savefig(f"basic_maxwell_output/mesh_plot_{N=}.pdf", dpi=300, bbox_inches="tight" )
+
+# Save results for later plotting
+np.savez(
+    f"finerzgrid_folded_maxwell_output/basic_data_{N=}.npz",
+    grid=np.array(xs),
+    phi_vals=np.array(ys),
+    exact_omega=exact_omega,
+    exact_dist=exact_dist,
+    #error=error,
+    dofs=problem.restricted_space.dim(),
+    N=N,
+)

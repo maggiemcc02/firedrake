@@ -96,10 +96,10 @@ else:
 Nx = int(os.environ.get("NX", 5 if SMOKE else 10))
 Ny = int(os.environ.get("NY", 5 if SMOKE else 10))
 # diam_tol = float(os.environ.get("DIAM_TOL", 0.4 if SMOKE else 0.005))
-diam_tol = float(os.environ.get("DIAM_TOL", 0.4 if SMOKE else 0.01))
-max_sweeps = int(os.environ.get("MAX_SWEEPS", 1 if SMOKE else 2))
-max_it = int(os.environ.get("MAX_IT", 2 if SMOKE else 50)) # Make it high for now
-max_dofs = int(os.environ.get("MAX_DOFS", 10000)) # Use a max dof to speed things up
+diam_tol = float(os.environ.get("DIAM_TOL", 0.4 if SMOKE else 0.02))
+max_sweeps = int(os.environ.get("MAX_SWEEPS", 1 if SMOKE else 10))
+max_it = int(os.environ.get("MAX_IT", 2 if SMOKE else 1000)) # Make it high for now
+max_dofs = int(os.environ.get("MAX_DOFS", 100000)) # Use a max dof to speed things up
 
 # OUTDIR overrides the destination -- point a smoke test somewhere scratch so
 # it cannot overwrite the plates of a real run into the same domain's directory
@@ -798,6 +798,8 @@ while len(triangles) > 0 and sweep < max_sweeps:
     # ------------------------------------------------------------
 
     local_results = []
+    local_solve_results = []
+
     for col_idx in range(RANK, len(columns), NPROCS):
 
 
@@ -820,6 +822,25 @@ while len(triangles) > 0 and sweep < max_sweeps:
 
         inner_hit_maxit = (getattr(solver, "termination_reason", None) == "max_it_reached")
         dof_limited = (getattr(solver, "termination_reason", None)== "max_dofs_reached")
+
+
+        # Save results per eigensolve (avoid repeated logs)
+        local_solve_results.append({
+            "xkey": float(xkey),
+            "x": float(x),
+            "h_column": float(h_column),
+            "eta": float(np.real(eta)),
+            "eta_target": float(h_column**2),
+            "eta_ratio": (
+                float(np.real(eta)) / float(h_column**2)
+                if h_column > 0 else np.inf),
+            "iterations": len(solver.Ndofs_vec),
+            "dofs": solver.Ndofs_vec[-1],
+            "cells": final_mesh.num_cells(),
+            "max_it_limited": inner_hit_maxit,
+            "dof_limited": dof_limited,
+            "marked_fractions": [
+                float(q) for q in getattr(solver, "marked_fractions", [])],})
 
         # --------------------------------------------------------
         # Quantities shared by the entire vertical column
@@ -900,8 +921,9 @@ while len(triangles) > 0 and sweep < max_sweeps:
     rss_max = WORLD.reduce( rss_local_gb,op=MPI.MAX,root=0 )
 
 
-    # Still inside the sweep, but after the k loop
+    # Gather across ranks
     gathered = WORLD.gather(local_results, root=0)
+    gathered_solves = WORLD.gather(local_solve_results, root=0)
 
     # combine results from each rank
     if RANK == 0:
@@ -913,10 +935,33 @@ while len(triangles) > 0 and sweep < max_sweeps:
         #       results.append(result)
         results = [result for rank_results in gathered for result in rank_results]
         results.sort(key=lambda result: result["cell"])
-        its_hist = [result["iterations"] for result in results]
-        dofs_hist = [result["dofs"] for result in results]
-        cells_hist = [result["cells"] for result in results]
-        marked_hist = [fraction for result in results for fraction in result["marked_fractions"]]
+        solve_results = [result for rank_results in gathered_solves for result in rank_results]
+        solve_results.sort(key=lambda result: result["x"])
+        its_hist = [r["iterations"] for r in solve_results]
+        dofs_hist = [r["dofs"] for r in solve_results]
+        cells_hist = [r["cells"] for r in solve_results]
+        marked_hist = [fraction for r in solve_results for fraction in r["marked_fractions"]]
+
+
+        # check max dofs and maxits
+        maxit_solves = [r for r in solve_results if r["max_it_limited"]]
+        maxdof_solves = [r for r in solve_results if r["dof_limited"]]
+        n_max_it = len(maxit_solves)
+        n_max_dofs = len(maxdof_solves)
+        # Number of outer cells whose reused solve was DOF-limited
+        n_maxdof_cells = sum(r["dof_limited"] for r in results)
+        if maxdof_solves:
+            log_line(RED % (
+                f"WARNING: max_dofs reached in "
+                f"{n_max_dofs}/{len(solve_results)} eigensolves "
+                f"({n_maxdof_cells}/{len(results)} outer cells affected)"
+            ))
+
+        if maxit_solves:
+            log_line(RED % (
+                f"WARNING: max_it reached in "
+                f"{n_max_it}/{len(solve_results)} eigensolves"
+            ))
 
 
 
@@ -930,17 +975,6 @@ while len(triangles) > 0 and sweep < max_sweeps:
             # Set k and zk
             k = result["cell"]
             zK = barycentres[k]
-
-
-            # Check inner loop max its and dof
-            if result["max_it_limited"]:
-                log_line(RED % (f"WARNING: max_it reached at cell "f"{result['cell']}"))
-
-            if result["dof_limited"]:
-                log_line(RED % (
-                        f"WARNING: max_dofs reached at cell "
-                        f"{result['cell']}, "
-                        f"dofs = {result['dofs']}"))
 
             # Check for nans and infs
             if result["phi_nonfinite"]:
@@ -994,20 +1028,10 @@ while len(triangles) > 0 and sweep < max_sweeps:
             # Save classified triangles
             if cls != "refine":records.append({"tri": triangle,"phi": phi,"R": R,"cls": cls,})
 
-
-        
-        # Check how many times we hit maxits or maxdof
-        n_max_it = sum(result["max_it_limited"] for result in results)
-        n_max_dofs = sum(result["dof_limited"] for result in results)
-
         # Extra checks 
         ratios = np.array([r["eta_ratio"] for r in results], dtype=float)
-
-        dof_limited_results = [r for r in results if r["dof_limited"]]
-        dof_ratios = np.array(
-            [r["eta_ratio"] for r in dof_limited_results],
-            dtype=float
-        )
+        dof_limited_results = [r for r in solve_results if r["dof_limited"]]
+        dof_ratios = np.array([r["eta_ratio"] for r in dof_limited_results],dtype=float)
 
         log_line(
             f"eta/target ratio: "
@@ -1028,7 +1052,7 @@ while len(triangles) > 0 and sweep < max_sweeps:
         
         # print DOF report
         if dof_limited_results:
-            
+
             sample_idx = np.linspace(
                 0,
                 len(dof_limited_results) - 1,
@@ -1040,9 +1064,8 @@ while len(triangles) > 0 and sweep < max_sweeps:
                 r = dof_limited_results[ii]
                 log_line(
                     f"MAXDOF SAMPLE: "
-                    f"cell={r['cell']}, "
-                    f"z={r['zK']:.4f}, "
-                    f"hK={r['hK']:.4e}, "
+                    f"x={r['x']:.4f}, "
+                    f"h={r['h_column']:.4e}, "
                     f"eta={r['eta']:.4e}, "
                     f"target={r['eta_target']:.4e}, "
                     f"ratio={r['eta_ratio']:.2e}, "
@@ -1057,16 +1080,19 @@ while len(triangles) > 0 and sweep < max_sweeps:
             f"{counts['out']} out, "
             f"{counts['contour']} contour, "
             f"{counts['refine']} refined; "
+            f"eigensolves {len(solve_results)}, "
             f"inner its avg {np.mean(its_hist):.2f}, "
             f"final cells avg {np.mean(cells_hist):.0f}, "
             f"final cells max {np.max(cells_hist):.0f}, "
             f"final dofs avg {np.mean(dofs_hist):.0f}, "
             f"final dofs max {np.max(dofs_hist):.0f}, "
-            f"max_it limited {n_max_it}, "
-            f"max_dofs limited {n_max_dofs}, "
+            f"max_it limited {n_max_it}/{len(solve_results)}, "
+            f"max_dofs limited {n_max_dofs}/{len(solve_results)}, "
+            f"dof-affected cells {n_maxdof_cells}/{len(results)}, "
             f"marked fraction avg "
             f"{np.mean(marked_hist) if marked_hist else 0:.2f}, "
-            f"peak RSS across ranks {rss_max:.2f} GB"))
+            f"peak RSS across ranks {rss_max:.2f} GB"
+        ))
 
         # New triangle list
         triangles = np.asarray(new_triangles, dtype=complex)

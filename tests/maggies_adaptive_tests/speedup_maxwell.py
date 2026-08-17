@@ -798,10 +798,10 @@ while len(triangles) > 0 and sweep < max_sweeps:
     # ------------------------------------------------------------
 
     local_results = []
-    for j in range(RANK, len(columns), NPROCS):
+    for col_idx in range(RANK, len(columns), NPROCS):
 
 
-        xkey, cell_indices = columns[j]
+        xkey, cell_indices = columns[col_idx]
 
         # Use the actual x-coordinate rather than the rounded key
         x = float(np.real(barycentres[cell_indices[0]]))

@@ -18366,3 +18366,669 @@ firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary p
 [1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
 [1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.02166484413104236-3.1698922365679414e-17j)[0m
 [1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.013229188182954443+9.204014023975069e-18j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.02020321815112022-5.5560130078576664e-18j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.018793152392074824+1.3386718142236707e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.008831714808802746-9.495230787301055e-21j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.011920585422666958+1.4759604363189805e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.014060847561278057-2.4225146854892142e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.008457037971919362-7.067030366333269e-20j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.009734244564534741-4.04370746446189e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.01244322315252005-1.0109190227151025e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.009115308437022624-2.0830423949768318e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.007416373390585436-2.484232340552758e-19j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-1.0161078666634622-3.1385796468187755e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.6614478361535566-2.5541713324375957e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.6294949014407297-9.239632728489101e-18j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.5281006588230414+1.4352967121344093e-18j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.43031753926415467+2.997449347552743e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.3955479961723392+1.4766639344307427e-18j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.30673395635041845-1.0363925744212699e-18j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.2507162685235236-7.936247328774539e-19j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.187616607747936-5.814654028364324e-18j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.1634032945601532+7.452425567654677e-18j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.13804422634139124-2.6918438424045572e-18j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.11156229872268505-5.60036081387881e-20j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.10527324285343814-3.489149754146618e-18j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.09766523039851016+6.384741013078008e-18j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.08523128377073383-8.5125229612712e-19j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0847690688676659-4.212892461996085e-18j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.07061416686635566-5.368560330830147e-18j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.06632156961654873-2.103942142779953e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.00977349793302521+3.176182607861547e-18j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.05277941773575792-3.852475993923239e-18j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.047326965226281034-1.0379913204474195e-18j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.037319925512788676+1.5732056159652084e-18j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.034495674481645214+1.709624354132844e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.00852566646655967-2.682480054620315e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-1.1453551314825776-1.9513695359426407e-15j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.6768326308766709-3.379582982235078e-16j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.5820602498131037-2.8164125217720546e-16j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.4899178869074164+3.3112584110205755e-16j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.026725464570688865+2.100825085450205e-18j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.4486060748996597+1.042356463795151e-15j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.4332539555399217-6.576391249096228e-16j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.3541450457790673-1.714043135003725e-16j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.3167286094700524-1.7469440831340602e-15j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.3084143213971196+2.6903828692610515e-15j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.26044234360603236+4.574104561593105e-16j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.25396629430537704-1.0258432191747071e-16j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.22814716175504515+3.821293316737655e-16j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.21191648671484148+1.4605020707121736e-16j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.19304601107391786+8.89194932388283e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.18141049674667367+2.0646019886905775e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.1615420410353501+1.5355022030856677e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.14201767982138339+9.041436470834563e-18j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.10970506745675958+2.878408413584922e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.02286492350002073-1.0545119802663274e-18j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.09178572684151198-3.8138181818098553e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0870217851831252+3.5568283560170187e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.07525852851426357+2.7320670244801565e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.06079574825542693+3.8608870290321083e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.04390305330263108+5.652413119880501e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.009190738939439292-2.736967577646844e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.019283195629583534-9.440110854067685e-19j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.03946707460447712+1.7140901792743678e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0348445367189305-1.8335665610365983e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.018236033504144013-4.2745401516740455e-18j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.026575363183778764-5.1108700556995685e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.01496219011404415-9.703567824044219e-19j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.024914634971217636+2.3485266431226346e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.02213581319775817+3.2114690105886975e-19j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.013870631354527768+4.763514201062921e-19j)[0m
+2026-08-17T20:45:28+02:00 RAM usage: 136.33 GiB; limit: 200.00 GiB
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.019732378256682913+1.2626868929395562e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.01136314142095625+8.242376798229592e-19j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.018580139999699215-5.158752935603315e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.015964082313919492-2.1320831451310085e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.010684747126898738+2.0199906185885105e-18j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-1.07946549909152+4.82434895017195e-15j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.6836766184930558+3.418916366088856e-16j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.6030939031508489+2.5246825301222484e-15j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.5314231224726353+1.6457330007982273e-15j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.43368767412542786-1.3000967453581864e-16j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.4019689194364708-1.9440108229563372e-16j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.3241468797818636-7.152249867662104e-16j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.2825407204454864-3.578989547622194e-15j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.2569704923396487+6.015253278448805e-16j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.22146618062388634-1.4469548592884318e-15j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.20542996462640528+1.675543559067012e-16j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.18812872972967803+1.4186323751589785e-15j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.17482329408127978+3.8904868000992823e-16j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.16591582174200364-4.524002322573635e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.1463262735568099-1.3983023810034163e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.12945089834114434+6.256751338309351e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.12434699970301916+4.3851286940887656e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0138042522536224-1.6124752567429542e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.10622481337192145+9.475629342860224e-18j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.08613157346535065-2.2264790132044762e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.07716127416208395+3.2431391748991027e-18j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.06641226578553484+2.005842814449553e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.05788928082858916+4.0877918274624706e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.05418262556839694+1.220894098035538e-18j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.03705409972279176+6.344777839270819e-18j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.034809718315305445-3.239636201448786e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.012663515472274896-1.744308500529527e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.027744813539809083+1.1841659329116018e-17j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.025492341601927006-2.2112686328125558e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.019669307353553933+4.5824242724001835e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.010730249435179797-2.6806868105988364e-17j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.018108275687472312-3.2474160208358284e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.014599841600311247+5.962117240027151e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.013390744957092797+5.929079672495006e-18j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.010158685474353802+6.903886408772846e-18j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.009687152816106957+1.2639588865795133e-17j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.009099293213168725-4.360679412152027e-19j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-1.1238541348470035-6.874029026964309e-16j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.6765722739661196+3.445446510365631e-16j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.5790107186367492+1.9864570934794865e-16j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.48367307792252817+1.2751309727143713e-16j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.43344569006187295+1.6696477125918528e-16j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.4164019035849384+8.366703854517545e-16j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.33779114178707975-4.51016653030263e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.29562431049199767-3.9051032330821004e-16j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.27085252366339346+1.9756985906349674e-19j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.2455308452318748-1.6013992936324162e-15j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.2272987192065653-3.713546192822055e-16j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.2129278148019383+2.5696510634243052e-15j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.18227270542265814-3.0432399808883114e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.1664352371604592+1.2743963993803362e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.15904157514811812-8.993521208640447e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.14169125913062872-6.350585946108412e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.13867283012050524-1.9295016992119422e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.12532208434887449+1.1174429321153591e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.11019651073972511-1.662327687591864e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.09406047616734099+1.690174903840554e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.08092576934531268+1.8281968502097276e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.07427941807419376+7.114437460383015e-18j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.06260657376801253+3.321805750951567e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.04833346845793019-5.1195088061001695e-18j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.03929787961094276+1.1301917945836806e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.03661003539368886+4.455281742305735e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.02947935872311634-1.5942630452963467e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.028237680244504317-4.3335926939687733e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.02459561833431317+2.431983608257931e-18j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.020569559447085106-2.87965679319455e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.018308305924585447+3.5636997344225134e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.015828157278760205+2.9204037009038474e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.014047776837823595-2.4781269977576664e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.01221337151262715-1.8284280042573364e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.011510879860123401-6.899705316694653e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.009622489514071906+1.7060466874419826e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.009192828945306094-1.339424527501359e-17j)[0m
+[1;37;31mWARNING: max_dofs reached in 117/160 eigensolves (2924/3928 outer cells affected)[0m
+eta/target ratio: median 2.05e+00, p90 6.10e+00, max 8.62e+00
+max-dof eta/target ratio: min 1.55e+00, median 2.35e+00, p90 6.91e+00, max 8.62e+00
+MAXDOF SAMPLE: x=2.5417, h=3.5355e-02, eta=2.1779e-03, target=1.2500e-03, ratio=1.74e+00, dofs=84090
+MAXDOF SAMPLE: x=2.9083, h=3.5355e-02, eta=2.1944e-03, target=1.2500e-03, ratio=1.76e+00, dofs=98331
+MAXDOF SAMPLE: x=3.2667, h=3.5355e-02, eta=2.9261e-03, target=1.2500e-03, ratio=2.34e+00, dofs=87537
+MAXDOF SAMPLE: x=3.6333, h=3.5355e-02, eta=5.7510e-03, target=1.2500e-03, ratio=4.60e+00, dofs=92541
+MAXDOF SAMPLE: x=3.9917, h=3.5355e-02, eta=1.0730e-02, target=1.2500e-03, ratio=8.58e+00, dofs=84375
+[1;37;32msweep 3: 570 in, 737 out, 0 contour, 2621 refined; eigensolves 160, inner its avg 30.16, final cells avg 62793, final cells max 96096, final dofs avg 80405, final dofs max 99708, max_it limited 0/160, max_dofs limited 117/160, dof-affected cells 2924/3928, marked fraction avg 0.03, peak RSS across ranks 39.94 GB[0m
+--- sweep 4: 10484 active cells on 4 ranks ---
+sweep 4: 10484 active triangles, 312 distinct Re(z) values, 10172 eigensolves avoided
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.08490483124222092-1.0346850553077258e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.08491530664541717+3.5741308945165884e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.08490120334063322-1.6977038266522414e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.07271019840317115+4.3560658505787374e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0727069971006338-5.9113847020161635e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.07271907168677838-1.3644820915539956e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.041115008449081995+2.7680830892384868e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.04111620331850985-9.308476322202883e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.04283413421181213+2.1573599712441887e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.02884918476881129+4.278702735651464e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.02865210520006931+1.470345827032733e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.030879454567813686-4.1177262239061e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.08491188422947792+1.6254189398727438e-17j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.02352240527997575+6.740230224589109e-18j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.023354036247069297+2.2627253987142837e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.026237691959845152+4.280904100820457e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.07271624186765-6.5553339510306116e-18j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.04158718670038407+2.8772228105456116e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.021320544178968528-3.705161124464751e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.023190719199932364+4.532497701710233e-17j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0186944586369056+1.3622435314215716e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.02971478200996865+2.207794978056861e-18j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.020806644670991487-5.708480951528931e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.016558125859169735-9.629315734498647e-18j)[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.01614795424093047-3.21874020250519e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.02450670570832141+2.8823604306268507e-17j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.015286961365136163+1.6093980222705906e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.023664239308238303+2.32132044009341e-17j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.012845009650544975+3.0192155268028845e-17j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.012004431443173941-3.298153042859578e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.017673714085335548+2.1621995660180243e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.013757639513257156+4.317089001909972e-18j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.01053565258312122-1.9330177763473763e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.015124820931207674-6.664504098477896e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.009402964677878043+1.5217721837565226e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.009762133198104525+7.880779172462925e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.012795398250956228-1.1037791123823546e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.00658801294449143+3.963476343957073e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.007036204433803842+7.046479247272142e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.010211345988267164-2.9483026367084354e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.007333010543253503-4.62204253438601e-18j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.009047293449888095+1.758497905244479e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.006522091077499928-1.0389265379175085e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.005838990506230044-2.939356178704234e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.006035850281261401+1.6981935174850197e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.006262710985099777-1.9097267548949427e-17j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.005848998004983211-2.3718578325878956e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0051512260861882415+2.5024271218690572e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.005539466998281656-1.1587863340314802e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.005741417278041463+1.7131883214097606e-17j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.005008994275991642+9.636149420725482e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.004135570938835474+2.1651190356904616e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.00471718222519739-4.687140811229731e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0038352844707712714-2.906721837124474e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0038032797992932133-1.0864554698025744e-17j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.004023777504808622-5.7976631280170494e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.003552486721202711-4.028775774004866e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.00349505347028059-2.7739137525090926e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0035162050083394794-1.8920933604670068e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0032377247806691643+9.993158150188757e-19j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0030939703491362964+1.350615143722038e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0028880345736387665-1.4212419127303844e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0026431881978492243+9.086927549908406e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.00282279875904861+2.810593564098647e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.002610796718804308+1.6228625293898283e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0026361362895441676+1.1917386949456363e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0017082790413833068+1.4720233281918409e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.002476997673674225-1.8240066288647922e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0017770718489949087-8.211237146381954e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0020581689809080067+1.7369401010283292e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0018565781732135845+2.3116772312156146e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0016202241173407037+7.25572896149882e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0016681468033322934+2.3714208399551253e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0016642676833859445-8.723277816511209e-19j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0015090247538826508+1.0268296333867134e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0014373022262951299+1.0197929056665307e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.00152190125500871+4.050068087120855e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0014485144770516975+3.7656116286377853e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0013309447347001745+2.4746188527295585e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0013100712630842786-3.0131004833151943e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0013370708512059025-2.408665597107589e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.001280744665655487-1.943165631848177e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0011474648153221405-5.7895517589295045e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0010852322098508635-1.6230488811459185e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0011372651267181797+8.34225952240867e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0010109757927491076+5.900865938508043e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.001032224691412491+1.6614732704194878e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0009538671598896799+2.92212192171602e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0008688670566211428+6.4914937527066165e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0008997137930059867-1.0921375255270384e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0008074549411005382-1.633953392386667e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.000834795641847602-1.3548256817409659e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.000813269104463488-1.371225299355325e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0007197464373185288+2.885773117024261e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0007179593075215552+1.3395571494534265e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0006828788440337519-5.8171146930916865e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0006859251321422471-5.74278531021234e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0006596548347024058+7.139573707626975e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0006350049394285016+9.816094232106396e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0006078101591453413-2.4318659646704552e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0005884718534619047-4.718249062995151e-19j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0005556936859274152-2.7083171412237516e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0004548269775460888-4.576318215598003e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0004317722824455243+1.1602358243907504e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0005182716615266357+6.9364108543945366e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0004513843021888049+8.519295243588558e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0003935040508042172-1.96255382274775e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0004151429918114677-3.0903397752215433e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.08493428862239108+4.779415940433087e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.07273287683729947-4.189814470042449e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.04420815096376379-5.381262347054921e-19j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.03576288011060584-3.755493889959986e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.02589677432571084+2.9006461480675187e-18j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.019378479964257334+1.6906295372514607e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.017369307969154917+9.044467613341892e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.013126965920607272-7.129850256619344e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.011578514869166-6.986112438882488e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.008000465739193495-4.8290465009679715e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0003977944096275385+3.1444738714363143e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.006139551919275165+1.6499886265934065e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0056725769394913444-1.5904612648815241e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.005221141859261963+8.63483471223197e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.08492514011551869+4.068173154227509e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.07272670722884562+5.384733540829703e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.04315440343125844-2.30575896293911e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.03152112783970254-3.576541355083592e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.02690381113458169-2.8840208780856513e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0037675418366207906+1.847712521915286e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.02377128262837755-7.586945870741488e-18j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.02036899795531357-3.0652871772623217e-19j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.015721976641770347+5.120548408971098e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.013423634190708768-1.4165255420681523e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.010115314956803135-2.333993750235386e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.003550704438628765-1.0734182236953867e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.008098220357332467-1.1946096706063997e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.08493131816993436+8.668548180483172e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.07273100001635181+2.0447437694210716e-18j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.04412527432904172+2.7550434788900776e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.03448802925809252-1.9549060372928273e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.005867177166476181+3.063105794475917e-18j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.026420498421449844+1.1806266120266421e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.020288396513437775+5.070409948312533e-18j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.018814246922477143-1.1993893797235686e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.013469258949286125+3.6731881147019023e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.005538243428624016-6.2876336388742155e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0026470058337135826+1.9003292718732153e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.011609366083561432-1.3773805400828795e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.00824462420123324-1.325143406968774e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.004008465544878994-1.642308122919898e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.006731281465930177-8.467447117853026e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.00040819652864341154-4.4205109318365065e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.005812339804921939-2.0395768505804893e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.003442656902602165+1.727473482797535e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.005205117086896218-2.7308757549536147e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0020050604937431374-1.2630770033389422e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.004272743442589487+5.595808976994284e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0031300957032242803-1.2733133289182521e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0035660274124273156+1.9640918338765995e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0018519933197768726-6.836981103713208e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.08492193613713497+2.232626189695703e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.07272431237833867+1.1002653607774415e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.002363724262274995-1.5477276117312796e-17j)[0m
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.043156024367201444+1.1165795903631553e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0029524242773577487-1.6047186493814332e-17j)[0m
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:3664: ComplexWarning: Casting complex values to real discards the imaginary part
+  vertexcoords = np.asarray(vertexcoords, dtype=RealType)
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.03152100225059036-1.5492199460305707e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+/home/mccarthy/projects/firedrake_main_complex/firedrake/firedrake/mesh.py:2937: ComplexWarning: Casting complex values to real discards the imaginary part
+  max_refs = 0 if mark_np.size == 0 else int(mark_np.max())
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.026904265439768177-4.753618202869969e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.023770942625588615+2.0663779868588845e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - the lower degree and enriched multiplicities dont match[0m
+firedrake:WARNING Smallest lower- and higher- degree eigenvalues have different cluster sizes
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.020369818096432853+9.993904002710263e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.01557002160564028-1.3805055063442973e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.013429712666777973+3.4174614399190446e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.01010393073165436-3.7986027707819054e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.002718625557147921+9.360682542510027e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.008096444990748644-1.4846452953408684e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.001737729614343179+2.4086829824174048e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.005871178384200504+6.12028834463842e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.002239585064507419+2.1100742116400144e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.00558660040961119+9.55012890037963e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.004352720560569609+2.429378058100064e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0022550089983735884-4.748943562776709e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.003686775592342655-1.8361516360752052e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0018721370803531205+9.117112826973875e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0014289899316397858-3.848231623980696e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.002920388428172514-5.792112090966605e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0016794330782480267-1.1440986243106903e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0016117464491927542+2.473234684284915e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0018739991078519558-7.061194643514506e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0013389850486821653-7.278951846941728e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0015589050730181729-1.944590800973241e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.001494025146563526-5.586981329703577e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.001664276330663864+1.536677241233482e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0014612674138996255+6.535649875983828e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.001090904168933989-1.352128917861437e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0014951876426187467-6.450129514035639e-18j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.001330056962257309-1.009328433599153e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0012476362393748887-1.735069811867902e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0013407597960098188+1.2598039275539779e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0011360273552230324+7.89111668486953e-18j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0008884957436026658+1.9185744472440795e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0010852665774605465-2.0567724776593514e-17j)[0m
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.001145836235251304-1.752601910167005e-17j)[0m
+firedrake:WARNING Self-adjoint problem has DWR estimate with a small imaginary part. We took its real part
+[1;37;31mWarning - Error estimate has a trivial imaginary part and we will take real part: (-0.0009225625556260164-1.8334713833955545e-18j)[0m

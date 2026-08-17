@@ -49,3 +49,14 @@ MAXDOF SAMPLE: x=3.9833, h=7.0711e-02, eta=9.1907e-03, target=5.0000e-03, ratio=
 sweep 2: 0 in, 402 out, 0 contour, 982 refined; eigensolves 80, inner its avg 25.93, final cells avg 39060, final cells max 96096, final dofs avg 52945, final dofs max 99708, max_it limited 0/80, max_dofs limited 24/80, dof-affected cells 420/1384, marked fraction avg 0.03, peak RSS across ranks 27.03 GB
 --- sweep 3: 3928 active cells on 4 ranks ---
 sweep 3: 3928 active triangles, 160 distinct Re(z) values, 3768 eigensolves avoided
+WARNING: max_dofs reached in 117/160 eigensolves (2924/3928 outer cells affected)
+eta/target ratio: median 2.05e+00, p90 6.10e+00, max 8.62e+00
+max-dof eta/target ratio: min 1.55e+00, median 2.35e+00, p90 6.91e+00, max 8.62e+00
+MAXDOF SAMPLE: x=2.5417, h=3.5355e-02, eta=2.1779e-03, target=1.2500e-03, ratio=1.74e+00, dofs=84090
+MAXDOF SAMPLE: x=2.9083, h=3.5355e-02, eta=2.1944e-03, target=1.2500e-03, ratio=1.76e+00, dofs=98331
+MAXDOF SAMPLE: x=3.2667, h=3.5355e-02, eta=2.9261e-03, target=1.2500e-03, ratio=2.34e+00, dofs=87537
+MAXDOF SAMPLE: x=3.6333, h=3.5355e-02, eta=5.7510e-03, target=1.2500e-03, ratio=4.60e+00, dofs=92541
+MAXDOF SAMPLE: x=3.9917, h=3.5355e-02, eta=1.0730e-02, target=1.2500e-03, ratio=8.58e+00, dofs=84375
+sweep 3: 570 in, 737 out, 0 contour, 2621 refined; eigensolves 160, inner its avg 30.16, final cells avg 62793, final cells max 96096, final dofs avg 80405, final dofs max 99708, max_it limited 0/160, max_dofs limited 117/160, dof-affected cells 2924/3928, marked fraction avg 0.03, peak RSS across ranks 39.94 GB
+--- sweep 4: 10484 active cells on 4 ranks ---
+sweep 4: 10484 active triangles, 312 distinct Re(z) values, 10172 eigensolves avoided

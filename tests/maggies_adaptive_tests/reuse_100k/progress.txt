@@ -60,3 +60,15 @@ MAXDOF SAMPLE: x=3.9917, h=3.5355e-02, eta=1.0730e-02, target=1.2500e-03, ratio=
 sweep 3: 570 in, 737 out, 0 contour, 2621 refined; eigensolves 160, inner its avg 30.16, final cells avg 62793, final cells max 96096, final dofs avg 80405, final dofs max 99708, max_it limited 0/160, max_dofs limited 117/160, dof-affected cells 2924/3928, marked fraction avg 0.03, peak RSS across ranks 39.94 GB
 --- sweep 4: 10484 active cells on 4 ranks ---
 sweep 4: 10484 active triangles, 312 distinct Re(z) values, 10172 eigensolves avoided
+WARNING: max_dofs reached in 312/312 eigensolves (10484/10484 outer cells affected)
+eta/target ratio: median 9.00e+00, p90 2.84e+01, max 3.63e+01
+max-dof eta/target ratio: min 1.17e+00, median 8.04e+00, p90 2.44e+01, max 3.63e+01
+MAXDOF SAMPLE: x=2.0042, h=1.7678e-02, eta=4.0820e-04, target=3.1250e-04, ratio=1.31e+00, dofs=91755
+MAXDOF SAMPLE: x=2.4833, h=1.7678e-02, eta=7.2948e-04, target=3.1250e-04, ratio=2.33e+00, dofs=92559
+MAXDOF SAMPLE: x=3.0208, h=1.7678e-02, eta=2.3430e-03, target=3.1250e-04, ratio=7.50e+00, dofs=94809
+MAXDOF SAMPLE: x=3.5083, h=1.7678e-02, eta=5.3577e-03, target=3.1250e-04, ratio=1.71e+01, dofs=97449
+MAXDOF SAMPLE: x=3.9958, h=1.7678e-02, eta=8.8898e-03, target=3.1250e-04, ratio=2.84e+01, dofs=98532
+sweep 4: 858 in, 1207 out, 8419 contour, 0 refined; eigensolves 312, inner its avg 31.42, final cells avg 73725, final cells max 96096, final dofs avg 91286, final dofs max 99912, max_it limited 0/312, max_dofs limited 312/312, dof-affected cells 10484/10484, marked fraction avg 0.03, peak RSS across ranks 51.58 GB
+classified 12461 cells, 0 misclassified against the reference epsilon-disks
+field assembled from 12461 barycentre evaluations (no extra solves)
+all output in reuse_100k/

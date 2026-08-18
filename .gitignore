@@ -63,3 +63,4 @@ pyop2.log
 *.msh
 *.node
 *.geo
+tests/maggies_adaptive_tests/updated_finerzgrid_folded_maxwell_output/

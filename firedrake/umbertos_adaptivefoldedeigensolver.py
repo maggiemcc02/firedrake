@@ -1117,6 +1117,22 @@ class GoalAdaptiveFoldedEigenSolver(SteadyGoalAdaptiveSolver, OptionsManager):
         denom = 1.0 - sigma_h
         self.signed_error = rhs/denom if abs(denom) > 1e-14 else float("nan")
 
+        # Debugging
+        rhs_expected = (self._lam_p - self._lam_h) * m_hp
+        if abs(np.imag(self.signed_error)) > 1e-8:
+            print(RED % (
+                "\nCOMPLEX DWR DIAGNOSTIC\n"
+                f"lambda_h       = {self._lam_h}\n"
+                f"lambda_p       = {self._lam_p}\n"
+                f"m_hp           = {m_hp}\n"
+                f"rhs            = {rhs}\n"
+                f"rhs_expected   = {rhs_expected}\n"
+                f"rhs difference = {rhs - rhs_expected}\n"
+                f"sigma_h        = {sigma_h}\n"
+                f"denom          = {denom}\n"
+                f"signed_error   = {self.signed_error}\n"
+            ))
+
         # 23. Maggie change - Check if complex and how complex
         if abs(self.signed_error.imag) > self.imag_tol:
                 print(RED % f"Warning - Error estimate has a nontrivial imaginary part and we will take real part: {self.signed_error}")

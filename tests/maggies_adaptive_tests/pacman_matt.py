@@ -1,4 +1,6 @@
 from firedrake import *
+from netgen.occ import *
+from netgen.geom2d import SplineGeometry
 import numpy as np
 import matplotlib
 matplotlib.use("PDF")

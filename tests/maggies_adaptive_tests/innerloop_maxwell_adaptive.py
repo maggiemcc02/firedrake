@@ -142,7 +142,7 @@ def my_output(self, it: int):
 
     # Create the directory
     zval = float(z.values()[0].real)
-    z_dir= f"finerzgrid_folded_maxwell_output/z-{float(z.values()[0].real):.6f}"
+    z_dir = f"updated_finerzgrid_folded_maxwell_output/z-{float(z.values()[0].real):.6f}"
     primal_dir = f"{z_dir}/primal"
     enriched_dir = f"{z_dir}/enriched"
     os.makedirs(z_dir, exist_ok=True)
@@ -221,7 +221,7 @@ for curr_z in grid:
     print()
 
     # Save the error plot at the current z 
-    z_dir= f"moreadapts_folded_maxwell_output/"
+    z_dir= f"updated_finerzgrid_folded_maxwell_output/"
     os.makedirs(z_dir, exist_ok=True)
     plt.plot([i for i in range(len(error_ests))], error_ests)
     plt.xlabel(r"mesh")
@@ -261,7 +261,7 @@ exact_omega = np.sort(exact_omega) # sort them
 exact_dist = np.min(np.abs(np.subtract.outer(grid, exact_omega)), axis=1)
 
 # the plot
-z_dir= f"finerzgrid_folded_maxwell_output/"
+z_dir= f"updated_finerzgrid_folded_maxwell_output/"
 os.makedirs(z_dir, exist_ok=True)
 
 # Save results for later plotting

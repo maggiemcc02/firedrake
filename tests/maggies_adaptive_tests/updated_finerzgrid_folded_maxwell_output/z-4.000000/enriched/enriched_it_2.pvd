@@ -1,0 +1,6 @@
+<?xml version="1.0" ?>
+<VTKFile type="Collection" version="0.1" byte_order="LittleEndian">
+<Collection>
+<DataSet timestep="4.0" file="enriched_it_2/enriched_it_2_0.vtu" />
+</Collection>
+</VTKFile>

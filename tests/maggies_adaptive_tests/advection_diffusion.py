@@ -314,7 +314,7 @@ sp = {
         "tolerance": 1.0e-5,
         "max_it": 500, 
         "max_dofs": 20000,
-        "dorfler_alpha": 0.5,
+        "dorfler_alpha": 0.1,
         "primal_extra_degree": (1, 1),
         "dual_extra_degree": (1, 1),
         "cell_residual_extra_degree": (1, 1),

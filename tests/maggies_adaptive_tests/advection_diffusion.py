@@ -253,6 +253,24 @@ class GoalAdaptive1DFoldedEigenSolver(GoalAdaptiveFoldedEigenSolver):
         # Read old vertices and insert midpoints for the marked cells
         old_xs = np.sort(np.real(mesh.coordinates.dat.data_ro))
         new_xs = np.sort(np.concatenate([old_xs, mids[marked]]))
+
+        
+        # Debugging
+        hs = np.diff(new_xs)
+        PETSc.Sys.Print(
+            RED % (
+                "\nMESH GRADING DEBUG\n"
+                f"cells       = {len(hs)}\n"
+                f"h_min       = {hs.min():.6e}\n"
+                f"h_max       = {hs.max():.6e}\n"
+                f"hmax/hmin   = {hs.max()/hs.min():.6e}\n"
+                f"marked      = {marked.sum()}\n"
+            )
+        )
+
+
+
+
         # new_mesh = interval_mesh_from_vertices(new_xs)
         new_mesh = interval_mesh_from_vertices(new_xs,comm=LOCAL_COMM)
         # No hierarchy registration: the transfer manager is unused (warm
@@ -305,10 +323,9 @@ sp = {
         "nev": 5,
         "verbose": True,
     },
-    "eps_type": "krylovschur",
-    "eps_tol": 1.0e-8,
-    "st_type": "sinvert",
-    "eps_target": 0,
+  "eps_type": "lapack",
+  "eps_smallest_real": None,
+  "eps_view": None,
 }
 
 # Enriched-problem cache for the (permanent) base problem only; adapted

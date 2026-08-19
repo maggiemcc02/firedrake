@@ -1058,6 +1058,34 @@ class GoalAdaptiveFoldedEigenSolver(SteadyGoalAdaptiveSolver, OptionsManager):
         A = self.problem._original_A
         M = self.problem._original_M
 
+        # ------------------------------------------------------------
+        # DEBUGGING: CHECK DISCRETE EIGENRELATIONS
+        # ------------------------------------------------------------
+
+        raw_up = self.vecs_p[0]
+
+        raw_cross_res = (
+            assemble(replace_both_args(A, u_h, raw_up))
+            - self._lam_p * assemble(replace_both_args(M, u_h, raw_up))
+        )
+
+        matched_cross_res = (
+            assemble(replace_both_args(A, u_h, u_p))
+            - self._lam_p * assemble(replace_both_args(M, u_h, u_p))
+        )
+
+        low_self_res = (
+            assemble(replace_both_args(A, u_h, u_h))
+            - self._lam_h * assemble(replace_both_args(M, u_h, u_h))
+        )
+
+        print(RED % (
+            "\nEIGENRELATION DEBUG\n"
+            f"RAW CROSS EIG RES     = {raw_cross_res}\n"
+            f"MATCHED CROSS EIG RES = {matched_cross_res}\n"
+            f"LOW SELF RES          = {low_self_res}\n"
+        ))
+
         # 20. Maggie change - m_norm in error
         # ISSUE - For mixed spaces and inner product do I need to interpolate e_sigma???!! Interpolation not reliable !!??
         # But needed for mixed function buisness to work??
@@ -1118,13 +1146,27 @@ class GoalAdaptiveFoldedEigenSolver(SteadyGoalAdaptiveSolver, OptionsManager):
         self.signed_error = rhs/denom if abs(denom) > 1e-14 else float("nan")
 
         # Debugging
+        discrete_gap = self._lam_p - self._lam_h
+        gap_defect = self.signed_error - discrete_gap
+        gap_defect_rel = abs(gap_defect) / max(abs(discrete_gap), 1e-14)
+
+        if gap_defect_rel > 1e-6:
+            print(RED % (
+                "\nDWR / EIGENVALUE-GAP CHECK\n"
+                f"DWR estimate      = {self.signed_error}\n"
+                f"lambda_p-lambda_h = {discrete_gap}\n"
+                f"difference        = {gap_defect}\n"
+                f"relative defect   = {gap_defect_rel:.3e}\n"
+            ))
+
+        # Debugging
         rhs_expected = (self._lam_p - self._lam_h) * m_hp
         if abs(np.imag(self.signed_error)) > 1e-8:
             print(RED % (
                 "\nCOMPLEX DWR DIAGNOSTIC\n"
                 f"lambda_h       = {self._lam_h}\n"
                 f"lambda_p       = {self._lam_p}\n"
-                f"m_hp           = {m_hp}\n"
+                f"m(uh, up)           = {m_hp}\n"
                 f"rhs            = {rhs}\n"
                 f"rhs_expected   = {rhs_expected}\n"
                 f"rhs difference = {rhs - rhs_expected}\n"

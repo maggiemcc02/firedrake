@@ -18,7 +18,7 @@ def folded_dist(N, xs):
     Z = MixedFunctionSpace([V0, V1])
     bc = [DirichletBC(Z.sub(0), 0, "on_boundary")]   # no BC on sigma
 
-    nu = Constant(0.015)
+    nu = Constant(1)
     j = Constant(1j)
     U = TrialFunction(Z)
     (u, sigma) = split(U)
@@ -119,7 +119,7 @@ def folded_dist(N, xs):
     return np.array(ys)
 
 
-xs = np.array(list(np.arange(-6.0, 6.0, 0.05)) + [6.0])
+xs = np.array(list(np.arange(1, 6.0, 0.05)) + [6.0])
 
 # spec(L) = {n^2}, so the exact distance function is a sawtooth with gaps
 # that widen as n grows
@@ -129,7 +129,7 @@ spec = np.sort(np.concatenate([ -positive_spec, [0.0], positive_spec ]))
 dist = np.min(np.abs(np.subtract.outer(xs, spec)), axis=1)
 
 err = None
-for N in [8, 16, 32, 64]:
+for N in [8, 16, 32, 64, 128, 256]:
     ys = folded_dist(N, xs)
     plt.plot(xs, ys, linewidth=2, label=f"$N = {N}$")
     prev, err = err, np.max(np.abs(ys - dist))

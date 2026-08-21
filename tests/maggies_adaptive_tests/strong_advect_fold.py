@@ -105,10 +105,13 @@ for N in [8, 16, 32, 64]:
     # print(GREEN % f"N = {N}: max error = {err}{rate}")
 
 plt.plot(xs, exact, 'k--', linewidth=1, label="exact")
-plt.plot(nn[nn <= xs[-1]], 0*nn[nn <= xs[-1]], 'ok', markersize=5)
+mask = (nn >= xs[0]) & (nn <= xs[-1])
+plt.plot(nn[mask], np.zeros_like(nn[mask]), 'ok', markersize=5)
+# plt.plot(nn[nn <= xs[-1]], 0*nn[nn <= xs[-1]], 'ok', markersize=5)
 
 os.makedirs("strong_advect/", exist_ok=True)
 plt.xlabel("$x$")
+plt.xlim(xs[0], xs[-1])
 plt.legend()
 plt.title(r"Approximation of $\mathrm{dist}(x, \text{spectrum})$, 1D Advection Diffusion (Hermite)")
 plt.savefig("strong_advect/hermite.pdf")

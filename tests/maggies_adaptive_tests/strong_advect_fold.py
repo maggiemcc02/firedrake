@@ -66,7 +66,7 @@ def folded_dist(N, xs):
         solver2.solve()
 
         eig1 = solver1.eigenvalue(0)
-        eig2 = solver1.eigenvalue(0)
+        eig2 = solver2.eigenvalue(0)
 
         phi = np.sqrt(min(eig1, eig2))
 
@@ -87,10 +87,15 @@ xs = np.array(list(np.arange(0.05, 64, 0.05)) + [64])
 
 # spec(L) = {n^2}, so the exact distance function is a sawtooth with gaps
 # that widen as n grows
-nu = 1
-positive_spec = np.array([ np.sqrt(1/(4*nu) + nu*(n*np.pi)**2) for n in range(1, 100 + 1) ]) 
-nn = np.sort(np.concatenate([ -positive_spec, [0.0], positive_spec ]))
-exact = np.min(np.abs(np.subtract.outer(xs, nn)), axis=1)
+# nu = 1
+# positive_spec = np.array([ np.sqrt(1/(4*nu) + nu*(n*np.pi)**2) for n in range(1, 100 + 1) ]) 
+# nn = np.sort(np.concatenate([ -positive_spec, [0.0], positive_spec ]))
+# exact = np.min(np.abs(np.subtract.outer(xs, nn)), axis=1)
+
+nu = 1.0
+n = np.arange(1, 101)
+nn = nu*(n*np.pi)**2 + 1/(4*nu)
+exact = np.min(np.abs(np.subtract.outer(xs, nn)),axis=1)
 
 err = None
 

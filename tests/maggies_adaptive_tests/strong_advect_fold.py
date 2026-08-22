@@ -108,10 +108,10 @@ def folded_dist(N, xs, ys):
 
 
 # Set the grid
-xmin, xmax = 0.0, 64.0
+xmin, xmax = 0.0, 160
 ymin, ymax = -80.0, 80.0
-Nx = 180
-Ny = 81
+Nx = 181
+Ny = 181
 xvals = np.linspace(xmin, xmax, Nx)
 yvals = np.linspace(ymin, ymax, Ny)
 N = 64
@@ -371,7 +371,10 @@ ax.set_ylabel(r"$\operatorname{Im}(z)$")
 ax.set_xlim(xmin, xmax)
 ax.set_ylim(ymin, ymax)
 
-ax.set_aspect("equal")
+# ax.set_aspect("equal")
+# ax.set_xlim(xmin, xmax)
+# ax.set_ylim(ymin, ymax)
+ax.set_aspect("equal", adjustable="box")
 
 ax.tick_params(
     direction="in",

@@ -33,7 +33,7 @@ def folded_dist(N, xs, ys):
     zbar = Constant(0.0 + 0.0j)
 
     # Operator and adjoint
-    nu = 0.015
+    nu = 1
     L = lambda w: -nu*w.dx(0).dx(0) - w.dx(0)
     Ls = lambda w: -nu*w.dx(0).dx(0) + w.dx(0)
 
@@ -222,7 +222,7 @@ triang = Triangulation(pts.real, pts.imag)
 #     lambda_n = (n*pi)^2 + 1/4
 # ----------------------------------------------------------------
 
-nu = 0.015
+nu = 1
 n = np.arange(1, 101)
 
 spec = nu*(n*np.pi)**2 + 1/(4*nu)
@@ -296,6 +296,9 @@ ax.tricontour(
 # ----------------------------------------------------------------
 
 epsilon_levels = [
+    0.1, 
+    0.15,
+    0.2, 
     0.25,
     0.5,
     1.0,
@@ -350,7 +353,7 @@ ax.scatter(
 # ----------------------------------------------------------------
 
 
-nu=0.015
+nu=1
 
 yy = np.linspace(ymin, ymax, 1000)
 

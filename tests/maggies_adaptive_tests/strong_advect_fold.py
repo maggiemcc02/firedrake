@@ -108,13 +108,17 @@ def folded_dist(N, xs, ys):
 
 
 # Set the grid
-xmin, xmax = 0.0, 160
-ymin, ymax = -80.0, 80.0
-Nx = 181
-Ny = 181
+# xmin, xmax = 0.0, 160
+# ymin, ymax = -80.0, 80.0
+# Nx = 181
+# Ny = 181
+xmin, xmax = 14, 35
+ymin, ymax = -8, 8
+Nx = 300
+Ny = 161
 xvals = np.linspace(xmin, xmax, Nx)
 yvals = np.linspace(ymin, ymax, Ny)
-N = 64
+N = 128
 
 # Compute the results
 field_samples = folded_dist(N, xvals, yvals)
@@ -296,6 +300,9 @@ epsilon_levels = [
     0.5,
     1.0,
     2.0,
+    3.0,
+    4.0,
+    5.0
 ]
 
 # Only ask matplotlib to draw levels that actually occur in the field
@@ -413,7 +420,7 @@ ax.set_title(
 for ext in ("png", "pdf"):
 
     fig.savefig(
-        f"{OUT}/pseudospectra_field_N={N}.{ext}",
+        f"{OUT}/updated_pseudospectra_field_N={N}.{ext}",
         dpi=300
     )
 

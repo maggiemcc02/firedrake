@@ -8,7 +8,7 @@ from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.tri import Triangulation
 import os
 
-
+nu = 1
 
 
 def folded_dist(N, xs, ys):
@@ -33,7 +33,6 @@ def folded_dist(N, xs, ys):
     zbar = Constant(0.0 + 0.0j)
 
     # Operator and adjoint
-    nu = 1
     L = lambda w: -nu*w.dx(0).dx(0) - w.dx(0)
     Ls = lambda w: -nu*w.dx(0).dx(0) + w.dx(0)
 
@@ -119,10 +118,10 @@ def folded_dist(N, xs, ys):
 # xvals = np.linspace(xmin, xmax, Nx)
 # yvals = np.linspace(ymin, ymax, Ny)
 N = 128
-xmin, xmax = 15.0, 42.0
-ymin, ymax = -10.0, 10.0
-Nx = 271     # dx = 0.1
-Ny = 161     # dy = 0.125
+xmin, xmax = 0.0, 50.0
+ymin, ymax = -35.0, 35.0
+Nx = 201
+Ny = 201
 xvals = np.linspace(xmin, xmax, Nx)
 yvals = np.linspace(ymin, ymax, Ny)
 
@@ -228,7 +227,6 @@ triang = Triangulation(pts.real, pts.imag)
 #     lambda_n = (n*pi)^2 + 1/4
 # ----------------------------------------------------------------
 
-nu = 1
 n = np.arange(1, 101)
 
 spec = nu*(n*np.pi)**2 + 1/(4*nu)
@@ -359,7 +357,7 @@ ax.scatter(
 # ----------------------------------------------------------------
 
 
-nu=1
+
 
 yy = np.linspace(ymin, ymax, 1000)
 

@@ -8,7 +8,7 @@ from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.tri import Triangulation
 import os
 
-nu = 0.01
+nu = 0.1
 
 
 def folded_dist(N, xs, ys):

@@ -8,7 +8,7 @@ from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.tri import Triangulation
 import os
 
-nu = 1
+nu = 0.01
 
 
 def folded_dist(N, xs, ys):
@@ -427,7 +427,7 @@ ax.set_title(
 for ext in ("png", "pdf"):
 
     fig.savefig(
-        f"{OUT}/updated_pseudospectra_field_N={N}.{ext}",
+        f"{OUT}/updated_pseudospectra_field_nu={nu}.{ext}",
         dpi=300
     )
 

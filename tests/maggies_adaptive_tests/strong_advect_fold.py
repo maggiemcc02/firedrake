@@ -112,13 +112,19 @@ def folded_dist(N, xs, ys):
 # ymin, ymax = -80.0, 80.0
 # Nx = 181
 # Ny = 181
-xmin, xmax = 14, 35
-ymin, ymax = -8, 8
-Nx = 300
-Ny = 161
+# xmin, xmax = 14, 35
+# ymin, ymax = -8, 8
+# Nx = 300
+# Ny = 161
+# xvals = np.linspace(xmin, xmax, Nx)
+# yvals = np.linspace(ymin, ymax, Ny)
+N = 128
+xmin, xmax = 15.0, 42.0
+ymin, ymax = -10.0, 10.0
+Nx = 271     # dx = 0.1
+Ny = 161     # dy = 0.125
 xvals = np.linspace(xmin, xmax, Nx)
 yvals = np.linspace(ymin, ymax, Ny)
-N = 128
 
 # Compute the results
 field_samples = folded_dist(N, xvals, yvals)

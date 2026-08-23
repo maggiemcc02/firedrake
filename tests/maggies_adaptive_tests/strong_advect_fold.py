@@ -359,17 +359,17 @@ ax.scatter(
 
 
 
-yy = np.linspace(ymin, ymax, 1000)
+# yy = np.linspace(ymin, ymax, 1000)
 
-xx_W = nu*yy**2 + nu*np.pi**2
+# xx_W = nu*yy**2 + nu*np.pi**2
 
-ax.plot(
-    xx_W,
-    yy,
-    "k--",
-    linewidth=1.2,
-    label=r"$\partial W(A)$"
-)
+# ax.plot(
+#     xx_W,
+#     yy,
+#     "k--",
+#     linewidth=1.2,
+#     label=r"$\partial W(A)$"
+# )
 
 
 # ----------------------------------------------------------------

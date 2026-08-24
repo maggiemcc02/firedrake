@@ -1,0 +1,47 @@
+RUN PARAMETERS:
+  domain = square
+  element = CG1
+  epsilon = 0.2
+  maxh0 = 0.3
+  region = [2.0, 4.0] x [-1.0, 1.0]
+  Nx = 10
+  Ny = 10
+  diam_tol = 0.01
+  max_sweeps = 10
+  max_dofs = 200000
+  MPI ranks = 16
+SOLVER PARAMETERS:
+  tolerance = 1e-05
+  max_it = 1000
+  max_dofs = 200000
+  dorfler_alpha = 0.5
+  primal_extra_degree = (1, 1)
+  dual_extra_degree = (1, 1)
+  cell_residual_extra_degree = (1, 1)
+  facet_residual_extra_degree = (1, 1)
+  self_adjoint = True
+  nev = 5
+  eps_type = krylovschur
+  eps_tol = 1e-08
+  st_type = sinvert
+  eps_target = 0
+base mesh: 256 cells, 447 dofs
+reference omega in view: 2.0000, 2.2361, 2.8284, 3.0000, 3.1623, 3.6056, 4.0000, 4.1231, 4.2426, 4.4721
+self-test max |Phi(x+iy)^2 - y^2 - Phi(x)^2| = 7.966e-15
+--- sweep 0: 200 active cells on 16 ranks ---
+sweep 0: 200 active triangles, 20 distinct Re(z) values, 180 eigensolves avoided
+eta/target ratio: median 9.13e-01, p90 9.84e-01, max 9.98e-01
+sweep 0: 0 in, 62 out, 0 contour, 138 refined; eigensolves 20, inner its avg 9.05, final cells avg 2997, final cells max 8138, final dofs avg 4660, final dofs max 12534, max_it limited 0/20, max_dofs limited 0/20, dof-affected cells 0/200, marked fraction avg 0.05, peak RSS across ranks 1.69 GB
+--- sweep 1: 552 active cells on 16 ranks ---
+sweep 1: 552 active triangles, 40 distinct Re(z) values, 512 eigensolves avoided
+eta/target ratio: median 9.15e-01, p90 9.84e-01, max 9.99e-01
+sweep 1: 0 in, 206 out, 0 contour, 346 refined; eigensolves 40, inner its avg 17.12, final cells avg 10504, final cells max 29926, final dofs avg 16068, final dofs max 45537, max_it limited 0/40, max_dofs limited 0/40, dof-affected cells 0/552, marked fraction avg 0.04, peak RSS across ranks 5.93 GB
+--- sweep 2: 1384 active cells on 16 ranks ---
+sweep 2: 1384 active triangles, 80 distinct Re(z) values, 1304 eigensolves avoided
+WARNING: max_dofs reached in 1/80 eigensolves (18/1384 outer cells affected)
+eta/target ratio: median 9.12e-01, p90 9.81e-01, max 1.27e+00
+max-dof eta/target ratio: min 1.27e+00, median 1.27e+00, p90 1.27e+00, max 1.27e+00
+MAXDOF SAMPLE: x=3.9833, h=7.0711e-02, eta=6.3690e-03, target=5.0000e-03, ratio=1.27e+00, dofs=148752
+sweep 2: 0 in, 417 out, 0 contour, 967 refined; eigensolves 80, inner its avg 26.69, final cells avg 44192, final cells max 153645, final dofs avg 65875, final dofs max 194736, max_it limited 0/80, max_dofs limited 1/80, dof-affected cells 18/1384, marked fraction avg 0.03, peak RSS across ranks 33.85 GB
+--- sweep 3: 3868 active cells on 16 ranks ---
+sweep 3: 3868 active triangles, 160 distinct Re(z) values, 3708 eigensolves avoided

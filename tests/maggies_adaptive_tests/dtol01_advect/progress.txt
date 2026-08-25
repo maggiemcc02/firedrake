@@ -1,0 +1,13 @@
+[1;37;31m---- [SWEEP 0: 864 active cells on 8 ranks] ----[0m
+[1;37;32msweep 0: 0 in, 323 out, 0 contour, 541 refined; fold 1: its avg 1.00, dofs avg 34, dofs max 34, cells avg 16, marked avg 0.00; fold 2: its avg 1.00, dofs avg 34, dofs max 34, cells avg 16, marked avg 0.00; Phi minimum: fold 1 466/864, fold 2 398/864; peak RSS across ranks 0.35 GB[0m
+[1;37;31m---- [SWEEP 1: 2164 active cells on 8 ranks] ----[0m
+[1;37;32msweep 1: 0 in, 443 out, 0 contour, 1721 refined; fold 1: its avg 1.00, dofs avg 34, dofs max 66, cells avg 16, marked avg 1.00; fold 2: its avg 1.00, dofs avg 34, dofs max 66, cells avg 16, marked avg 1.00; Phi minimum: fold 1 1161/2164, fold 2 1003/2164; peak RSS across ranks 0.35 GB[0m
+[1;37;31m---- [SWEEP 2: 6884 active cells on 8 ranks] ----[0m
+[1;37;32msweep 2: 351 in, 1355 out, 0 contour, 5178 refined; fold 1: its avg 1.38, dofs avg 46, dofs max 66, cells avg 22, marked avg 1.00; fold 2: its avg 1.38, dofs avg 46, dofs max 66, cells avg 22, marked avg 1.00; Phi minimum: fold 1 3664/6884, fold 2 3220/6884; peak RSS across ranks 0.40 GB[0m
+[1;37;31m---- [SWEEP 3: 20712 active cells on 8 ranks] ----[0m
+[1;37;32msweep 3: 7211 in, 2916 out, 0 contour, 10585 refined; fold 1: its avg 1.65, dofs avg 55, dofs max 66, cells avg 26, marked avg 1.00; fold 2: its avg 1.65, dofs avg 55, dofs max 66, cells avg 26, marked avg 1.00; Phi minimum: fold 1 10644/20712, fold 2 10068/20712; peak RSS across ranks 0.61 GB[0m
+[1;37;31m---- [SWEEP 4: 42340 active cells on 8 ranks] ----[0m
+[1;37;32msweep 4: 14903 in, 8326 out, 0 contour, 19111 refined; fold 1: its avg 2.28, dofs avg 88, dofs max 130, cells avg 43, marked avg 1.00; fold 2: its avg 2.28, dofs avg 88, dofs max 130, cells avg 43, marked avg 1.00; Phi minimum: fold 1 21916/42340, fold 2 20424/42340; peak RSS across ranks 1.34 GB[0m
+[1;37;31m---- [SWEEP 5: 76444 active cells on 8 ranks] ----[0m
+[1;37;32msweep 5: 21370 in, 16206 out, 0 contour, 38868 refined; fold 1: its avg 2.62, dofs avg 106, dofs max 130, cells avg 52, marked avg 1.00; fold 2: its avg 2.62, dofs avg 106, dofs max 130, cells avg 52, marked avg 1.00; Phi minimum: fold 1 39559/76444, fold 2 36885/76444; peak RSS across ranks 2.69 GB[0m
+[1;37;31m---- [SWEEP 6: 155472 active cells on 8 ranks] ----[0m

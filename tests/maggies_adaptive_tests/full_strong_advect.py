@@ -104,11 +104,11 @@ zbar = Constant(0.0 + 0.0j)
 
 xmin, xmax = 0.0, 15.0
 ymin, ymax = -10.0, 10.0
-Nx = 6
-Ny = 8
+Nx = 18
+Ny = 24 # start finer cause finer diamtol
 epsilon = 0.5
-diam_tol = 0.05
-max_sweeps = 8
+diam_tol = 0.01 # last plots 0.05
+max_sweeps = 10
 
 
 
@@ -341,7 +341,7 @@ sp = {
         "cell_residual_extra_degree": (1,),
         "facet_residual_extra_degree": (1,),
         "self_adjoint": True,
-        "nev": 5,
+        "nev": 2, # was 5 for last run
         "verbose": False,
     },
 #   "eps_type": "lapack",
@@ -369,17 +369,19 @@ _base_enriched = {} # where we will save enriched versions of base problem to be
 # TEST HERMITE DEGREE
 test_high = _maggie._reconstruct_eig_degree( base_problem_1, (1,))
 
-PETSc.Sys.Print(
-    "LOW :",
-    base_problem_1.output_space.ufl_element(),
-    "dofs =", base_problem_1.output_space.dim()
-)
 
-PETSc.Sys.Print(
-    "HIGH:",
-    test_high.output_space.ufl_element(),
-    "dofs =", test_high.output_space.dim()
-)
+
+# PETSc.Sys.Print(
+#     "LOW :",
+#     base_problem_1.output_space.ufl_element(),
+#     "dofs =", base_problem_1.output_space.dim()
+# )
+
+# PETSc.Sys.Print(
+#     "HIGH:",
+#     test_high.output_space.ufl_element(),
+#     "dofs =", test_high.output_space.dim()
+# )
 
 
 

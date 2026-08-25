@@ -1,0 +1,11 @@
+[1;37;31m---- [SWEEP 0: 96 active cells on 8 ranks] ----[0m
+[1;37;32msweep 0: 0 in, 7 out, 0 contour, 89 refined; fold 1: its avg 1.00, dofs avg 34, dofs max 34, cells avg 16, marked avg 0.00; fold 2: its avg 1.00, dofs avg 34, dofs max 34, cells avg 16, marked avg 0.00; Phi minimum: fold 1 53/96, fold 2 43/96; peak RSS across ranks 0.34 GB[0m
+[1;37;31m---- [SWEEP 1: 356 active cells on 8 ranks] ----[0m
+[1;37;32msweep 1: 0 in, 72 out, 0 contour, 284 refined; fold 1: its avg 1.00, dofs avg 34, dofs max 34, cells avg 16, marked avg 0.00; fold 2: its avg 1.00, dofs avg 34, dofs max 34, cells avg 16, marked avg 0.00; Phi minimum: fold 1 183/356, fold 2 173/356; peak RSS across ranks 0.35 GB[0m
+[1;37;31m---- [SWEEP 2: 1136 active cells on 8 ranks] ----[0m
+[1;37;32msweep 2: 0 in, 267 out, 0 contour, 869 refined; fold 1: its avg 1.00, dofs avg 34, dofs max 34, cells avg 16, marked avg 0.00; fold 2: its avg 1.00, dofs avg 34, dofs max 34, cells avg 16, marked avg 0.00; Phi minimum: fold 1 599/1136, fold 2 537/1136; peak RSS across ranks 0.35 GB[0m
+[1;37;31m---- [SWEEP 3: 3476 active cells on 8 ranks] ----[0m
+[1;37;32msweep 3: 0 in, 710 out, 0 contour, 2766 refined; fold 1: its avg 1.14, dofs avg 39, dofs max 66, cells avg 18, marked avg 1.00; fold 2: its avg 1.14, dofs avg 39, dofs max 66, cells avg 18, marked avg 1.00; Phi minimum: fold 1 1879/3476, fold 2 1597/3476; peak RSS across ranks 0.36 GB[0m
+[1;37;31m---- [SWEEP 4: 11064 active cells on 8 ranks] ----[0m
+[1;37;32msweep 4: 1887 in, 1869 out, 0 contour, 7308 refined; fold 1: its avg 1.49, dofs avg 50, dofs max 66, cells avg 24, marked avg 1.00; fold 2: its avg 1.49, dofs avg 50, dofs max 66, cells avg 24, marked avg 1.00; Phi minimum: fold 1 5759/11064, fold 2 5305/11064; peak RSS across ranks 0.46 GB[0m
+[1;37;31m---- [SWEEP 5: 29232 active cells on 8 ranks] ----[0m

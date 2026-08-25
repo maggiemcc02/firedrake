@@ -93,12 +93,22 @@ nu_value = 0.1
 z = Constant(0.0 + 0.0j)
 zbar = Constant(0.0 + 0.0j)
 
-xmin, xmax = 0.0, 30.0
+
+# Bigger Run:
+# xmin, xmax = 0.0, 30.0
+# ymin, ymax = -10.0, 10.0
+# Nx = 8
+# Ny = 8
+# epsilon = 0.5
+# max_sweeps = 10
+
+xmin, xmax = 0.0, 15.0
 ymin, ymax = -10.0, 10.0
-Nx = 8
+Nx = 6
 Ny = 8
 epsilon = 0.5
-max_sweeps = 4
+diam_tol = 0.05
+max_sweeps = 8
 
 
 
@@ -251,14 +261,14 @@ class GoalAdaptive1DFoldedEigenSolver(GoalAdaptiveFoldedEigenSolver):
 
         
         # Debugging
-        hs = np.diff(new_xs)
-        PETSc.Sys.Print(
-            RED % (
-                "\nCHECK MARKING\n"
-                f"cells       = {len(hs)}\n"
-                f"marked      = {marked.sum()}\n"
-            )
-        )
+        # hs = np.diff(new_xs)
+        # PETSc.Sys.Print(
+        #     RED % (
+        #         "\nCHECK MARKING\n"
+        #         f"cells       = {len(hs)}\n"
+        #         f"marked      = {marked.sum()}\n"
+        #     )
+        # )
 
 
         # new_mesh = interval_mesh_from_vertices(new_xs)
@@ -324,7 +334,7 @@ sp = {
     "goal_adaptive": {
         "tolerance": 1.0e-5,
         "max_it": 500, 
-        "max_dofs": 20000,
+        "max_dofs": 100000,
         "dorfler_alpha": 0.0, # MARK EVERYTHING,
         "primal_extra_degree": (1,),
         "dual_extra_degree": (1,),
@@ -332,7 +342,7 @@ sp = {
         "facet_residual_extra_degree": (1,),
         "self_adjoint": True,
         "nev": 5,
-        "verbose": True,
+        "verbose": False,
     },
 #   "eps_type": "lapack",
 #   "eps_smallest_real": None,

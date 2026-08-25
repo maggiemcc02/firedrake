@@ -1062,29 +1062,29 @@ class GoalAdaptiveFoldedEigenSolver(SteadyGoalAdaptiveSolver, OptionsManager):
         # DEBUGGING: CHECK DISCRETE EIGENRELATIONS
         # ------------------------------------------------------------
 
-        raw_up = self.vecs_p[0]
+        # raw_up = self.vecs_p[0]
 
-        raw_cross_res = (
-            assemble(replace_both_args(A, u_h, raw_up))
-            - self._lam_p * assemble(replace_both_args(M, u_h, raw_up))
-        )
+        # raw_cross_res = (
+        #     assemble(replace_both_args(A, u_h, raw_up))
+        #     - self._lam_p * assemble(replace_both_args(M, u_h, raw_up))
+        # )
 
-        matched_cross_res = (
-            assemble(replace_both_args(A, u_h, u_p))
-            - self._lam_p * assemble(replace_both_args(M, u_h, u_p))
-        )
+        # matched_cross_res = (
+        #     assemble(replace_both_args(A, u_h, u_p))
+        #     - self._lam_p * assemble(replace_both_args(M, u_h, u_p))
+        # )
 
-        low_self_res = (
-            assemble(replace_both_args(A, u_h, u_h))
-            - self._lam_h * assemble(replace_both_args(M, u_h, u_h))
-        )
+        # low_self_res = (
+        #     assemble(replace_both_args(A, u_h, u_h))
+        #     - self._lam_h * assemble(replace_both_args(M, u_h, u_h))
+        # )
 
-        print(RED % (
-            "\nEIGENRELATION DEBUG\n"
-            f"RAW CROSS EIG RES     = {raw_cross_res}\n"
-            f"MATCHED CROSS EIG RES = {matched_cross_res}\n"
-            f"LOW SELF RES          = {low_self_res}\n"
-        ))
+        # print(RED % (
+        #     "\nEIGENRELATION DEBUG\n"
+        #     f"RAW CROSS EIG RES     = {raw_cross_res}\n"
+        #     f"MATCHED CROSS EIG RES = {matched_cross_res}\n"
+        #     f"LOW SELF RES          = {low_self_res}\n"
+        # ))
 
         # 20. Maggie change - m_norm in error
         # ISSUE - For mixed spaces and inner product do I need to interpolate e_sigma???!! Interpolation not reliable !!??
@@ -1139,14 +1139,14 @@ class GoalAdaptiveFoldedEigenSolver(SteadyGoalAdaptiveSolver, OptionsManager):
 
         
         # a bunch of checks:
-        m_hh = assemble(replace_both_args(M, u_h, u_h))
-        m_pp = assemble(replace_both_args(M, u_p, u_p))
-        m_hp = assemble(replace_both_args(M, u_h, u_p))
-        self.print(BLUE % f"m(u_h, u_h) = {m_hh}")
-        self.print(BLUE % f"m(u_p, u_p) = {m_pp}")
-        self.print(BLUE % f"m(u_h, u_p) = {m_hp}")
-        self.print(BLUE % f'top of estimate = {rhs}')
-        self.print(BLUE % f'bottom of estimate = {1.0 - sigma_h}')
+        # m_hh = assemble(replace_both_args(M, u_h, u_h))
+        # m_pp = assemble(replace_both_args(M, u_p, u_p))
+        # m_hp = assemble(replace_both_args(M, u_h, u_p))
+        # self.print(BLUE % f"m(u_h, u_h) = {m_hh}")
+        # self.print(BLUE % f"m(u_p, u_p) = {m_pp}")
+        # self.print(BLUE % f"m(u_h, u_p) = {m_hp}")
+        # self.print(BLUE % f'top of estimate = {rhs}')
+        # self.print(BLUE % f'bottom of estimate = {1.0 - sigma_h}')
 
 
 
@@ -1154,35 +1154,35 @@ class GoalAdaptiveFoldedEigenSolver(SteadyGoalAdaptiveSolver, OptionsManager):
         denom = 1.0 - sigma_h
         self.signed_error = rhs/denom if abs(denom) > 1e-14 else float("nan")
 
-        # Debugging
-        discrete_gap = self._lam_p - self._lam_h
-        gap_defect = self.signed_error - discrete_gap
-        gap_defect_rel = abs(gap_defect) / max(abs(discrete_gap), 1e-14)
+        # # Debugging
+        # discrete_gap = self._lam_p - self._lam_h
+        # gap_defect = self.signed_error - discrete_gap
+        # gap_defect_rel = abs(gap_defect) / max(abs(discrete_gap), 1e-14)
 
-        if gap_defect_rel > 1e-6:
-            print(RED % (
-                "\nDWR / EIGENVALUE-GAP CHECK\n"
-                f"DWR estimate      = {self.signed_error}\n"
-                f"lambda_p-lambda_h = {discrete_gap}\n"
-                f"difference        = {gap_defect}\n"
-                f"relative defect   = {gap_defect_rel:.3e}\n"
-            ))
+        # if gap_defect_rel > 1e-6:
+        #     print(RED % (
+        #         "\nDWR / EIGENVALUE-GAP CHECK\n"
+        #         f"DWR estimate      = {self.signed_error}\n"
+        #         f"lambda_p-lambda_h = {discrete_gap}\n"
+        #         f"difference        = {gap_defect}\n"
+        #         f"relative defect   = {gap_defect_rel:.3e}\n"
+        #     ))
 
-        # Debugging
-        rhs_expected = (self._lam_p - self._lam_h) * m_hp
-        if abs(np.imag(self.signed_error)) > 1e-8:
-            print(RED % (
-                "\nCOMPLEX DWR DIAGNOSTIC\n"
-                f"lambda_h       = {self._lam_h}\n"
-                f"lambda_p       = {self._lam_p}\n"
-                f"m(uh, up)           = {m_hp}\n"
-                f"rhs            = {rhs}\n"
-                f"rhs_expected   = {rhs_expected}\n"
-                f"rhs difference = {rhs - rhs_expected}\n"
-                f"sigma_h        = {sigma_h}\n"
-                f"denom          = {denom}\n"
-                f"signed_error   = {self.signed_error}\n"
-            ))
+        # # Debugging
+        # rhs_expected = (self._lam_p - self._lam_h) * m_hp
+        # if abs(np.imag(self.signed_error)) > 1e-8:
+        #     print(RED % (
+        #         "\nCOMPLEX DWR DIAGNOSTIC\n"
+        #         f"lambda_h       = {self._lam_h}\n"
+        #         f"lambda_p       = {self._lam_p}\n"
+        #         f"m(uh, up)           = {m_hp}\n"
+        #         f"rhs            = {rhs}\n"
+        #         f"rhs_expected   = {rhs_expected}\n"
+        #         f"rhs difference = {rhs - rhs_expected}\n"
+        #         f"sigma_h        = {sigma_h}\n"
+        #         f"denom          = {denom}\n"
+        #         f"signed_error   = {self.signed_error}\n"
+        #     ))
 
         # 23. Maggie change - Check if complex and how complex
         if abs(self.signed_error.imag) > self.imag_tol:

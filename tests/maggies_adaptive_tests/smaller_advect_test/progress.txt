@@ -9,3 +9,10 @@
 [1;37;31m---- [SWEEP 4: 11064 active cells on 8 ranks] ----[0m
 [1;37;32msweep 4: 1887 in, 1869 out, 0 contour, 7308 refined; fold 1: its avg 1.49, dofs avg 50, dofs max 66, cells avg 24, marked avg 1.00; fold 2: its avg 1.49, dofs avg 50, dofs max 66, cells avg 24, marked avg 1.00; Phi minimum: fold 1 5759/11064, fold 2 5305/11064; peak RSS across ranks 0.46 GB[0m
 [1;37;31m---- [SWEEP 5: 29232 active cells on 8 ranks] ----[0m
+[1;37;32msweep 5: 11425 in, 4428 out, 0 contour, 13379 refined; fold 1: its avg 1.93, dofs avg 69, dofs max 130, cells avg 34, marked avg 1.00; fold 2: its avg 1.93, dofs avg 69, dofs max 130, cells avg 34, marked avg 1.00; Phi minimum: fold 1 14861/29232, fold 2 14371/29232; peak RSS across ranks 0.91 GB[0m
+[1;37;31m---- [SWEEP 6: 53516 active cells on 8 ranks] ----[0m
+[1;37;32msweep 6: 17506 in, 11741 out, 0 contour, 24269 refined; fold 1: its avg 2.50, dofs avg 98, dofs max 130, cells avg 48, marked avg 1.00; fold 2: its avg 2.50, dofs avg 98, dofs max 130, cells avg 48, marked avg 1.00; Phi minimum: fold 1 27372/53516, fold 2 26144/53516; peak RSS across ranks 1.92 GB[0m
+[1;37;31m---- [SWEEP 7: 97076 active cells on 8 ranks] ----[0m
+[1;37;32msweep 7: 24836 in, 20798 out, 51442 contour, 0 refined; fold 1: its avg 2.91, dofs avg 135, dofs max 258, cells avg 66, marked avg 1.00; fold 2: its avg 2.91, dofs avg 135, dofs max 258, cells avg 66, marked avg 1.00; Phi minimum: fold 1 49539/97076, fold 2 47537/97076; peak RSS across ranks 4.14 GB[0m
+[1;37;32mfield assembled from 146988 barycentre evaluations[0m
+[1;37;32mwrote dwr_local VTK files[0m

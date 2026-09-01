@@ -4,7 +4,7 @@ This directory contains the code used for the numerical experiments in the 2026 
 
 ## Requirements
 
-The examples were run using the complex version of Firedrake with SLEPc.
+All examples require the  complex version of Firedrake with SLEPc.
 
 ## Contents
 
@@ -19,5 +19,5 @@ The .py files that implement Algorithm 3 (alg3.py) can be run in parallel using 
 ```bash 
 mkdir -p advection_output
 
-mkdir -p advection_output nohup env OUTDIR=advection_output mpiexec -n 4 python -u SCRIPT_NAME.py \ > advection_output/run.log 2>&1 < /dev/null &
+mkdir -p advection_output nohup env OUTDIR=advection_output mpiexec -n 4 python -u advection_alg3.py \ > advection_output/run.log 2>&1 < /dev/null &
 

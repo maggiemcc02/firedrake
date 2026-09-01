@@ -735,10 +735,8 @@ while len(triangles) > 0 and sweep < max_sweeps:
     diameters = get_diameters(triangles)
     log_line(f"--- sweep {sweep}: {len(triangles)} active cells on "f"{NPROCS} ranks ---")
 
-    # ------------------------------------------------------------
-    # Group active outer cells by Re(z)
-    # ------------------------------------------------------------
-
+  
+    # Group barycentres by real part
     groups = {}
     for k, zK in enumerate(barycentres):
         # round only for constructing the dictionary key
@@ -755,10 +753,8 @@ while len(triangles) > 0 and sweep < max_sweeps:
     f"{len(columns)} distinct Re(z) values, "
     f"{len(triangles) - len(columns)} eigensolves avoided")
 
-    # ------------------------------------------------------------
-    # One independent inner eigensolve per Re(z)
-    # ------------------------------------------------------------
-
+  
+    # one inner solve per real part group
     local_results = []
     local_solve_results = []
 
@@ -770,10 +766,7 @@ while len(triangles) > 0 and sweep < max_sweeps:
         # Use the actual x-coordinate rather than the rounded key
         x = float(np.real(barycentres[cell_indices[0]]))
 
-        # Strictest outer tolerance required anywhere in this column.
-        #
-        # In your present outer algorithm these should normally all
-        # be the same anyway, but this makes the code safe.
+        # Strictest outer tolerance (should match)
         h_column = min(diameters[k] for k in cell_indices)
 
         # ONE expensive adaptive eigensolve for this whole vertical column
@@ -804,9 +797,6 @@ while len(triangles) > 0 and sweep < max_sweeps:
             "marked_fractions": [
                 float(q) for q in getattr(solver, "marked_fractions", [])],})
 
-        # --------------------------------------------------------
-        # Quantities shared by the entire vertical column
-        # --------------------------------------------------------
 
         phi_x = float(np.real(phi_x))
         corr_x = float(np.real(corr_x))
@@ -819,10 +809,6 @@ while len(triangles) > 0 and sweep < max_sweeps:
         # corresponding corrected folded eigenvalue at x
         mu_corr_x = corr_x**2
 
-         # --------------------------------------------------------
-        # Create an ordinary result for EVERY outer triangle
-        # in this vertical column
-        # --------------------------------------------------------
 
         for k in cell_indices:
 
@@ -831,11 +817,7 @@ while len(triangles) > 0 and sweep < max_sweeps:
             y = float(np.imag(zK))
 
             # Exact self-adjoint shift:
-            #
             # mu_h(x + iy) = mu_h(x) + y^2
-            #
-            # hence
-            #
             # Phi_h(x + iy) = sqrt(mu_h(x) + y^2)
             phi = np.sqrt(mu_x + y**2)
             # Same transformation for your corrected Phi

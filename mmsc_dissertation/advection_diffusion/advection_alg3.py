@@ -20,19 +20,6 @@ from firedrake.umbertos_adaptivefoldedeigensolver import (
 from finat.ufl import BrokenElement, FiniteElement
 
 # Pseudospectra of the 1D advection operator with Maggie's FULL inner loop:
-# unlike pseudospectra_poisson_dwr.py, which uses only her global DWR
-# estimate and escalates through uniform meshes, this driver runs her
-# SOLVE -> ESTIMATE -> MARK -> REFINE cycle with genuinely LOCAL mesh
-# adaptivity: her cell-wise indicators (bubble/cone projections), her
-# max-marking, and hand-built non-uniform interval meshes in place of the
-# netgen refine path (netgen has no 1D meshes; a 1D mesh is just a sorted
-# vertex list, so we split the marked cells ourselves).
-
-# Two 1D substitutions, both documented below: the FacetBubble element does
-# not exist on intervals (facets are points), so the facet-residual space
-# becomes broken P1 -- one dof per cell endpoint, exactly the bubble-on-a-
-# facet role -- with the cones identically one in CG1; and warm starts go
-# through cross-mesh interpolation instead of the netgen transfer manager.
 
 
 # ADDED PARALLEL STUFF
@@ -171,16 +158,6 @@ def m_form(a, b):
 # BYPASS LOCALIZATION
 ##################################################################
 
-# ------------------------------------------------------------------
-# UNIFORM INNER REFINEMENT
-#
-# We do not localise the DWR estimator for the strong fourth-order
-# folded problem.  The global DWR estimator still determines whether
-# another inner refinement is required.
-#
-# If refinement is required, return the same positive dummy indicator
-# on every physical cell, so that every cell is marked.
-# ------------------------------------------------------------------
 
 def _uniform_error_indicators(F, z_err, options):
 
@@ -749,9 +726,6 @@ def save_outer_sweep(sweep,records,active,field_samples,counts,results,filename=
             counts["refine"]
         ]),
 
-        # ----------------------
-        # THIS SWEEP: BOTH FOLDS
-        # ----------------------
 
         cells=np.asarray([r["cell"] for r in results]),
 

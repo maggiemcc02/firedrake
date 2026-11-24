@@ -1,0 +1,45 @@
+--- a/finat/ufl/elementlist.py
++++ b/finat/ufl/elementlist.py
+@@ -427,6 +427,10 @@
+     # name)
+     (family, short_name, value_rank, sobolev_space, mapping, krange, cellnames) = ufl_elements[family]
+ 
++    # Interval Hermite has endpoint jets and interior values for any degree >= 3.
++    if family == "Hermite" and cellname == "interval":
++        krange = (3, None)
++
+     # Accept CG/DG on all kind of cells, but use Q/DQ on "product" cells
+     if cellname in set(cubes) - set(simplices) or isinstance(cell, TensorProductCell):
+         if family == "Lagrange":
+--- a/test/finat/test_ufl_elements.py
++++ b/test/finat/test_ufl_elements.py
+@@ -62,3 +62,29 @@
+         symmetry = S.symmetry()
+         assert isinstance(symmetry, dict)
+         assert len(symmetry) == symmetry_size
++
++
++@pytest.mark.parametrize("family", ("Hermite", "HER"))
++@pytest.mark.parametrize("degree", (3, 4, 5, 7))
++def test_interval_hermite_degree(family: str, degree: int) -> None:
++    element = finat.ufl.FiniteElement(family, ufl.interval, degree)
++    cubic = finat.ufl.FiniteElement(family, ufl.interval, 3)
++    assert cubic.reconstruct(degree=degree) == element
++    assert element.degree() == degree
++
++
++@pytest.mark.parametrize("family", ("Hermite", "HER"))
++@pytest.mark.parametrize("cell_name, degree", (
++    ("interval", 2),
++    ("triangle", 4),
++    ("triangle", 5),
++    ("tetrahedron", 4),
++    ("tetrahedron", 5),
++))
++def test_hermite_invalid_degree(family: str, cell_name: str, degree: int) -> None:
++    cell = ufl.Cell(cell_name)
++    cubic = finat.ufl.FiniteElement(family, cell, 3)
++    with pytest.raises(ValueError, match="Order .* invalid for 'Hermite'"):
++        finat.ufl.FiniteElement(family, cell, degree)
++    with pytest.raises(ValueError, match="Order .* invalid for 'Hermite'"):
++        cubic.reconstruct(degree=degree)

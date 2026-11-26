@@ -329,6 +329,111 @@ if record["last_mesh"] is not final_mesh:
     save_snapshot(solution, final_exact)
 
 
+######################################################
+# 9. Convergence and effectivity plots
+######################################################
+
+snapshots = record["snapshots"]
+dofs = np.array([s["dofs"] for s in snapshots], dtype=float)
+
+fig, axes = plt.subplots(1, 3, figsize=(16, 4))
+
+# Solution errors and convergence slopes.
+for key, label in [
+    ("L2_error", r"$L^2$"),
+    ("H1_error", r"$H^1$"),
+    ("H2_error", r"$H^2$"),
+]:
+    errors = np.array([s[key] for s in snapshots], dtype=float)
+    valid = np.isfinite(errors) & (errors > 0) & (dofs > 0)
+
+    # Fit log(error) against log(DOFs).
+    if np.unique(dofs[valid]).size >= 2:
+        slope, intercept = np.polyfit(
+            np.log(dofs[valid]), np.log(errors[valid]), 1
+        )
+        print(f"{key}: slope = {slope:.3f}")
+    else:
+        print(f"{key}: insufficient valid data for a slope")
+
+    # Local slopes between consecutive saved meshes.
+    local_slopes = np.full(len(dofs) - 1, np.nan)
+    pairs = valid[:-1] & valid[1:] & (dofs[1:] != dofs[:-1])
+    local_slopes[pairs] = (
+        np.log(errors[1:][pairs]) - np.log(errors[:-1][pairs])
+    ) / (
+        np.log(dofs[1:][pairs]) - np.log(dofs[:-1][pairs])
+    )
+
+    print("Local slopes:")
+    print(local_slopes)
+    print()
+
+    axes[0].loglog(
+        dofs, np.where(valid, errors, np.nan), "o-", label=label
+    )
+
+axes[0].set(
+    xlabel="Primal DOFs",
+    ylabel="Error norm",
+    title="Solution errors",
+)
+
+# Magnitudes accommodate complex-valued goal quantities.
+goal_errors = np.abs(
+    np.array([s["true_goal_error"] for s in snapshots], dtype=complex)
+)
+estimates = np.abs(
+    np.array([s["goal_estimate"] for s in snapshots], dtype=complex)
+)
+
+goal_valid = np.isfinite(goal_errors) & (goal_errors > 0)
+estimate_valid = np.isfinite(estimates) & (estimates > 0)
+
+axes[1].loglog(
+    dofs, np.where(goal_valid, goal_errors, np.nan),
+    "o-", label="True goal error",
+)
+axes[1].loglog(
+    dofs, np.where(estimate_valid, estimates, np.nan),
+    "s--", label="DWR estimate",
+)
+axes[1].set(
+    xlabel="Primal DOFs",
+    ylabel="Magnitude",
+    title="Goal error and estimate",
+)
+
+# Missing estimates and zero true errors give undefined effectivity.
+effectivity = np.full(dofs.shape, np.nan)
+np.divide(
+    estimates,
+    goal_errors,
+    out=effectivity,
+    where=goal_valid & np.isfinite(estimates),
+)
+
+axes[2].semilogx(dofs, effectivity, "o-", label="Effectivity")
+axes[2].axhline(1, color="black", linestyle=":", label="Ideal")
+axes[2].set(
+    xlabel="Primal DOFs",
+    ylabel="Effectivity",
+    title="DWR effectivity",
+)
+
+for ax in axes:
+    ax.grid(True, which="both", alpha=0.3)
+    ax.legend()
+    ax.set_xticks(dofs)
+    ax.set_xticklabels([str(int(n)) for n in dofs])
+    ax.tick_params(axis="x", which="both", labelrotation=45)
+
+fig.tight_layout()
+fig.savefig("biharmonic_convergence.png", dpi=200)
+plt.close(fig)
+print("Saved: biharmonic_convergence.png")
+
+
 
 
 

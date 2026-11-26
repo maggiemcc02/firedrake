@@ -522,9 +522,12 @@ class GoalOrientedMarker:
         high_space = V.reconstruct(degree=high_degree)
 
         dual_low = Function(V, name="dual_low")
-        goal_derivative = derivative(self.goal_functional, current_solution)
+        goal_derivative = derivative(self.goal_functional, current_solution,
+                                     ufl.conj(TestFunction(V)))
         rhs = assemble(goal_derivative, bcs=problem.bcs)
         ctx.solve_jacobian(rhs, dual_low, transpose=True)
+        with dual_low.dat.vec as vec:
+            vec.conjugate()
 
         primal_high = Function(high_space, name="primal_high")
         primal_high.interpolate(current_solution)
@@ -552,8 +555,12 @@ class GoalOrientedMarker:
 
         goal_high = replace(self.goal_functional, {current_solution: primal_high})
         dual_high = Function(high_space, name="dual_high")
-        rhs_high = assemble(derivative(goal_high, primal_high), bcs=high_problem.bcs)
+        rhs_high = assemble(derivative(goal_high, primal_high,
+                                       ufl.conj(TestFunction(high_space))),
+                            bcs=high_problem.bcs)
         high_solver._ctx.solve_jacobian(rhs_high, dual_high, transpose=True)
+        with dual_high.dat.vec as vec:
+            vec.conjugate()
 
         dual_error = dual_high - dual_low
         estimate = self._estimate_error(

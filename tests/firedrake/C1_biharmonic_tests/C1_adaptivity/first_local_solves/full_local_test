@@ -245,7 +245,7 @@ def save_snapshot(current_solution, exact, estimate=None):
     record["eta"] = assemble(inner(current_f, exact - current_solution) * dx)
 
     # create the plots
-    callback(record, len(record.snapshots))
+    callback(record, len(record['snapshots']))
 
     # Save the last mesh
     record["last_mesh"] = current_mesh
@@ -286,7 +286,7 @@ solver_parameters = {
     **direct,
     "snes_type": "ksponly",
 
-    "snes_grid_sequence": 1,       # Start with one refinement.
+    "snes_grid_sequence": 20,       # Start with one refinement.
     "goal_enrichment_degree": 1,  # Cubic primal -> quartic enriched.
     "goal_residual_degree": 1,
     "goal_marking_fraction": 0.5,

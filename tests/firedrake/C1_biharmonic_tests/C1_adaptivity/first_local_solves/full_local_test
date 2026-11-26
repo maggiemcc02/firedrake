@@ -1,0 +1,334 @@
+from firedrake import *
+from firedrake.biharmonic_adapt import ClampedHermiteBC, Biharmonic1DMarker
+from pathlib import Path
+import numpy as np
+import matplotlib.pyplot as plt
+from firedrake import Function, FunctionSpace, assemble, ds, errornorm, inner, norm
+from firedrake import PointEvaluator, project
+
+######################################################
+# 0. My output helper
+######################################################
+
+
+def make_post_iteration_callback(
+    output_dir="biharmonic_snapshots",
+    npoints=1001,
+    bc_tol=1.0e-10,
+    show=True,):
+
+
+    """Return a callback accepting (solver, it).
+
+    Records the base solution solver.problem.u after each solve, before
+    marking/refinement. Requires solver.u_exact on that same mesh.
+    Boundary checks assume homogeneous clamping at both interval endpoints.
+    Saves PNG figures and NPZ numerical snapshots, and appends snapshots
+    to solver.snapshots. NPZ files contain samples, not restart checkpoints.
+
+    """
+    output_dir = Path(output_dir)
+    if npoints < 2:
+        raise ValueError("npoints must be at least 2.")
+    if bc_tol < 0:
+        raise ValueError("bc_tol must be nonnegative.")
+
+    def post_iteration(solver, it):
+
+
+        # 1. Read the solution and exact expression on the CURRENT mesh.
+        #uh = solver.problem.u # extracts current uh
+        uh = solver["problem"]["u"]
+        V = uh.function_space() # extracts current space
+        mesh = V.mesh() # gets mesh from space
+        #u_exact = solver.u_exact # extracts u_exact on the current mesh
+        u_exact = solver["u_exact"]
+
+        # The output directory
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        # 2. Compute errors by integration using Firedrake's norms.
+        # Full H2 norm in 1D: ||e||_H2^2 = ||e||_H1^2 + ||e''||_L2^2.
+        error = u_exact - uh
+        l2_error = float(np.real(errornorm(u_exact, uh, norm_type="L2")))
+        h1_error = float(np.real(errornorm(u_exact, uh, norm_type="H1")))
+        h2_seminorm = float(np.real(norm(error.dx(0).dx(0), norm_type="L2")))
+        h2_error = float(np.hypot(h1_error, h2_seminorm))
+
+        # 3. Check u=0 and u'=0 at BOTH endpoints.
+        # In 1D these boundary integrals sum squared endpoint values.
+        # Taking a square root makes bc_tol a tolerance on the boundary norms.
+        boundary_value = float(np.sqrt(float(np.real(assemble(inner(uh, uh) * ds)))))
+        boundary_slope = float(np.sqrt(float(np.real(assemble(inner(uh.dx(0), uh.dx(0)) * ds)))))
+        bc_ok = boundary_value <= bc_tol and boundary_slope <= bc_tol
+
+        # 4. Extract physical vertices and sample the numerical solution.
+        # Hermite coefficient arrays contain derivative DOFs too: they are
+        # not a list of solution values to plot against mesh coordinates.
+        vertices = np.sort(mesh.coordinates.dat.data_ro.real.reshape(-1).copy())
+        x_plot = np.unique(np.concatenate((np.linspace(vertices[0], vertices[-1], npoints), vertices)))
+
+        # Represent the Hermite solution in a Lagrange space for plotting.
+        # On these straight 1D cells, CG of the same polynomial degree
+        # can represent the same solution.
+        degree = V.ufl_element().degree()
+        V_plot = FunctionSpace(mesh, "CG", degree)
+
+        plot_field = project(
+            uh,
+            V_plot,
+            solver_parameters={
+                "mat_type": "aij",
+                "ksp_type": "preonly",
+                "pc_type": "lu",},)
+
+
+        # Use the supported point-evaluation API.
+        evaluator = PointEvaluator(mesh, x_plot.reshape(-1, 1))
+        u_plot = np.asarray(evaluator.evaluate(plot_field)).reshape(-1)
+
+        # 5. Save one self-contained numerical snapshot per solved mesh.
+        # Retain complex sample/goal values; only the plot selects real parts.
+        # true_goal_error = getattr(solver, "eta", None) # get eta from solver, if it DNE, take None
+        true_goal_error = solver.get("eta") # get eta from solver, if it DNE, take None
+        snapshot = {
+            "iteration": it + 1,
+            "cells": mesh.num_cells(),
+            "dofs": V.dim(),
+            "vertices": vertices.copy(),
+            "x_plot": x_plot.copy(),
+            "u_plot": u_plot.copy(),
+            "L2_error": l2_error,
+            "H1_error": h1_error,
+            "H2_error": h2_error,
+            "H2_seminorm_error": h2_seminorm,
+            "boundary_value_norm": boundary_value,
+            "boundary_slope_norm": boundary_slope,
+            "boundary_tolerance": bc_tol,
+            "boundary_ok": bc_ok,
+            "goal_estimate": complex(solver["eta_h"]),
+            "true_goal_error": (
+                complex(true_goal_error) if true_goal_error is not None
+                else complex(float("nan"), 0.0)),}
+        # if not hasattr(solver, "snapshots"): # create snapshot list if not already created
+        #     solver.snapshots = []
+        # solver.snapshots.append(snapshot)
+        solver.setdefault("snapshots", []).append(snapshot)
+        stem = output_dir / f"iteration_{it + 1:02d}"
+        np.savez_compressed(stem.with_suffix(".npz"), **snapshot) # save as npz file
+
+
+        # 6. Draw the solution and the mesh on ONE simple set of axes.
+        # Every vertical-bar marker at y=0 is an actual mesh vertex.
+        fig, ax = plt.subplots(figsize=(9, 4))
+
+        ax.plot(x_plot, u_plot.real, label="Re(u_h)")
+
+        if np.max(np.abs(u_plot.imag), initial=0.0) > 1.0e-12:
+            ax.plot(x_plot, u_plot.imag, "--", label="Im(u_h)")
+
+        ax.axhline(0.0, color="0.7", linewidth=0.7)
+
+        ax.plot(vertices, np.zeros_like(vertices), linestyle="none",
+                marker="|", markersize=12, color="black", label="Mesh")
+
+        ax.set(xlabel="x", ylabel="u_h(x)",
+               title=f"Iteration {it}: {mesh.num_cells()} cells, {V.dim()} DOFs")
+
+        ax.legend()
+        fig.tight_layout()
+        fig.savefig(stem.with_suffix(".png"), dpi=160)
+        if show:
+            print()
+            print()
+            plt.show()
+            print()
+            print()
+        plt.close(fig)
+
+        # 7. Print a short record matching the saved snapshot.
+        # A failed boundary check is reported, rather than hidden.
+        print(f"Iteration {it}: {mesh.num_cells()} cells, {V.dim()} DOFs")
+        print(f"L2 error = {l2_error:.6e}")
+        print(f"H1 error = {h1_error:.6e}")
+        print(f"H2 error = {h2_error:.6e}")
+        print(f"Boundary norms: value={boundary_value:.3e}, "
+              f"slope={boundary_slope:.3e}; "
+              f"{'PASS' if bc_ok else 'FAIL'} (tolerance {bc_tol:.1e})")
+        print(f"DWR estimate: {snapshot['goal_estimate']}")
+        print(f"True goal error: {snapshot['true_goal_error']}")
+        print(f'Their absolute difference: {abs(snapshot['true_goal_error'] - snapshot['goal_estimate'])}')
+        print(f"Saved: {stem.with_suffix('.npz')} and {stem.with_suffix('.png')}")
+        print()
+
+    return post_iteration
+
+######################################################
+# 1. Create manufactured solution
+######################################################
+
+def manufactured(mesh):
+    x = SpatialCoordinate(mesh)[0]
+    exact = x**2 * (1 - x)**2 * (1 + 10*x**3)
+    forcing = 8400*x**3 - 7200*x**2 + 1200*x + 24
+    return exact, forcing
+
+
+######################################################
+# 1. Create starting problem
+######################################################
+
+# Initial problem
+mesh = UnitIntervalMesh(16)
+
+# Your plotting callback currently assumes a serial mesh.
+if mesh.comm.size != 1:
+    raise ValueError("Run this first plotting example with one MPI rank.")
+
+
+# Create the problem
+V = FunctionSpace(mesh, "Hermite", 3)
+uh = Function(V, name="uh")
+v = TestFunction(V)
+u_exact, f = manufactured(mesh)
+bc = ClampedHermiteBC(V, 0, "on_boundary")
+
+F = (
+    inner(uh.dx(0).dx(0), v.dx(0).dx(0))
+    - inner(f, v)
+) * dx
+
+J = inner(f, uh) * dx
+
+problem = NonlinearVariationalProblem(F, uh, bcs=[bc])
+
+
+######################################################
+# 3. Use our Biharmonic Marker
+######################################################
+
+marker = Biharmonic1DMarker(J, exact_solution=u_exact)
+
+
+######################################################
+# 4. Saving desired info each iter
+######################################################
+
+# Plotting and diagnostics
+callback = make_post_iteration_callback(
+    output_dir="biharmonic_polynomial_snapshots",
+    npoints=1001,
+    bc_tol=1e-10,
+    show=False,  # Save figures without opening windows over SSH.
+)
+
+# This container supplies the fields your existing callback expects.
+# record = SimpleNamespace(snapshots=[], last_mesh=None)
+record = {
+    "snapshots": [],
+    "last_mesh": None,
+}
+
+
+def save_snapshot(current_solution, exact, estimate=None):
+
+    # find current mesh and f
+    current_mesh = current_solution.function_space().mesh()
+    _, current_f = manufactured(current_mesh)
+
+    # store the solution (computed and exact)
+    record["problem"] = {"u": current_solution}
+    record["u_exact"] = exact
+
+    # store the goal functional errors (computed and exact)
+    record["eta_h"] = (estimate.error_estimate if estimate is not None else float("nan"))
+    record["eta"] = assemble(inner(current_f, exact - current_solution) * dx)
+
+    # create the plots
+    callback(record, len(record.snapshots))
+
+    # Save the last mesh
+    record["last_mesh"] = current_mesh
+
+
+######################################################
+# 5. Biharmonic Marker + Snapshots
+######################################################
+
+def mark_and_save(ctx, current_solution):
+    # Enriched solve, error estimation, C1 localisation and marking.
+    marked_cells = marker(ctx, current_solution)
+
+    # The marker has moved its exact expression to the current mesh.
+    save_snapshot(
+        current_solution,
+        marker.exact_solution,
+        marker.estimates[-1],
+    )
+
+    return marked_cells
+
+
+######################################################
+# 6. Solver options
+######################################################
+
+
+# Solver options
+direct = {
+    "mat_type": "aij",
+    "ksp_type": "preonly",
+    "pc_type": "lu",
+    "pc_factor_mat_solver_type": "mumps",
+}
+
+solver_parameters = {
+    **direct,
+    "snes_type": "ksponly",
+
+    "snes_grid_sequence": 1,       # Start with one refinement.
+    "goal_enrichment_degree": 1,  # Cubic primal -> quartic enriched.
+    "goal_residual_degree": 1,
+    "goal_marking_fraction": 0.5,
+
+    # Run the requested refinement count without tolerance stopping.
+    "goal_atol": 0.0,
+    "goal_rtol": 0.0,
+    "goal_monitor": None,
+}
+
+# Configure the enriched and all three localisation solves.
+# Both facet solves currently share the goal_facet_ prefix.
+for stage in ("goal_enriched_", "goal_cell_", "goal_facet_"):
+    solver_parameters.update({stage + key: value for key, value in direct.items()})
+
+
+######################################################
+# 7. Call the solver
+######################################################
+
+# Run
+solver = NonlinearVariationalSolver(
+    problem,
+    marking_callback=mark_and_save,
+    options_prefix="biharmonic_",
+    solver_parameters=solver_parameters,
+)
+
+solution = solver.solve()
+
+######################################################
+# 8. Save final solution
+######################################################
+
+
+# Save the final solution too: no further marking is requested there.
+final_mesh = solution.function_space().mesh()
+if record["last_mesh"] is not final_mesh:
+    final_exact, _ = manufactured(final_mesh)
+    save_snapshot(solution, final_exact)
+
+
+
+
+

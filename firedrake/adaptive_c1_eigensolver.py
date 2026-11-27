@@ -37,12 +37,11 @@ from firedrake.mg.ufl_utils import refine
 #     def refine(*args, **kwargs):
 #         raise NotImplementedError("mesh-adaptation path requires Maggie's Firedrake branch")
 # from firedrake.utils import RealType
-# from firedrake.mg.adaptive_hierarchy import AdaptiveMeshHierarchy
-# from firedrake.mg.adaptive_transfer_manager import AdaptiveTransferManager
+# from firedrake.mg.adaptive_hierarchy import MeshHierarchy
+# from firedrake.mg.adaptive_transfer_manager import TransferManager
 # Current implementations, with aliases matching your existing code.
 
-from firedrake import MeshHierarchy as AdaptiveMeshHierarchy
-from firedrake import TransferManager as AdaptiveTransferManager
+from firedrake import MeshHierarchy, TransferManager
 
 from finat.ufl import BrokenElement, FiniteElement
 from ufl import avg, dx, ds, dS, inner, replace
@@ -53,7 +52,7 @@ import ufl
 # Earlier stuff but add in eigensolver
 __all__ = ["GoalAdaptiveSolverBase",
            "SteadyGoalAdaptiveSolver",
-           "GoalAdaptiveNonlinearVariationalSolver",
+           # "GoalAdaptiveNonlinearVariationalSolver",
            "vtk_output_callback",
            "GoalAdaptiveFoldedEigensolver"]
 
@@ -68,18 +67,20 @@ __all__ = ["GoalAdaptiveSolverBase",
 # New code uses @dataclass(frozen=True) to generate the constructor. The old code had a constructor (init)
 # Solver parameters for cell and facet solves are the same choices
 
+
+# Maggie change MT 2026 
+# One options class because I am no longer using the nonlinear variational solver. 
+# I will just use the base class and the eigensolver class. 
+
 @dataclass(frozen=True)
-class GoalAdaptiveOptions:
-    """Options for goal-adaptive solvers.
+class GoalAdaptiveEigenOptions:
+
+    """Options for goal-adaptive eigensolver.
 
     Parameters
     ----------
-    tolerance
-        Terminate the adaptive loop when ``|eta_h| < tolerance``.
     max_it
-        Maximum number of SOLVE–ESTIMATE–MARK–REFINE cycles.  The loop also
-        terminates early if the error estimate falls below the requested tolerance.
-        Defaults to ``10``.
+        Maximum number of SOLVE–ESTIMATE–MARK–REFINE cycles.
     max_dofs
         Maximum number of dofs we will allows the meshes to have. This will 
         avoid long adaptive loops.
@@ -90,80 +91,44 @@ class GoalAdaptiveOptions:
         produce more targeted (but potentially slower-converging) refinement.
         Defaults to ``0.5``.
     primal_extra_degree
-        Extra polynomial degree used when solving the primal problem in an
+        Extra polynomial degree(s) used when solving the primal problem in an
         enriched space (only relevant when ``use_adjoint_residual=True``).
         The enriched-space degree is ``degree + primal_extra_degree``.
         Defaults to ``1``.
-    dual_extra_degree
-        Extra polynomial degree used when solving the dual (adjoint) problem
-        in an enriched space.  The enriched-space degree is
-        ``degree + dual_extra_degree``.  Defaults to ``1``.
     cell_residual_extra_degree
-        Extra polynomial degree for the DG space used to represent cell
+        Extra polynomial degree(s) for the DG space used to represent cell
         residuals during error indicator computation.  The DG space degree is
-        ``degree + cell_residual_extra_degree``.  Defaults to ``1``.
+        ``degree + cell_residual_extra_degree``.  Defaults to ``(1,)``.
     facet_residual_extra_degree
-        Extra polynomial degree for the broken facet-bubble space used to
+        Extra polynomial degree(s) for the broken facet-bubble space used to
         represent facet residuals during error indicator computation.
         The space degree is ``degree + facet_residual_extra_degree``.
-        Defaults to ``1``.
-    use_adjoint_residual
-        If ``True``, both the primal residual
-        :math:`\\rho(u_h; z - z_h)` and the adjoint residual
-        :math:`\\rho^*(z_h; u - u_h)` are used to form the error estimate
-        :math:`\\frac{1}{2}(\\rho + \\rho^*)`, which gives a remainder term
-        that is cubic in the errors z - z_h and u - u_h.
-        This requires four PDE solves per iteration (primal and dual each at two degrees).
-        If ``False`` (the default), only the primal residual is used, requiring
-        only two PDE solves per iteration (primal at degree :math:`p` and dual
-        at degree :math:`p + \\text{dual\\_extra\\_degree}`). This means
-        that the remainder term is instead quadratic in the errors
-        z - z_h and u - u_h.
-        Defaults to ``False``.
-    primal_low_method
-        How to obtain the low-degree primal solution when
-        ``use_adjoint_residual=True``.  Options:
-
-        * ``"interpolate"`` (default) – nodally interpolate the enriched-space
-          solution into the base space.
-        * ``"project"`` – :math:`L^2`-project the enriched-space solution into
-          the base space.
-        * ``"solve"`` – solve the primal problem independently in the base
-          space; the enriched-space solution is used only for the error estimate.
-
-    dual_low_method
-        How to obtain the low-degree dual solution used in the error estimate.
-        Options:
-
-        * ``"interpolate"`` (default) – nodally interpolate the enriched-space
-          dual solution into the base space.
-        * ``"project"`` – :math:`L^2`-project the enriched-space dual solution
-          into the base space.
-        * ``"solve"`` – solve the dual problem independently in the base space;
-          this is the most expensive option but produces the most accurate solver-error
-          estimate.
-
+        Defaults to ``(1,)``.
     verbose
         If ``True`` (the default), print progress information at each
         iteration via :func:`PETSc.Sys.Print`.
+    nev
+        Number of eigenpairs requested from each eigensolve. Defaults to ``5``.
+    sp_cell
+        Solver parameters for cell residual local problems.
+    sp_facet
+        Solver parameters for facet residual local problems.
     """
 
-    # dataclass will build the desired init with the below info? 
-    tolerance: float = 1e-4
     max_it: int = 10
     max_dofs: int | None = None
     dorfler_alpha: float = 0.5
-    primal_extra_degree: int = 1
-    dual_extra_degree: int = 1
-    cell_residual_extra_degree: int = 1
-    facet_residual_extra_degree: int = 1
-    use_adjoint_residual: bool = False
-    primal_low_method: str = "interpolate"
-    dual_low_method: str = "interpolate"
     verbose: bool = True
+    primal_extra_degree: tuple[int, ...] = (1,)
+    cell_residual_extra_degree: tuple[int, ...] = (1,)
+    facet_residual_extra_degree: tuple[int, ...] = (1,)
+    nev: int = 5 # default number of eigenpairs requested from each eigensolve. 
+
+    # mult_tol: float = 0.01 # Maggie addition - tolerance for computing cluster size.
 
     # Solver parameters for cell/facet bubble projections
     # These are the same choices as in the old code (pre deletion of eigensolver)
+    # I am not sure of the motivation behind these choices, but I will keep them the same for now.
     sp_cell: ClassVar[dict] = {
         "mat_type": "matfree",
         "snes_type": "ksponly",
@@ -177,65 +142,19 @@ class GoalAdaptiveOptions:
     }
 
 
-
-
-
-# The old code has special eigenoptions which we will need again
-# We will use an updated form using Pablo's dataclass approach
-# The extra options needed for an eigensolver
-@dataclass(frozen=True)
-class GoalAdaptiveEigenOptions(GoalAdaptiveOptions):
-    """Options for :class:`GoalAdaptiveEigensolver`.
-
-    Extends :class:`GoalAdaptiveOptions` with eigenproblem-specific options.
-
-    Parameters
-    ----------
-    self_adjoint
-        Whether the eigenproblem is self-adjoint. If ``True``, the dual
-        eigenproblem agrees with the primal eigenproblem. Defaults to ``False``.
-
-    nev
-        Number of eigenpairs requested from each eigensolve. Defaults to ``5``.
-        The solver constructs (via least squares problem) the 
-        eigenfunction in the span of the eigenbasis that is
-        best correlated with the current eigenfunction estimate.
-        This is done via :func:`match_best`.  
-        Defaults to ``5``.
-
-    Notes
-    -----
-    The options ``use_adjoint_residual``, ``primal_low_method``, and
-    ``dual_low_method`` inherited from :class:`GoalAdaptiveOptions` are not
-    used by :class:`GoalAdaptiveEigensolver`.
-    """
-
-    # Allow the enriched spaces to be mixed spaces
-    # and for the user to specify the degree addition for each subspace
-    primal_extra_degree: tuple[int, ...] = (1,)
-    dual_extra_degree: tuple[int, ...] = (1,)
-    cell_residual_extra_degree: tuple[int, ...] = (1,)
-    facet_residual_extra_degree: tuple[int, ...] = (1,)
-
-    self_adjoint: bool = False
-    nev: int = 5
-    # mult_tol: float = 0.01 # Maggie addition - tolerance for computing cluster size.
-
-
-# Pablo's new solver base:
     
 
 class GoalAdaptiveSolverBase:
-    """Base class for goal-adaptive solvers.
+    """Base class for goal-adaptive eigensolvers.
 
-    Owns the SOLVE→ESTIMATE→MARK→REFINE loop and the Dörfler marking
+    Owns the SOLVE→ESTIMATE→MARK→REFINE loop and the Dörfler(Max) marking
     strategy.  Subclasses must implement :meth:`solve_and_estimate`,
     :meth:`compute_error_indicators`, and :meth:`refine_problem`.
 
     Parameters
     ----------
-    goal_adaptive_options
-        A ``GoalAdaptiveOptions`` instance, or a dict of keyword
+    goal_adaptive_eigenoptions
+        A ``GoalAdaptiveEigenOptions`` instance, or a dict of keyword
         arguments to construct one.  Defaults to ``{}``.
     exact_goal
         Exact value of the goal functional (or eigenvalue).  Optional; used
@@ -245,34 +164,15 @@ class GoalAdaptiveSolverBase:
   
 
     def __init__(self, base_mesh,
-                 goal_adaptive_options: "GoalAdaptiveOptions | dict | None" = None,
+                 goal_adaptive_eigenoptions: "GoalAdaptiveEigenOptions | dict | None" = None,
                  exact_goal=None,
                  post_iteration_callback=None,
                  ):
 
 
-
-        # Some noted changes from older code:
-        # no seperate tolerance argument in this code. Now it is in self.options.tolerance
-        # Stopping criteria is if abs(eta_h) < self.options.tolerance:
-        # So use self.options.tolerance and not self.tolerance
-        # 
-        # Also max_iterations is now self.options.max_it
-        #
-        # The new base needs the initial mesh because it now constructs and manages the adaptive mesh hierarchy itself. Thus, we need a base_mesh input
-        # I should keep this in mind - my eigensolver constructor may need to pass the base mesh (most likely vis V.mesh())
-        #
-        # A big change is that in this new code, this base constructs the mesh hierarchy.
-        # The old code has calls like AdaptiveMeshHierarchy(...) and AdaptiveTransferManager(...)
-        # The new code base has amh = AdaptiveMeshHierarchy(mesh) and later calls self.amh = amh, self.base_levels = len(amh), self.atm = AdaptiveTransferManager()
-        # So the eigensolver should not create amh or atm, it should inherit them
-        #
-        # The new base supports mesh sequences: meshes = {*base_mesh, base_mesh}
-        # Thus, it can now support problems with a single mesh and problems made from several component meshes
-
-        if goal_adaptive_options is None:
-            goal_adaptive_options = {}
-        self.options = self._make_options(goal_adaptive_options)
+        if goal_adaptive_eigenoptions is None:
+            goal_adaptive_eigenoptions = {}
+        self.options = self._make_options(goal_adaptive_eigenoptions)
         self.goal_exact = exact_goal
         self.post_iteration_callback = post_iteration_callback
 
@@ -280,39 +180,65 @@ class GoalAdaptiveSolverBase:
         self.eta_vec: list[float] = []
         self.etah_vec: list[float] = []
 
-        # Set up an AdaptiveMeshHierarchy for every mesh of the problem.
+        # Set up an MeshHierarchy for every mesh of the problem.
         # For a MeshSequenceGeometry, iterating over it yields the component meshes;
         # we also need a separate AMH for the sequence geometry itself.
-        meshes = {*base_mesh, base_mesh}  # component meshes + the sequence geometry (same object for a regular mesh)
-        for mesh in meshes:
+        # meshes = {*base_mesh, base_mesh}  # component meshes + the sequence geometry (same object for a regular mesh)
+        # for mesh in meshes:
+        #     mh, level = get_level(mesh)
+        #     if mh is None:
+        #         amh = MeshHierarchy(mesh)
+        #     else:
+        #         amh = MeshHierarchy(mh[0])
+        #         for m in mh[1:level+1]:
+        #             amh.add_mesh(m)
+
+        # amh, _ = get_level(base_mesh)
+        # self.amh = amh
+        # self.base_levels = len(amh)
+        # self.atm = TransferManager()
+
+        # Set up each distinct physical mesh once.
+        for mesh in dict.fromkeys(base_mesh):
             mh, level = get_level(mesh)
+
             if mh is None:
-                amh = AdaptiveMeshHierarchy(mesh)
-            else:
-                amh = AdaptiveMeshHierarchy(mh[0])
-                for m in mh[1:level+1]:
-                    amh.add_mesh(m)
+                mh = MeshHierarchy(mesh)
+                level = 0
 
-        amh, _ = get_level(base_mesh)
-        self.amh = amh
-        self.base_levels = len(amh)
-        self.atm = AdaptiveTransferManager()
+            if mh.refinements_per_level != 1:
+                raise ValueError(
+                    "Adaptive refinement requires refinements_per_level=1."
+                )
+
+            if level != len(mh) - 1:
+                raise ValueError(
+                    "Start adaptation from the finest mesh in its hierarchy."
+                )
+
+        # Derive the sequence hierarchy from its component hierarchies.
+        if isinstance(base_mesh, MeshSequenceGeometry):
+            base_mesh.set_hierarchy()
+
+        self.amh, _ = get_level(base_mesh)
+        self.base_levels = len(self.amh)
+        self.atm = TransferManager()
 
 
-
-    # Old code assumed the options were in a dictionary
-    # New code allows for as options object?
-    # My eigensolver code should overwrite this to take the extra arguments (below)
     def _make_options(self, d):
-        """Construct a ``GoalAdaptiveOptions`` from a dict or pass through as-is.  Override in subclasses."""
-        if isinstance(d, GoalAdaptiveOptions):
+        """Construct a ``GoalAdaptiveEigenOptions`` from a dict or pass through as-is.  Override in subclasses."""
+        if isinstance(d, GoalAdaptiveEigenOptions):
             return d
-        # FIXME
-        return GoalAdaptiveOptions(**d["goal_adaptive"])
+        return GoalAdaptiveEigenOptions(**d["goal_adaptive"])
+
 
     
-    # The new code adds the following, which returns the most recently stored predicted error estimate
+    # def get_error_estimate(self):
+    #     return self.etah_vec[-1]
     def get_error_estimate(self):
+        """Return the most recently stored error-estimate magnitude."""
+        if not self.etah_vec:
+            raise RuntimeError("No error estimate has been computed yet.")
         return self.etah_vec[-1]
 
     # ------------------------------------------------------------------
@@ -320,9 +246,6 @@ class GoalAdaptiveSolverBase:
     # ------------------------------------------------------------------
 
 
-
-
-    # Solve is the same as in the older code
     def solve(self):
         """Run the adaptive SOLVE→ESTIMATE→MARK→REFINE loop to convergence."""
         # Runs the standard loop for adaptivity where step() executes the steps of a given iteration
@@ -333,14 +256,14 @@ class GoalAdaptiveSolverBase:
                 break
 
 
-    # 0. Maggie change - I seperated refinement criteria so I can overwrite it for the folded operator
+    # # Maggie change - I seperated refinement criteria so I can overwrite it for the folded operator
+    # def should_refine(self, it, eta_h, eta):
+    #     """ Return true when refinement is needed """
+    #     return abs(eta_h) >= self.options.tolerance
     def should_refine(self, it, eta_h, eta):
-        """ Return true when refinement is needed """
-        return abs(eta_h) >= self.options.tolerance
+        """Return whether refinement is needed; implemented by subclasses."""
+        raise NotImplementedError("Subclasses must implement their refinement criterion.")
 
-    
-    # Some changes since older code:
-    # write_solution was replaced with a call back hook via post_iteration
 
     def step(self, it):
         """Execute one SOLVE→ESTIMATE→MARK→REFINE cycle.
@@ -365,40 +288,25 @@ class GoalAdaptiveSolverBase:
         self.print(BLUE % f"---------------------------- [MESH LEVEL {it}] ----------------------------")
 
 
-        # SOLVE + ESTIMATE
+        # 1. SOLVE + ESTIMATE
         self.eta_h, self.eta = self.solve_and_estimate() # defined in the subclass
         self.post_iteration(it) # user given actions
         
         
-        # 1. Maggie change - stopping criteria moved outside
-        # Pablo:
-        # Stopping criteria
-        # if abs(eta_h) < self.options.tolerance: # tolerance stopping criteria 
-        #     self.print("Error estimate below tolerance, finished.")
-        #     raise StopIterations
+        # Maggie change - stopping criteria moved outside
         if not self.should_refine(it, self.eta_h, self.eta): # tolerance stopping criteria 
             self.print("We have decided not to adapt - we are done!.")
             self.inner_converged = True
-            self.termination_reason = "error_target_reached"
+            self.termination_reason = "inner_target_reached"
             raise StopIteration
-
-        # RECENT CHANGE - MAX DOF
-        # elif (self.options.max_dofs is not None and self.Ndofs_vec[-1] >= self.options.max_dofs):
-        #     self.print(f"Maximum DOF limit ({self.options.max_dofs}) reached: "f"{self.Ndofs_vec[-1]} DOFs. Exiting.")
-        #     self.inner_converged = False
-        #     self.termination_reason = "max_dofs_reached"
-        #     raise StopIteration
-
 
         elif it == self.options.max_it - 1: # max iter stopping criteria
             self.print(f"Maximum iteration ({self.options.max_it}) reached. Exiting.")
             self.inner_converged = False
             self.termination_reason = "max_it_reached"
             raise StopIteration
-
-
         
-        # MARK
+        # 2. MARK
         self.print("Computing local refinement indicators eta_K ...")
         eta_cell = self.compute_error_indicators() # defined in the subclass - local indicators
         self.compute_efficiency_indices(eta_cell, self.eta_h, self.eta) # effectivity indices
@@ -409,25 +317,36 @@ class GoalAdaptiveSolverBase:
         if max_imag > self.imag_tol:
             raise ValueError(f"Cell markers have a nontrivial nonzero imaginary part: {max_imag:.3e}")
         else:
-            self.print("Do not worry about the throwing out imaginary part warning to follow:")
+            self.print("Thus, do not worry about the throwing out imaginary part warning to follow:")
   
 
 
-        # REFINE
-        self.print("Transferring problem to new mesh ...")
-        self.refine_problem(markers) # refine the problem (base class)
+        # 3. REFINE
+        # ATTEMPT REFINEMENT
+        self.print("Preparing a candidate refined mesh ...")
 
-        # CHECK MAX DOF:
-        new_dof = self.problem.output_space.dim()
-        if (self.options.max_dofs is not None and new_dof >= self.options.max_dofs):
-            self.print(f"Maximum DOF limit ({self.options.max_dofs}) reached on refined mesh: "f"{new_dof} DOFs. Exiting.")
+        if not self.refine_problem(markers): # attempt the transfer
             self.inner_converged = False
             self.termination_reason = "max_dofs_reached"
             raise StopIteration
 
-
-        # 2. Maggie change - Allow subclasses to transfer solutions/eigenfunctions.
+        # The candidate was accepted: transfer eigenfunctions as initial guesses.
+        self.print("Transferring problem to new mesh ...")
         self.post_refinement()
+
+        # self.print("Transferring problem to new mesh ...")
+        # self.refine_problem(markers) # refine the problem (base class)
+
+        # # CHECK MAX DOF:
+        # new_dof = self.problem.output_space.dim()
+        # if (self.options.max_dofs is not None and new_dof >= self.options.max_dofs):
+        #     self.print(f"Maximum DOF limit ({self.options.max_dofs}) reached on refined mesh: "f"{new_dof} DOFs. Exiting.")
+        #     self.inner_converged = False
+        #     self.termination_reason = "max_dofs_reached"
+        #     raise StopIteration
+
+        # Allow subclasses to transfer solutions/eigenfunctions.
+        # self.post_refinement()
 
     # Pretty much, after each iteration, this will run any user-supplied code.
     # For example, the user could want to save the solution, print output, save plots, etc
@@ -438,11 +357,15 @@ class GoalAdaptiveSolverBase:
             self.post_iteration_callback(self, it)
     
     # Allow the subclasss to extend found solutions on coarser mesh to adapted mesh as initial guess
+    # def post_refinement(self):
+    #     """Hook called after SOLVE+ESTIMATE+MARK+REFINE. 
+    #     Invokes the subclass's ``post_refinement``, if any."""
+    #     if self.post_refinement is not None:
+    #         self.post_refinement(self)
+
     def post_refinement(self):
-        """Hook called after SOLVE+ESTIMATE+MARK+REFINE. 
-        Invokes the subclass's ``post_refinement``, if any."""
-        if self.post_refinement is not None:
-            self.post_refinement(self)
+        """Hook for subclasses to transfer solutions after accepted refinement."""
+        pass
 
 
     # ------------------------------------------------------------------
@@ -464,15 +387,41 @@ class GoalAdaptiveSolverBase:
         Function
             A DG0 Function with value 1 on cells selected for refinement.
         """
-        # NOTE this is not quite Dorfler marking
+        # note - this is not quite Dorfler marking
         # For Dorfler marking we need to implement a parallel sort
+
+        # if not 0 < self.options.dorfler_alpha <= 1:
+        #     raise ValueError("dorfler_alpha must lie in (0, 1]")
+        
+
+        # markers = Function(eta_cell.function_space())
+        
+        # for m, e in zip(markers.subfunctions, eta_cell.subfunctions):
+        #     with e.dat.vec_ro as evec:
+        #         _, emax = evec.max()
+        #     threshold = self.options.dorfler_alpha * emax
+        #     m.dat.data_wo[e.dat.data_ro > threshold] = 1
+        # return markers
+
+        fraction = self.options.dorfler_alpha
+
+        if not 0 < fraction <= 1:
+            raise ValueError("dorfler_alpha must lie in (0, 1]")
+
+        # Global maximum across MPI processes.
+        with eta_cell.dat.vec_ro as vec:
+            _, eta_max = vec.max()
+
         markers = Function(eta_cell.function_space())
-        for m, e in zip(markers.subfunctions, eta_cell.subfunctions):
-            with e.dat.vec_ro as evec:
-                _, emax = evec.max()
-            threshold = self.options.dorfler_alpha * emax
-            m.dat.data_wo[e.dat.data_ro > threshold] = 1
+
+        if eta_max > 0:
+            markers.dat.data_wo[:] = (eta_cell.dat.data_ro.real >= fraction * eta_max)
+
         return markers
+
+        
+        
+
 
     
     # In the old code, this was implemented in subclasses not in this base class
@@ -480,58 +429,109 @@ class GoalAdaptiveSolverBase:
     # Thus, the new version of the eigensolver should inherit this 
     # The question is whether refine(self.problem, ...) will know how to handle an eigenproblem - I think it does (bult in and in old code)
 
+    # def refine_problem(self, markers, coef_map=None):
+    #     """Refine the mesh and reconstruct the problem on the new mesh.
+
+    #     Parameters
+    #     ----------
+    #     markers
+    #         DG0 Function with value 1 on cells to refine.
+    #     """
+
+    #     # Loop over markers 
+    #     for marker in markers.subfunctions:
+    #         mesh = marker.function_space().mesh()
+    #         # refine marked elements
+    #         new_mesh = mesh.refine_marked_elements(marker)
+    #         # add it to its repsective hierarchy
+    #         amh, _ = get_level(mesh)
+    #         amh.add_mesh(new_mesh)
+
+    #     # Reconstruct MeshSequence with the refined meshes
+    #     # Reconstruct the problem on the refined mesh
+    #     mesh = self.amh[-1]
+    #     if len(mesh) > 1:
+    #         new_mesh = type(mesh)([get_level(m)[0][-1] for m in mesh])
+    #         self.amh.add_mesh(new_mesh)
+    #     if coef_map is None:
+    #         coef_map = {}
+    #     self.problem = refine(self.problem, refine, coefficient_mapping=coef_map)
+
+    
+    
     def refine_problem(self, markers, coef_map=None):
-        """Refine the mesh and reconstruct the problem on the new mesh.
+        """Return True after refinement, or False if the DOF limit rejects it.
+           Assumes each component shares the same mesh."""
+    
+        V = self.problem.output_space
+        old_domain = V.mesh()
+        old_mesh = old_domain.unique()
 
-        Parameters
-        ----------
-        markers
-            DG0 Function with value 1 on cells to refine.
-        """
+        # 1. Create a candidate mesh without extending the hierarchy.
+        new_mesh = old_mesh.refine_marked_elements(markers)
 
-        # Loop over markers 
-        for marker in markers.subfunctions:
-            mesh = marker.function_space().mesh()
-            # refine marked elements
-            new_mesh = mesh.refine_marked_elements(marker)
-            # add it to its repsective hierarchy
-            amh, _ = get_level(mesh)
-            amh.add_mesh(new_mesh)
+        # Preserve the domain structure for mixed function spaces.
+        if isinstance(old_domain, MeshSequenceGeometry):
+            candidate_domain = MeshSequenceGeometry(
+                [new_mesh for _ in old_domain],
+                set_hierarchy=False,
+            )
+        else:
+            candidate_domain = new_mesh
 
-        # Reconstruct MeshSequence with the refined meshes
-        # Reconstruct the problem on the refined mesh
-        mesh = self.amh[-1]
-        if len(mesh) > 1:
-            new_mesh = type(mesh)([get_level(m)[0][-1] for m in mesh])
-            self.amh.add_mesh(new_mesh)
+        # 2. Construct a space only to count its DOFs.
+        # No eigenproblem is solved here.
+        candidate_space = V.reconstruct(
+            mesh=candidate_domain,
+            name="dof_check_space",
+        )
+        candidate_dofs = candidate_space.dim()
+
+        # 3. Reject the candidate before changing the active problem/hierarchy.
+        limit = self.options.max_dofs
+        if limit is not None and candidate_dofs >= limit:
+            self.print(
+                f"Candidate mesh has {candidate_dofs} DOFs; "
+                f"limit is {limit}. Keeping the last solved problem."
+            )
+            return False
+
+        # 4. Accept the candidate and extend the hierarchy.
+        mh, _ = get_level(old_mesh)
+        mh.add_mesh(new_mesh)
+
+        if isinstance(old_domain, MeshSequenceGeometry):
+            old_domain.set_hierarchy()
+
+        self.amh, _ = get_level(old_domain)
+
+        # 5. Reconstruct the problem on the accepted mesh.
         if coef_map is None:
             coef_map = {}
-        self.problem = refine(self.problem, refine, coefficient_mapping=coef_map)
+
+        self.problem = refine(
+            self.problem,
+            refine,
+            coefficient_mapping=coef_map,
+        )
+        return True
 
 
-    # Old code computed several diagnostics on the error
-    # In particular, it computed eff1, eff2, and eff3 like in Joe's old code
-    # This code leaves it up to the subclasses to decide what their measure of efficiency it
-    # This means the generic base no longer assumes that all goal-adaptive solvers should measure efficiency in exactly the same way.
 
     def compute_efficiency_indices(self, eta_cell, eta_h, eta):
         """Hook called after marking.  Default no-op; override in subclasses."""
         pass
 
-    
-    # Same as before 
-    # Chat: This uses PETSc-aware printing. In parallel, it avoids every MPI process printing the same message.
-
     def print(self, *args, **kwargs):
         if self.options.verbose:
             PETSc.Sys.Print(*args, **kwargs)
+
+
 
     # ------------------------------------------------------------------
     # Abstract interface for subclasses
     # ------------------------------------------------------------------
 
-
-    # Same as before - needs to be defined in the subclass
 
     def solve_and_estimate(self):
         """Solve the PDE(s) and compute a global error estimate.
@@ -585,11 +585,11 @@ class SteadyGoalAdaptiveSolver(GoalAdaptiveSolverBase):
         Localisation efficiency ``|sum(eta_K) / eta|`` (only when
         ``exact_goal`` is provided).
     eff3_vec : list[float]
-        Ratio ``sum(eta_K) / eta_h`` when no exact goal is available.
+        Ratio ``sum(eta_K) / abs(eta_h)`` when no exact goal is available.
     """
 
-    def __init__(self, base_mesh, goal_adaptive_options=None, exact_goal=None, post_iteration_callback=None):
-        super().__init__(base_mesh, goal_adaptive_options, exact_goal, post_iteration_callback)
+    def __init__(self, base_mesh, goal_adaptive_eigenoptions=None, exact_goal=None, post_iteration_callback=None):
+        super().__init__(base_mesh, goal_adaptive_eigenoptions, exact_goal, post_iteration_callback)
         self.eta_cell_sum_vec: list[float] = []
         self.eff1_vec: list[float] = []
         self.eff2_vec: list[float] = []
@@ -597,7 +597,7 @@ class SteadyGoalAdaptiveSolver(GoalAdaptiveSolverBase):
 
     def compute_efficiency_indices(self, eta_cell, eta_h, eta):
         """Compute and log effectivity and localisation efficiency indices."""
-        with eta_cell.dat.vec as evec:
+        with eta_cell.dat.vec_ro as evec:
             eta_cell_total = abs(evec.sum())
 
         self.eta_cell_sum_vec.append(eta_cell_total)
@@ -613,7 +613,7 @@ class SteadyGoalAdaptiveSolver(GoalAdaptiveSolverBase):
         else:
             eff3 = eta_cell_total / abs(eta_h)
             self.eff3_vec.append(eff3)
-            self.print(BLUE % f'{"Localisation efficiency:":40s}{eff3: 15.12f}')
+            self.print(BLUE % f'{"(Approximate) Localisation efficiency, (sum of indicators / |eta_h|):":40s}{eff3: 15.12f}')
 
 
 
@@ -659,20 +659,12 @@ class GoalAdaptiveFoldedEigenSolver(SteadyGoalAdaptiveSolver, OptionsManager):
         Tolerance for throwing out imaginary part of eigenvalue and error
     can_interp
         Can the finite element space use interpolation?
-    tolerance
-        Terminate when ``|eta_h| < tolerance``.
-    goal_adaptive_options
-        Dictionary passed to :class:`GoalAdaptiveEigenOptions`.
-        Key extra entries: ``"self_adjoint"`` (bool) and ``"nev"`` (int).
     solver_parameters
         SLEPc solver parameters forwarded to :class:`~.LinearEigensolver`.
         Do not set ``eps_target`` here; it is set from ``target``.
     exact_eigenvalue
         Exact eigenvalue, if known, for computing efficiency indices.
     """
-    # 2. Maggie change - user inputs m(,), initial_space (initial guess), epsilon for pseudospectral contour, mult_tol, imag_tol.
-
-
 
     # 3. Maggie change - New init (made by chat to match the nonlinar solver approach). Also add in epsilon for pseudospectrum
     _GOAL_PREFIX = "goal_adaptive_"
@@ -693,7 +685,7 @@ class GoalAdaptiveFoldedEigenSolver(SteadyGoalAdaptiveSolver, OptionsManager):
         solver_parameters: dict | None = None,
         options_prefix: str | None = None,
         exact_eigenvalue: float | complex | None = None,
-        post_iteration_callback=None,):
+        post_iteration_callback = None ,):
         
         if solver_parameters is None:
             solver_parameters = {}
@@ -791,20 +783,9 @@ class GoalAdaptiveFoldedEigenSolver(SteadyGoalAdaptiveSolver, OptionsManager):
 
         # Check if L2 alignement failed 
         if self.check_up:
-            self.print(BLUE % f'The L2 aligned enriched soln was very small (in norm) - red flag!!')
-            self.print(BLUE % f'As a result, we will adapt the eigensolve')
+            self.print(RED % f'The L2 aligned enriched soln was very small (in norm) - red flag!!')
+            self.print(RED % f'As a result, we will adapt the eigensolve')
             return True 
-
-        # Check if we are completely inside pseudospectra
-        # Assumes conforming approximation
-        # Taken out because ^^^
-        # And does not fit nicely into our outer loop construction
-        # if self.matts_phi + self.diameter < self.epsilon:
-        #     # SHIM 2 (U.Z.): bugfix, the original f-string reads the undefined name `diameter`
-        #     # (NameError whenever a z-cell lies inside the pseudospectrum, even with verbose=False)
-        #     self.print(BLUE % f'Since phi = {self.matts_phi} + diameter = {self.diameter} < epsilon = {self.epsilon}, we are in the pseudospectrum')
-        #     self.print(BLUE % f'As a result, we dont need to adapt the eigensolve')
-
 
         # Check the diameter condition
         if eta_h > diam_cond:
@@ -819,8 +800,6 @@ class GoalAdaptiveFoldedEigenSolver(SteadyGoalAdaptiveSolver, OptionsManager):
             self.print(BLUE % f'No need to do an adaptive solve')
             return False
 
-
-    # 9. Maggie change - Rewrite solve and step like in nonlinear code
     def solve(self):
         """Run the adaptive loop and return the final computed eigenpair."""
         super().solve()
@@ -843,23 +822,7 @@ class GoalAdaptiveFoldedEigenSolver(SteadyGoalAdaptiveSolver, OptionsManager):
         V_new = self.problem.output_space
         initial_space = []
 
-        # Optional check of the new mesh's coordinate Function
-        # coordinates = V_new.mesh().coordinates.dat.data_ro
-        # max_imag = (np.max(np.abs(coordinates.imag)))
-        # self.print(f"Maximum imaginary part of mesh coordinates: {max_imag}")
-        # if max_imag > self.imag_tol:\
-        #     raise ValueError(f"Mesh coordinates have nonzero imaginary parts: {max_imag}")
-        # else:
-        #     self.print('The mesh coordinates have zero imaginary part so ignore the next warning:')
-
-        # for old_u in self.vecs: # iterate over eigfuncs on last mesh
-        #     new_u = Function(V_new)
-        #     self.atm.prolong(old_u, new_u) # prolong or interpolate?
-        #     #new_u.interpolate(old_u)
-        #     initial_space.append(new_u)
-        # self.initial_space = tuple(initial_space) # set the initial space
-
-        # MAGGIE RECENT CHANGE FOR //
+        # MAGGIE CHANGE FOR //
         for old_u in self.vecs:
             new_u = Function(V_new)
             for old_sub, new_sub in zip(old_u.subfunctions,new_u.subfunctions,):
@@ -867,7 +830,9 @@ class GoalAdaptiveFoldedEigenSolver(SteadyGoalAdaptiveSolver, OptionsManager):
             initial_space.append(new_u)
         self.initial_space = tuple(initial_space) # set the initial space
 
-       
+    ###################################################################
+    # START HERE MONDAY
+    ###################################################################
 
     def solve_and_estimate(self):
 
@@ -1548,7 +1513,7 @@ def _compute_residual_indicators(F, z_err, options):
     z_err
         Dual error representative ``z_p - z_h`` (UFL expression or Function).
     options
-        :class:`GoalAdaptiveOptions` (or subclass) instance for degree
+        :class:`GoalAdaptiveEigenOptions` (or subclass) instance for degree
         parameters and solver parameters.
 
     Returns
